@@ -65,8 +65,6 @@ The application is built as a **web-based system** using a modern Java + React s
 ---
 
 
-**1. Clone the repository**
-
 ```bash
 git clone https://github.com/Kabir-Rajbhandari/ZeroWaste.git
 cd ZeroWaste
