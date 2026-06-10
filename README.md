@@ -59,7 +59,6 @@ The application is built as a "web-based system" using a modern Java + React sta
 
 ---
 
-**Clone the repository**
 
 ```bash
 git clone https://github.com/Kabir-Rajbhandari/ZeroWaste.git
@@ -68,11 +67,11 @@ cd ZeroWaste
 
 # Team:
 
-| Role        | Name                      | Student ID |
-| ----------- | ------------------------- | ---------- |
-| Team Leader | _(Kabir Rajbhandari)_     | ---------- |
-| Member 2    | _(Sailesh Maharjan)_      | ---------- |
-| Member 3    | _(Saksham Sharma Sedhai)_ | ---------- |
+| Role        | Name                      |
+| ----------- | ------------------------- |
+| Team Leader | _(Kabir Rajbhandari)_     |
+| Member 2    | _(Sailesh Maharjan)_      |
+| Member 3    | _(Saksham Sharma Sedhai)_ |
 
 ---
 
