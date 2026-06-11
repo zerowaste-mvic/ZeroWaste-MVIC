@@ -1,9 +1,12 @@
 <mxfile host="app.diagrams.net">
   <diagram name="Page-1" id="R5KKHNPj43oUtha7rH6N">
-    <mxGraphModel dx="8380" dy="6387" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+    <mxGraphModel dx="8380" dy="7487" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="o5ZYIHr2soX_Kp3K_aNa-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=light-dark(#FFFFFF,#181818);strokeColor=none;" value="" vertex="1">
+          <mxGeometry height="1920" width="5720" x="1840" y="-2210" as="geometry" />
+        </mxCell>
         <mxCell id="3Z0KBD_gkJNzs_-x4hTi-100" edge="1" parent="1" source="3Z0KBD_gkJNzs_-x4hTi-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="3Z0KBD_gkJNzs_-x4hTi-7">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
@@ -460,13 +463,13 @@
         <mxCell id="CicrGCmDBqrF_woeC3Ls-68" edge="1" parent="1" source="CicrGCmDBqrF_woeC3Ls-69" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="CicrGCmDBqrF_woeC3Ls-74">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="CicrGCmDBqrF_woeC3Ls-69" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" value="&lt;h4&gt;4.2.1 Use Case 1 -&amp;nbsp; Member 1&lt;/h4&gt;" vertex="1">
+        <mxCell id="CicrGCmDBqrF_woeC3Ls-69" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" value="&lt;h4&gt;4.2.1 Use Case 2 -&amp;nbsp; Member 1&lt;/h4&gt;" vertex="1">
           <mxGeometry height="60" width="240" x="5825" y="-1105" as="geometry" />
         </mxCell>
         <mxCell id="CicrGCmDBqrF_woeC3Ls-70" edge="1" parent="1" source="CicrGCmDBqrF_woeC3Ls-71" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="CicrGCmDBqrF_woeC3Ls-76">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
-        <mxCell id="CicrGCmDBqrF_woeC3Ls-71" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" value="&lt;h4&gt;4.2.2 Use Case 3 - Member 2&lt;/h4&gt;" vertex="1">
+        <mxCell id="CicrGCmDBqrF_woeC3Ls-71" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" value="&lt;h4&gt;4.2.2 Use Case 4 - Member 2&lt;/h4&gt;" vertex="1">
           <mxGeometry height="60" width="240" x="6170" y="-1105" as="geometry" />
         </mxCell>
         <mxCell id="CicrGCmDBqrF_woeC3Ls-72" edge="1" parent="1" source="CicrGCmDBqrF_woeC3Ls-73" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="CicrGCmDBqrF_woeC3Ls-75">
@@ -477,7 +480,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="CicrGCmDBqrF_woeC3Ls-73" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" value="&lt;h4&gt;4.2.3 Use 5 - Member 3&lt;/h4&gt;" vertex="1">
+        <mxCell id="CicrGCmDBqrF_woeC3Ls-73" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" value="&lt;h4&gt;4.2.3 Use 6 - Member 3&lt;/h4&gt;" vertex="1">
           <mxGeometry height="60" width="240" x="5990" y="-1005" as="geometry" />
         </mxCell>
         <mxCell id="CicrGCmDBqrF_woeC3Ls-74" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Helvetica;" value="&lt;h4&gt;4.2.1.1 Code &amp;amp; Test&lt;/h4&gt;" vertex="1">
