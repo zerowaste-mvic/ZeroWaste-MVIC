@@ -1,17 +1,17 @@
 // src/components/Body/Hero.jsx
-import { Package, Users, UtensilsCrossed } from 'lucide-react';
-import { colors, btnPrimaryStyle, btnOutlineStyle, shadows } from '../../theme';
+import { Recycle, Users, Calendar } from 'lucide-react';
+import { colors, btnPrimaryStyle, shadows } from '../../theme';
 
 const stats = [
-  { icon: Package, label: 'Food Saved', value: '123 kg' },
-  { icon: Users, label: 'Active Users', value: '123 people' },
-  { icon: UtensilsCrossed, label: 'Meals Shared', value: '123 meals' },
+  { icon: Recycle, label: 'Food Saved', value: '10 kg' },
+  { icon: Users, label: 'Active Donors', value: '100 people' },
+  { icon: Calendar, label: 'Meals Planned', value: '100+' },
 ];
 
 const headingStyle = {
-  fontSize: 'clamp(2.2rem, 4.5vw, 3.4rem)',
+  fontSize: 'clamp(2.4rem, 4.8vw, 3.6rem)',
   fontWeight: 800,
-  lineHeight: 1.15,
+  lineHeight: 1.2,
   letterSpacing: '-0.02em',
   color: colors.charcoal,
   marginBottom: '1.25rem',
@@ -27,68 +27,103 @@ export default function Hero() {
       }}
     >
       <div className="container" style={{ maxWidth: '1180px' }}>
-        <div className="row align-items-center g-5 py-5" style={{ paddingTop: '4rem', paddingBottom: '4rem' }}>
-          <div className="col-lg-6">
+        <div className="row align-items-stretch g-5" style={{ paddingTop: '3.5rem', paddingBottom: '2.5rem' }}>
+          <div className="col-lg-6 d-flex flex-column h-100">
             <h1 style={headingStyle}>
-              Rescue <span style={{ color: colors.green }}>Food.</span>{' '}
-              Feed <span style={{ color: colors.green }}>Communities.</span>{' '}
+              Rescue <span style={{ color: colors.green }}>Food.</span>
+              <br />
+              Feed <span style={{ color: colors.green }}>Communities.</span>
+              <br />
               Foster <span style={{ color: colors.green }}>Sustainability.</span>
             </h1>
 
             <p
               className="mb-4"
-              style={{ fontSize: '1.05rem', color: colors.muted, maxWidth: 480, lineHeight: 1.7 }}
+              style={{ fontSize: '1.05rem', color: colors.muted, maxWidth: 500, lineHeight: 1.7 }}
             >
-              ZeroWaste helps you reduce food waste, save money and support local communities.
+              ZeroWaste helps households track, share, and plan around their food, so nothing goes to waste.
             </p>
 
-            <div className="d-flex align-items-center flex-wrap gap-3 mb-4">
+            <div className="d-flex align-items-center flex-wrap gap-3 mb-4 mb-lg-0">
               <a
                 href="#"
                 className="btn btn-primary btn-lg"
-                style={{ ...btnPrimaryStyle, padding: '0.85rem 2rem', fontSize: '1rem', fontWeight: 600, borderRadius: 10 }}
+                style={{
+                  ...btnPrimaryStyle,
+                  padding: '0.75rem 1.75rem',
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  borderRadius: 10,
+                }}
               >
-                Start Saving Today
+                Browse today&apos;s plates
               </a>
               <a
                 href="#how"
-                className="btn btn-outline-secondary btn-lg"
-                style={{ ...btnOutlineStyle, padding: '0.85rem 2rem', fontSize: '1rem', fontWeight: 600, borderRadius: 10 }}
+                className="btn btn-lg"
+                style={{
+                  background: colors.white,
+                  border: `1.5px solid ${colors.border}`,
+                  color: colors.charcoal,
+                  padding: '0.75rem 1.75rem',
+                  fontSize: '0.95rem',
+                  fontWeight: 600,
+                  borderRadius: 10,
+                }}
               >
                 See how it works
               </a>
             </div>
 
-            <div className="d-flex flex-wrap gap-3">
-              {stats.map(({ icon: Icon, label, value }) => (
-                <div
-                  key={label}
-                  className="d-flex align-items-center gap-2"
-                  style={{
-                    background: '#eaf5ef',
-                    borderRadius: '100px',
-                    padding: '0.5rem 1rem',
-                    fontSize: '0.85rem',
-                    fontWeight: 600,
-                    color: colors.greenD,
-                  }}
-                >
-                  <Icon size={16} strokeWidth={2.5} style={{ color: colors.green }} />
-                  <span>{label}: {value}</span>
-                </div>
-              ))}
+            <div
+              className="mt-4 mt-lg-auto"
+              style={{
+                borderTop: '1px solid #d4e8db',
+                paddingTop: '1.25rem',
+              }}
+            >
+              <div className="d-flex flex-wrap gap-2">
+                {stats.map(({ icon: Icon, label, value }) => (
+                  <div
+                    key={label}
+                    className="d-flex align-items-center gap-2 flex-grow-1"
+                    style={{
+                      background: '#eaf5ef',
+                      borderRadius: 12,
+                      padding: '0.85rem 1rem',
+                      minWidth: 140,
+                      flex: '1 1 0',
+                    }}
+                  >
+                    <div
+                      className="d-flex align-items-center justify-content-center flex-shrink-0"
+                      style={{ color: colors.green }}
+                    >
+                      <Icon size={24} strokeWidth={2} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '0.78rem', color: colors.muted, marginBottom: 2 }}>
+                        {label}
+                      </div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 700, color: colors.charcoal }}>
+                        {value}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="col-lg-6">
+          <div className="col-lg-6 d-flex align-items-stretch">
             <div
-              className="overflow-hidden"
-              style={{ borderRadius: 20, aspectRatio: '4/5', boxShadow: shadows.lg }}
+              className="overflow-hidden w-100 h-100"
+              style={{ borderRadius: 16, boxShadow: shadows.lg, aspectRatio: '4/5' }}
             >
               <img
                 src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=900&q=80"
                 alt="Fresh healthy food including vegetables, fruits, and proteins"
-                className="w-100 h-100 object-fit-cover"
+                className="w-100 h-100 object-fit-cover d-block"
               />
             </div>
           </div>
