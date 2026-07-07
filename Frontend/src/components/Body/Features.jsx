@@ -1,62 +1,62 @@
 // src/components/Body/Features.jsx
-import { MapPin, Bell, BarChart2, Users, ShieldCheck, Zap } from 'lucide-react';
-import { colors, fonts, sectionTagStyle, sectionHeadingStyle, sectionSubStyle, shadows } from '../../theme';
+import {
+  ClipboardList,
+  Search,
+  Handshake,
+  Calendar,
+  BarChart2,
+  Bell,
+} from 'lucide-react';
+import { colors, sectionHeadingStyle, sectionSubStyle, shadows } from '../../theme';
 
 const features = [
   {
-    icon: <MapPin size={22} strokeWidth={2} />,
-    bg: '#eaf5ef',
-    color: colors.green,
-    title: 'Live local map',
-    desc: 'See every available food rescue within your area in real time. Filter by cuisine, dietary needs, or collection time.',
+    icon: <ClipboardList size={22} strokeWidth={2} />,
+    title: 'Smart Food Inventory',
+    desc: 'Track everything in your kitchen with expiry dates, quantities, and smart reminders.',
   },
   {
-    icon: <Bell size={22} strokeWidth={2} />,
-    bg: '#fdf3e7',
-    color: '#b96a10',
-    title: 'Smart alerts',
-    desc: 'Get notified the moment your favourite spots post surplus. Set preferences once and never miss a deal again.',
+    icon: <Search size={22} strokeWidth={2} />,
+    title: 'Search & Claim Donations',
+    desc: 'Browse surplus food shared by your community and claim items before they go to waste.',
+  },
+  {
+    icon: <Handshake size={22} strokeWidth={2} />,
+    title: 'Share food with community',
+    desc: 'List extra food you won\'t use and connect with neighbours who can put it to good use.',
+  },
+  {
+    icon: <Calendar size={22} strokeWidth={2} />,
+    title: 'Weekly Meal Planner',
+    desc: 'Plan meals around what you already have and cut down on unnecessary grocery trips.',
   },
   {
     icon: <BarChart2 size={22} strokeWidth={2} />,
-    bg: '#f4ede4',
-    color: colors.brown,
-    title: 'Impact dashboard',
-    desc: 'Track your personal CO₂ savings, meals rescued, and money saved — all in a beautiful at-a-glance snapshot.',
+    title: 'Food Impact Analytics',
+    desc: 'See how much food you\'ve saved, money you\'ve kept, and waste you\'ve prevented.',
   },
   {
-    icon: <Users size={22} strokeWidth={2} />,
-    bg: '#eaf5ef',
-    color: colors.green,
-    title: 'Charity integration',
-    desc: 'Businesses can donate unsold stock directly to verified local charities with a single click — fully tracked.',
-  },
-  {
-    icon: <ShieldCheck size={22} strokeWidth={2} />,
-    bg: '#fdf3e7',
-    color: '#b96a10',
-    title: 'Safe & certified',
-    desc: 'All partners pass our food-hygiene checks. Every listing includes allergen info, preparation time, and expiry details.',
-  },
-  {
-    icon: <Zap size={22} strokeWidth={2} />,
-    bg: '#f4ede4',
-    color: colors.brown,
-    title: 'Instant checkout',
-    desc: 'Frictionless in-app payment, digital receipt, and QR pickup code — the whole flow takes under 30 seconds.',
+    icon: <Bell size={22} strokeWidth={2} />,
+    title: 'Real-time Notifications',
+    desc: 'Get alerts for expiring items, new donations nearby, and meal plan reminders.',
   },
 ];
 
 export default function Features() {
   return (
-    <section className="py-5" id="features" style={{ paddingTop: '7rem', paddingBottom: '7rem', background: colors.cream }}>
+    <section
+      className="py-5"
+      id="features"
+      style={{ paddingTop: '5rem', paddingBottom: '5rem', background: '#f8fbf9' }}
+    >
       <div className="container" style={{ maxWidth: '1180px' }}>
-        <div className="text-center mx-auto mb-5" style={{ maxWidth: 580 }}>
-          <p style={sectionTagStyle}>Platform features</p>
-          <h2 style={sectionHeadingStyle}>Everything you need to fight food waste</h2>
+        <div className="text-center mx-auto mb-5" style={{ maxWidth: 680 }}>
+          <h2 style={{ ...sectionHeadingStyle, fontFamily: 'inherit', fontWeight: 800 }}>
+            Everything you need to waste less, every day.
+          </h2>
           <p className="mx-auto" style={{ ...sectionSubStyle, margin: '0 auto' }}>
-            From real-time inventory tools to community impact dashboards,
-            ZeroWaste is built for everyone in the chain.
+            From tracking what&apos;s in your fridge to sharing surplus with your neighbors,
+            ZeroWaste brings it all together in one simple app.
           </p>
         </div>
 
@@ -67,8 +67,9 @@ export default function Features() {
                 className="h-100 p-4 bg-white border"
                 style={{
                   borderColor: colors.border,
-                  borderRadius: 20,
-                  padding: '2.2rem',
+                  borderRadius: 16,
+                  padding: '2rem',
+                  boxShadow: shadows.sm,
                   transition: 'transform 0.28s ease, box-shadow 0.28s ease',
                 }}
                 onMouseEnter={(e) => {
@@ -77,16 +78,16 @@ export default function Features() {
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'none';
-                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.boxShadow = shadows.sm;
                 }}
               >
                 <div
                   className="d-flex align-items-center justify-content-center mb-4"
-                  style={{ width: 54, height: 54, borderRadius: 14, background: f.bg, color: f.color }}
+                  style={{ width: 54, height: 54, borderRadius: 14, background: '#eaf5ef', color: colors.green }}
                 >
                   {f.icon}
                 </div>
-                <h3 style={{ fontFamily: fonts.display, fontSize: '1.15rem', fontWeight: 700, color: colors.charcoal, marginBottom: '0.7rem' }}>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 700, color: colors.charcoal, marginBottom: '0.7rem' }}>
                   {f.title}
                 </h3>
                 <p style={{ fontSize: '0.9rem', color: colors.muted, lineHeight: 1.65, marginBottom: 0 }}>

@@ -21,7 +21,7 @@ export default function App() {
   useEffect(() => {
     document.documentElement.style.scrollBehavior = 'smooth';
     document.body.style.fontFamily = fonts.body;
-    document.body.style.backgroundColor = colors.cream;
+    document.body.style.backgroundColor = colors.white;
     document.body.style.color = colors.charcoal;
     document.body.style.fontSize = '16px';
     document.body.style.lineHeight = '1.65';
