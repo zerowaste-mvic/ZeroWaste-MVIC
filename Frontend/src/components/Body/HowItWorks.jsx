@@ -1,66 +1,71 @@
 // src/components/Body/HowItWorks.jsx
-import { Store, Search, PackageCheck } from 'lucide-react';
-import { colors, fonts, sectionTagStyle, sectionHeadingStyle, sectionSubStyle } from '../../theme';
+import { Store, UtensilsCrossed, Handshake } from 'lucide-react';
+import { colors, sectionHeadingStyle, sectionSubStyle, shadows } from '../../theme';
 
 const steps = [
   {
     num: '01',
-    icon: <Store size={22} strokeWidth={2} />,
-    title: 'Partners list surplus',
-    desc: 'Restaurants, bakeries, and grocers post same-day surplus items at reduced prices — easily via our dashboard or mobile app.',
+    icon: <Store size={24} strokeWidth={2} />,
+    title: 'Log Your Food',
+    desc: 'List the food items in your kitchen to keep track of what you have and avoid double buying.',
   },
   {
     num: '02',
-    icon: <Search size={22} strokeWidth={2} />,
-    title: 'Customers discover & reserve',
-    desc: 'Browse mystery bags or specific items nearby. Reserve in one tap and pay securely through the app — no cash needed.',
+    icon: <UtensilsCrossed size={24} strokeWidth={2} />,
+    title: 'Plan Your Meals',
+    desc: 'Use our meal planning tool to create delicious recipes with what you already have, reducing waste.',
   },
   {
     num: '03',
-    icon: <PackageCheck size={22} strokeWidth={2} />,
-    title: 'Pick up & enjoy',
-    desc: 'Collect your bag during the pickup window. Every transaction automatically offsets carbon and donates to a local charity.',
+    icon: <Handshake size={24} strokeWidth={2} />,
+    title: "Share What's Left",
+    desc: 'Too much food? Share it with your local community and help those in need, all with a simple click.',
   },
 ];
 
 export default function HowItWorks() {
   return (
-    <section className="py-5" id="how" style={{ paddingTop: '7rem', paddingBottom: '7rem', background: colors.white }}>
+    <section className="py-5 bg-white" id="how" style={{ paddingTop: '5rem', paddingBottom: '5rem' }}>
       <div className="container" style={{ maxWidth: '1180px' }}>
-        <div className="row align-items-end g-5 mb-5">
-          <div className="col-lg-6">
-            <p className="mb-3" style={sectionTagStyle}>How it works</p>
-            <h2 style={sectionHeadingStyle}>Three simple steps to zero waste</h2>
-          </div>
-          <div className="col-lg-6">
-            <p style={sectionSubStyle}>
-              Whether you're a business with surplus stock or someone looking for an
-              affordable, sustainable meal — getting started takes under two minutes.
-            </p>
-          </div>
+        <div className="text-center mx-auto mb-5" style={{ maxWidth: 640 }}>
+          <h2 style={{ ...sectionHeadingStyle, fontFamily: 'inherit', fontWeight: 800 }}>
+            Reduce food waste in 3 simple steps
+          </h2>
+          <p className="mx-auto mb-0" style={{ ...sectionSubStyle, margin: '0 auto' }}>
+            Getting started takes less than a minute. No complicated setup, just log, plan, and share.
+          </p>
         </div>
 
-        <div className="row g-0">
-          {steps.map((step, i) => (
+        <div className="row g-4">
+          {steps.map((step) => (
             <div key={step.num} className="col-lg-4">
               <div
-                className="h-100 p-4"
+                className="h-100 p-4 bg-white border"
                 style={{
-                  background: colors.cream,
-                  padding: '2.5rem 2rem',
-                  borderRadius: i === 0 ? '20px 0 0 20px' : i === steps.length - 1 ? '0 20px 20px 0' : 0,
+                  borderColor: colors.border,
+                  borderRadius: 16,
+                  padding: '2rem',
+                  boxShadow: shadows.sm,
                 }}
               >
-                <div style={{ fontFamily: fonts.display, fontSize: '4rem', fontWeight: 900, color: colors.border, lineHeight: 1, marginBottom: '1rem' }}>
+                <div
+                  style={{
+                    fontSize: '3rem',
+                    fontWeight: 800,
+                    color: '#d4e8db',
+                    lineHeight: 1,
+                    marginBottom: '1rem',
+                  }}
+                >
                   {step.num}
                 </div>
                 <div
                   className="d-flex align-items-center justify-content-center text-white mb-4"
-                  style={{ width: 52, height: 52, background: colors.green, borderRadius: 14 }}
+                  style={{ width: 56, height: 56, background: colors.green, borderRadius: 14 }}
                 >
                   {step.icon}
                 </div>
-                <h3 style={{ fontFamily: fonts.display, fontSize: '1.2rem', fontWeight: 700, color: colors.charcoal, marginBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, color: colors.charcoal, marginBottom: '0.75rem' }}>
                   {step.title}
                 </h3>
                 <p style={{ fontSize: '0.9rem', color: colors.muted, lineHeight: 1.65, marginBottom: 0 }}>
