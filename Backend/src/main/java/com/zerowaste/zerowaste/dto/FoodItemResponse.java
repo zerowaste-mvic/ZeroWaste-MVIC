@@ -16,8 +16,17 @@ public class FoodItemResponse {
     private String quantityUnit;
     private LocalDate expiryDate;
     private String imageUrl;
+    private Boolean donated;
+    private String donorName;
+    private String pickupLocation;
+    private String availableTime;
+    private String contactDetail;
 
     public static FoodItemResponse from(FoodItem item) {
+        return from(item, null);
+    }
+
+    public static FoodItemResponse from(FoodItem item, String donorName) {
         return new FoodItemResponse(
                 item.getId(),
                 item.getName(),
@@ -25,7 +34,12 @@ public class FoodItemResponse {
                 item.getQuantity(),
                 item.getQuantityUnit(),
                 item.getExpiryDate(),
-                item.getImageUrl()
+                item.getImageUrl(),
+                item.getDonated(),
+                donorName,
+                item.getPickupLocation(),
+                item.getAvailableTime(),
+                item.getContactDetail()
         );
     }
 }
