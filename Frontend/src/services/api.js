@@ -72,3 +72,23 @@ export const foodApi = {
     return request(`/api/food-items/${id}`, { method: 'DELETE' });
   },
 };
+
+export const userApi = {
+  getProfile() {
+    return request('/api/users/me', { method: 'GET' });
+  },
+
+  updateProfile(data) {
+    return request('/api/users/me', {
+      method: 'PUT',
+      body: JSON.stringify(data),
+    });
+  },
+
+  updatePrivacy(donationPublic) {
+    return request('/api/users/me/privacy', {
+      method: 'PUT',
+      body: JSON.stringify({ donationPublic }),
+    });
+  },
+};

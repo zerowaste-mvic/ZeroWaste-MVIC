@@ -37,4 +37,18 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private String role = "USER";
+
+    private String gender;
+
+    private String address;
+
+    /**
+     * Privacy setting: when true, this user's donations are visible to
+     * everyone in Browse Food Item. When false, their donations are only
+     * visible to themselves (still shown in their own browse list, tagged
+     * "(Private)").
+     */
+    @Builder.Default
+    @Column(name = "donation_public", columnDefinition = "boolean default true")
+    private Boolean donationPublic = true;
 }

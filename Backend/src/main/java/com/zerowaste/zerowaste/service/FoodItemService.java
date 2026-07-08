@@ -12,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class FoodItemService {
@@ -36,8 +38,33 @@ public class FoodItemService {
     }
 
     public List<FoodItemResponse> getAvailableForBrowse(Long userId) {
-        return foodItemRepository.findByDonatedTrueAndUserIdNotOrderByExpiryDateAsc(userId).stream()
-                .map(item -> FoodItemResponse.from(item, resolveDonorName(item.getUserId())))
+        List<FoodItem> donatedItems = foodItemRepository.findByDonatedTrueOrderByExpiryDateAsc();
+        if (donatedItems.isEmpty()) {
+            return List.of();
+        }
+
+        Set<Long> donorIds = donatedItems.stream()
+                .map(FoodItem::getUserId)
+                .collect(Collectors.toSet());
+        Map<Long, User> donorsById = userRepository.findAllById(donorIds).stream()
+                .collect(Collectors.toMap(User::getId, u -> u));
+
+        return donatedItems.stream()
+                .filter(item -> {
+                    boolean isOwn = item.getUserId().equals(userId);
+                    if (isOwn) {
+                        return true; // donors always see their own donations
+                    }
+                    User donor = donorsById.get(item.getUserId());
+                    return donor != null && Boolean.TRUE.equals(donor.getDonationPublic());
+                })
+                .map(item -> {
+                    boolean isOwn = item.getUserId().equals(userId);
+                    User donor = donorsById.get(item.getUserId());
+                    String donorName = donor != null ? donor.getFullName() : "Anonymous";
+                    Boolean donorPublic = donor != null ? donor.getDonationPublic() : null;
+                    return FoodItemResponse.from(item, donorName, isOwn, donorPublic);
+                })
                 .toList();
     }
 
@@ -108,6 +135,11 @@ public class FoodItemService {
             throw new ApiException("You cannot claim your own donation.", HttpStatus.BAD_REQUEST);
         }
 
+        User donor = userRepository.findById(item.getUserId()).orElse(null);
+        if (donor == null || !Boolean.TRUE.equals(donor.getDonationPublic())) {
+            throw new ApiException("This item is not available for claiming.", HttpStatus.BAD_REQUEST);
+        }
+
         item.setUserId(claimingUserId);
         item.setDonated(false);
         item.setPickupLocation(null);
@@ -121,12 +153,6 @@ public class FoodItemService {
         FoodItem item = foodItemRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ApiException("Food item not found.", HttpStatus.NOT_FOUND));
         foodItemRepository.delete(item);
-    }
-
-    private String resolveDonorName(Long donorUserId) {
-        return userRepository.findById(donorUserId)
-                .map(User::getFullName)
-                .orElse("Anonymous");
     }
 
     private void validateCategory(String category) {

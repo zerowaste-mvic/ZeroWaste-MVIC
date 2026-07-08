@@ -7,10 +7,15 @@ import AddFoodItem from './pages/AddFoodItem';
 import EditFoodItem from './pages/EditFoodItem';
 import MealPlanner from './pages/MealPlanner';
 import ExpiryAlerts from './pages/ExpiryAlerts';
+import Settings from './pages/Settings';
 
 export default function Dashboard({ onNavigate }) {
   const [activePage, setActivePage] = useState('inventory');
   const [editingItem, setEditingItem] = useState(null);
+  // Bumped whenever the profile is updated in Settings, so DashboardLayout
+  // re-reads the cached user (e.g. updated full name in the header) even
+  // though the user hasn't navigated away from the Settings page.
+  const [profileVersion, setProfileVersion] = useState(0);
 
   const handleFoodAdded = () => {
     setActivePage('inventory');
@@ -47,6 +52,8 @@ export default function Dashboard({ onNavigate }) {
           : <FoodInventory onNavigate={handleNavigate} />;
       case 'meal-planner':
         return <MealPlanner />;
+      case 'settings':
+        return <Settings onProfileUpdated={() => setProfileVersion((v) => v + 1)} />;
       default:
         return <DashboardHome />;
     }
@@ -54,6 +61,7 @@ export default function Dashboard({ onNavigate }) {
 
   return (
     <DashboardLayout
+      key={profileVersion}
       activePage={activePage}
       onPageChange={handleNavigate}
       onNavigate={onNavigate}
