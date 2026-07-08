@@ -18,7 +18,7 @@ const NAV_ITEMS = [
   { id: 'expiry', label: 'Expiry Alerts', icon: Bell },
   { id: 'meal-planner', label: 'Meal Planner', icon: CalendarDays },
   { id: 'analytics', label: 'Analytics', icon: BarChart2, disabled: true },
-  { id: 'settings', label: 'Settings', icon: Settings, disabled: true },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ];
 
 export default function DashboardSidebar({ activePage, onNavigate, onAppNavigate }) {
@@ -40,7 +40,7 @@ export default function DashboardSidebar({ activePage, onNavigate, onAppNavigate
         style={{ borderColor: 'rgba(255,255,255,0.15) !important' }}
       >
         <img
-          src="/images/zerowaste-logo.png"
+          src="/images/ZeroWaste_logo_transparent_bg.png"
           alt="ZeroWaste logo"
           style={{ width: 40, height: 40, objectFit: 'contain', background: '#fff', borderRadius: 8 }}
         />

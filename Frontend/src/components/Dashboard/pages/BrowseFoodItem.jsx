@@ -45,6 +45,12 @@ function getContactDetail(item) {
 function getImage(item) {
   return item.imageUrl || DEFAULT_IMAGE_BY_CATEGORY[item.category] || FALLBACK_IMAGE;
 }
+// Only the donor sees this tag on their own donated items, so they can tell
+// their own listings apart from everyone else's in the browse list.
+function getDisplayName(item) {
+  if (!item.isOwn) return item.name;
+  return `${item.name} (${item.donorPublic === false ? 'Private' : 'Public'})`;
+}
 
 export default function BrowseFoodItem({ onNavigate }) {
   const [search, setSearch] = useState(''); 
@@ -150,8 +156,8 @@ export default function BrowseFoodItem({ onNavigate }) {
 
             <div className="col-12 col-md-8">
               <h2 style={{ fontFamily: fonts.display, fontWeight: 700, color: colors.charcoal, borderBottom: `1px solid ${colors.border}`, paddingBottom: '0.6rem' }}>
-                {selectedItem.name}
-              </h2>
+  {getDisplayName(selectedItem)}
+</h2>
 
               <div className="d-flex align-items-center gap-2 mt-3 mb-3">
                 <span
@@ -210,8 +216,7 @@ export default function BrowseFoodItem({ onNavigate }) {
                   />
                 </div>
               </div>
-
-              {showContact && (
+{showContact && (
                 <div className="alert alert-success py-2 small mt-3 mb-0">
                   Contact: {getContactDetail(selectedItem)}
                 </div>
@@ -222,25 +227,33 @@ export default function BrowseFoodItem({ onNavigate }) {
                 </div>
               )}
 
-              <div className="d-flex justify-content-end gap-3 mt-4">
-                <button
-                  type="button"
-                  className="btn px-4"
-                  style={btnOutlineStyle}
-                  onClick={() => setShowContact((v) => !v)}
-                >
-                  Contact Donor
-                </button>
-                <button
-                  type="button"
-                  className="btn px-4"
-                  style={{ ...btnPrimaryStyle, background: colors.authGreen, borderColor: colors.authGreen }}
-                  onClick={handleClaim}
-                  disabled={claiming || claimMsg.startsWith('Donation claimed')}
-                >
-                  {claiming ? 'Claiming…' : 'Claim Donations'}
-                </button>
-              </div>
+              {selectedItem.isOwn ? (
+                <div className="alert alert-info py-2 small mt-4 mb-0">
+                  This is your own donation — {selectedItem.donorPublic === false
+                    ? 'it\'s currently private, so only you can see it.'
+                    : 'it\'s public, so anyone can see and claim it.'}
+                </div>
+              ) : (
+                <div className="d-flex justify-content-end gap-3 mt-4">
+                  <button
+                    type="button"
+                    className="btn px-4"
+                    style={btnOutlineStyle}
+                    onClick={() => setShowContact((v) => !v)}
+                  >
+                    Contact Donor
+                  </button>
+                  <button
+                    type="button"
+                    className="btn px-4"
+                    style={{ ...btnPrimaryStyle, background: colors.authGreen, borderColor: colors.authGreen }}
+                    onClick={handleClaim}
+                    disabled={claiming || claimMsg.startsWith('Donation claimed')}
+                  >
+                    {claiming ? 'Claiming…' : 'Claim Donations'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -310,7 +323,7 @@ export default function BrowseFoodItem({ onNavigate }) {
                       onError={(e) => { e.currentTarget.src = FALLBACK_IMAGE; }}
                     />
                     <div className="d-flex flex-column" style={{ minWidth: 0 }}>
-                      <div className="fw-bold" style={{ color: colors.charcoal }}>{item.name}</div>
+                    <div className="fw-bold" style={{ color: colors.charcoal }}>{getDisplayName(item)}</div>
                       <div className="small" style={{ color: colors.charcoal }}>
                         {item.quantity} {item.quantityUnit} - {item.category}
                       </div>
