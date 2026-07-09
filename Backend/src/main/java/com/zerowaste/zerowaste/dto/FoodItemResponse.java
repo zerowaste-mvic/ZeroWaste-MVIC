@@ -21,24 +21,23 @@ public class FoodItemResponse {
     private String pickupLocation;
     private String availableTime;
     private String contactDetail;
-
-    // Browse-only metadata: whether the viewer is the item's own donor, and
-    // whether that donor currently has their donations set to public. The
-    // frontend uses these to show a "(Public)"/"(Private)" tag next to the
-    // donor's own listings so they can tell their donations apart from
-    // everyone else's — this tag is never shown to other viewers.
     private Boolean isOwn;
     private Boolean donorPublic;
 
+    // Browse-only: true if the current viewer already has a pending claim
+    // request on this item, so the frontend can show "Request Pending"
+    // instead of letting them request the same item twice.
+    private Boolean alreadyRequestedByMe;
+
     public static FoodItemResponse from(FoodItem item) {
-        return from(item, null, false, null);
+        return from(item, null, false, null, false);
     }
 
     public static FoodItemResponse from(FoodItem item, String donorName) {
-        return from(item, donorName, false, null);
+        return from(item, donorName, false, null, false);
     }
 
-    public static FoodItemResponse from(FoodItem item, String donorName, boolean isOwn, Boolean donorPublic) {
+    public static FoodItemResponse from(FoodItem item, String donorName, boolean isOwn, Boolean donorPublic, boolean alreadyRequestedByMe) {
         return new FoodItemResponse(
                 item.getId(),
                 item.getName(),
@@ -53,7 +52,8 @@ public class FoodItemResponse {
                 item.getAvailableTime(),
                 item.getContactDetail(),
                 isOwn,
-                donorPublic
+                donorPublic,
+                alreadyRequestedByMe
         );
     }
 }

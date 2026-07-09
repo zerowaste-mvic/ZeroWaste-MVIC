@@ -3,7 +3,7 @@ import DashboardSidebar from './DashboardSidebar';
 import { colors } from '../../theme';
 import { getStoredUser } from '../../utils/auth';
 
-export default function DashboardLayout({ activePage, onPageChange, onNavigate, children }) {
+export default function DashboardLayout({ activePage, onPageChange, onNavigate, unreadCount = 0, children }) {
   const user = getStoredUser();
 
   return (
@@ -29,8 +29,34 @@ export default function DashboardLayout({ activePage, onPageChange, onNavigate, 
           </button>
 
           <div className="d-flex align-items-center gap-3">
-            <button type="button" className="btn btn-link p-0" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            <button
+              type="button"
+              className="btn btn-link p-0 position-relative"
+              style={{ color: 'rgba(255,255,255,0.85)' }}
+              onClick={() => onPageChange?.('notifications')}
+              aria-label="Notifications"
+            >
               <Bell size={20} />
+              {unreadCount > 0 && (
+                <span
+                  className="position-absolute d-flex align-items-center justify-content-center rounded-circle"
+                  style={{
+                    top: -6,
+                    right: -8,
+                    minWidth: 18,
+                    height: 18,
+                    padding: '0 4px',
+                    background: '#e14b4b',
+                    color: '#fff',
+                    fontSize: '0.65rem',
+                    fontWeight: 700,
+                    lineHeight: 1,
+                    border: '1.5px solid ' + colors.dashboardAccent,
+                  }}
+                >
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              )}
             </button>
 
             <div className="d-flex align-items-center gap-2">

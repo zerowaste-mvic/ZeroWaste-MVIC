@@ -104,21 +104,17 @@ export default function BrowseFoodItem({ onNavigate }) {
     setClaimMsg('');
   };
 
- const handleClaim = async () => {
+const handleClaim = async () => {
     if (!selectedItem) return;
     setClaiming(true);
     setClaimMsg('');
     try {
       await foodApi.claim(selectedItem.id);
-      setClaimMsg('Donation claimed! It has been added to your food inventory.');
-      setItems((prev) => prev.filter((i) => i.id !== selectedItem.id));
-      // Send the claimed item straight to the claimer's Food Inventory.
-      setTimeout(() => {
-        setSelectedItem(null);
-        onNavigate?.('inventory');
-      }, 900);
+      setClaimMsg('Request sent! The donor will be notified and can accept or decline it.');
+      setSelectedItem((prev) => (prev ? { ...prev, alreadyRequestedByMe: true } : prev));
+      setItems((prev) => prev.map((i) => (i.id === selectedItem.id ? { ...i, alreadyRequestedByMe: true } : i)));
     } catch (err) {
-      setClaimMsg(err.message || 'Failed to claim this donation. Please try again.');
+      setClaimMsg(err.message || 'Failed to send claim request. Please try again.');
     } finally {
       setClaiming(false);
     }
@@ -248,9 +244,9 @@ export default function BrowseFoodItem({ onNavigate }) {
                     className="btn px-4"
                     style={{ ...btnPrimaryStyle, background: colors.authGreen, borderColor: colors.authGreen }}
                     onClick={handleClaim}
-                    disabled={claiming || claimMsg.startsWith('Donation claimed')}
+                    disabled={claiming || selectedItem.alreadyRequestedByMe}
                   >
-                    {claiming ? 'Claiming…' : 'Claim Donations'}
+                    {selectedItem.alreadyRequestedByMe ? 'Request Pending' : claiming ? 'Sending…' : 'Claim Donations'}
                   </button>
                 </div>
               )}
@@ -330,6 +326,11 @@ export default function BrowseFoodItem({ onNavigate }) {
                       <div className="small mb-2" style={{ color: colors.muted }}>
                         Expires {formatDate(item.expiryDate)}
                       </div>
+                      {item.alreadyRequestedByMe && !item.isOwn && (
+                        <div className="small mb-2" style={{ color: colors.authGreen, fontWeight: 600 }}>
+                          Request Pending
+                        </div>
+                      )}
                       <button
                         type="button"
                         className="btn btn-sm mt-auto align-self-start"

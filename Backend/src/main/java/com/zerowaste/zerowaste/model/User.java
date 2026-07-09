@@ -51,4 +51,11 @@ public class User {
     @Builder.Default
     @Column(name = "donation_public", columnDefinition = "boolean default true")
     private Boolean donationPublic = true;
+    @Builder.Default
+    @Column(name = "two_factor_enabled", columnDefinition = "boolean default true")
+    private Boolean twoFactorEnabled = true;
+
+    @Builder.Default
+    @Column(name = "expiry_alerts_enabled", columnDefinition = "boolean default true")
+    private Boolean expiryAlertsEnabled = true;
 }

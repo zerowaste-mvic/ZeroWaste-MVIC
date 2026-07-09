@@ -31,9 +31,14 @@ async function request(path, options = {}) {
   }
 
   if (response.status === 204) return null;
-  return response.json();
-}
 
+  // Some endpoints (claim, accept, decline, mark-all-read, etc.) return 200
+  // with an empty body rather than 204 — read as text first so we don't
+  // crash trying to JSON-parse nothing.
+  const text = await response.text();
+  if (!text) return null;
+  return JSON.parse(text);
+}
 export const foodApi = {
   getAll() {
     return request('/api/food-items', { method: 'GET' });
@@ -90,5 +95,45 @@ export const userApi = {
       method: 'PUT',
       body: JSON.stringify({ donationPublic }),
     });
+  },
+
+  updateTwoFactor(enabled) {
+    return request('/api/users/me/two-factor', {
+      method: 'PUT',
+      body: JSON.stringify({ enabled }),
+    });
+  },
+
+  updateExpiryAlerts(enabled) {
+    return request('/api/users/me/expiry-alerts', {
+      method: 'PUT',
+      body: JSON.stringify({ enabled }),
+    });
+  },
+};
+
+export const notificationApi = {
+  getAll() {
+    return request('/api/notifications', { method: 'GET' });
+  },
+
+  getUnreadCount() {
+    return request('/api/notifications/unread-count', { method: 'GET' });
+  },
+
+  markAllRead() {
+    return request('/api/notifications/read-all', { method: 'PUT' });
+  },
+
+  markRead(id) {
+    return request(`/api/notifications/${id}/read`, { method: 'PUT' });
+  },
+
+  accept(id) {
+    return request(`/api/notifications/${id}/accept`, { method: 'POST' });
+  },
+
+  decline(id) {
+    return request(`/api/notifications/${id}/decline`, { method: 'POST' });
   },
 };

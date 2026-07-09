@@ -3,6 +3,7 @@ package com.zerowaste.zerowaste.controller;
 import com.zerowaste.zerowaste.dto.DonateRequest;
 import com.zerowaste.zerowaste.dto.FoodItemRequest;
 import com.zerowaste.zerowaste.dto.FoodItemResponse;
+import com.zerowaste.zerowaste.service.DonationRequestService;
 import com.zerowaste.zerowaste.service.FoodItemService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,9 +25,11 @@ import java.util.List;
 public class FoodItemController {
 
     private final FoodItemService foodItemService;
+    private final DonationRequestService donationRequestService;
 
-    public FoodItemController(FoodItemService foodItemService) {
+    public FoodItemController(FoodItemService foodItemService, DonationRequestService donationRequestService) {
         this.foodItemService = foodItemService;
+        this.donationRequestService = donationRequestService;
     }
 
     @GetMapping
@@ -63,9 +66,14 @@ public class FoodItemController {
         return foodItemService.donate(id, userId, request);
     }
 
+    /**
+     * Sends a claim request to the donor instead of transferring the item
+     * immediately. The donor accepts or declines it from their Notifications
+     * page; only then does the item move into a Food Inventory.
+     */
     @PostMapping("/{id}/claim")
-    public FoodItemResponse claim(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
-        return foodItemService.claim(id, userId);
+    public void claim(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
+        donationRequestService.requestClaim(id, userId);
     }
 
     @DeleteMapping("/{id}")

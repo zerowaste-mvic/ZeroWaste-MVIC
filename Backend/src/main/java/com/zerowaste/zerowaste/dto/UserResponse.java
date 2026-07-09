@@ -14,6 +14,8 @@ public class UserResponse {
     private String gender;
     private String address;
     private Boolean donationPublic;
+    private Boolean twoFactorEnabled;
+    private Boolean expiryAlertsEnabled;
 
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -23,7 +25,9 @@ public class UserResponse {
                 user.getRole(),
                 user.getGender(),
                 user.getAddress(),
-                user.getDonationPublic()
+                user.getDonationPublic(),
+                user.getTwoFactorEnabled(),
+                user.getExpiryAlertsEnabled()
         );
     }
 }

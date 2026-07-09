@@ -44,9 +44,8 @@ function SectionHeading({ children }) {
   );
 }
 
-// Purely visual pill switch. When `onChange` is provided it behaves like a
-// controlled input; otherwise it just flips its own local state (used for
-// the "replica" toggles that intentionally have no backend behind them yet).
+// Visual pill switch. Controlled via `checked`/`onChange`; `disabled` is used
+// while a save request to the backend is in flight.
 function ToggleSwitch({ checked, onChange, disabled }) {
   return (
     <button
@@ -111,9 +110,16 @@ export default function Settings({ onProfileUpdated }) {
   const [savingPrivacy, setSavingPrivacy] = useState(false);
   const [privacyMsg, setPrivacyMsg] = useState('');
 
-  // ---- Replica-only toggles (no backend, local state only) ----
-  const [twoFactor, setTwoFactor] = useState(false);
+  // ---- Security & Alerts (backend-connected: generate notifications on change) ----
+  const [twoFactor, setTwoFactor] = useState(true);
+  const [savingTwoFactor, setSavingTwoFactor] = useState(false);
+  const [twoFactorMsg, setTwoFactorMsg] = useState('');
+
   const [expiryAlerts, setExpiryAlerts] = useState(true);
+  const [savingExpiryAlerts, setSavingExpiryAlerts] = useState(false);
+  const [expiryAlertsMsg, setExpiryAlertsMsg] = useState('');
+
+  // ---- Replica-only toggle (no backend, local state only) ----
   const [donationUpdates, setDonationUpdates] = useState(true);
 
   useEffect(() => {
@@ -130,6 +136,8 @@ export default function Settings({ onProfileUpdated }) {
           address: data.address || '',
         });
         setDonationPublic(data.donationPublic !== false);
+        setTwoFactor(data.twoFactorEnabled !== false);
+        setExpiryAlerts(data.expiryAlertsEnabled !== false);
       } catch (err) {
         if (!cancelled) setProfileMsg({ type: 'danger', text: err.message || 'Failed to load profile.' });
       } finally {
@@ -197,6 +205,36 @@ export default function Settings({ onProfileUpdated }) {
       setPrivacyMsg(err.message || 'Failed to update privacy setting.');
     } finally {
       setSavingPrivacy(false);
+    }
+  };
+
+  const handleToggleTwoFactor = async (nextValue) => {
+    const previous = twoFactor;
+    setTwoFactor(nextValue); // optimistic
+    setSavingTwoFactor(true);
+    setTwoFactorMsg('');
+    try {
+      await userApi.updateTwoFactor(nextValue);
+    } catch (err) {
+      setTwoFactor(previous); // rollback
+      setTwoFactorMsg(err.message || 'Failed to update two-factor authentication.');
+    } finally {
+      setSavingTwoFactor(false);
+    }
+  };
+
+  const handleToggleExpiryAlerts = async (nextValue) => {
+    const previous = expiryAlerts;
+    setExpiryAlerts(nextValue); // optimistic
+    setSavingExpiryAlerts(true);
+    setExpiryAlertsMsg('');
+    try {
+      await userApi.updateExpiryAlerts(nextValue);
+    } catch (err) {
+      setExpiryAlerts(previous); // rollback
+      setExpiryAlertsMsg(err.message || 'Failed to update expiry alerts.');
+    } finally {
+      setSavingExpiryAlerts(false);
     }
   };
 
@@ -320,11 +358,14 @@ export default function Settings({ onProfileUpdated }) {
               Change Password
             </button>
 
+            {twoFactorMsg && <div className="alert alert-danger py-2 small mb-3">{twoFactorMsg}</div>}
+
             <PreferenceRow
               title="Two-Factor Authentication"
               description="Add an extra layer of security to your account."
               checked={twoFactor}
-              onChange={setTwoFactor}
+              onChange={handleToggleTwoFactor}
+              disabled={savingTwoFactor || loadingProfile}
             />
           </div>
 
@@ -351,11 +392,14 @@ export default function Settings({ onProfileUpdated }) {
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Notification Preferences</SectionHeading>
 
+            {expiryAlertsMsg && <div className="alert alert-danger py-2 small mb-3">{expiryAlertsMsg}</div>}
+
             <PreferenceRow
               title="Expiry Alerts"
               description="Get notified about items being expiry"
               checked={expiryAlerts}
-              onChange={setExpiryAlerts}
+              onChange={handleToggleExpiryAlerts}
+              disabled={savingExpiryAlerts || loadingProfile}
             />
             <PreferenceRow
               title="Donation Updates"

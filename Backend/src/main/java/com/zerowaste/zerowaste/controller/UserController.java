@@ -1,6 +1,8 @@
 package com.zerowaste.zerowaste.controller;
 
+
 import com.zerowaste.zerowaste.dto.PrivacyRequest;
+import com.zerowaste.zerowaste.dto.ToggleRequest;
 import com.zerowaste.zerowaste.dto.UpdateProfileRequest;
 import com.zerowaste.zerowaste.dto.UserResponse;
 import com.zerowaste.zerowaste.service.UserService;
@@ -39,5 +41,18 @@ public class UserController {
             @Valid @RequestBody PrivacyRequest request,
             @AuthenticationPrincipal Long userId) {
         return userService.updatePrivacy(userId, request);
+    }
+    @PutMapping("/me/two-factor")
+    public UserResponse updateTwoFactor(
+            @Valid @RequestBody ToggleRequest request,
+            @AuthenticationPrincipal Long userId) {
+        return userService.updateTwoFactor(userId, request.getEnabled());
+    }
+
+    @PutMapping("/me/expiry-alerts")
+    public UserResponse updateExpiryAlerts(
+            @Valid @RequestBody ToggleRequest request,
+            @AuthenticationPrincipal Long userId) {
+        return userService.updateExpiryAlerts(userId, request.getEnabled());
     }
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DashboardLayout from './DashboardLayout';
 import DashboardHome from './pages/DashboardHome';
 import FoodInventory from './pages/FoodInventory';
@@ -8,14 +8,28 @@ import EditFoodItem from './pages/EditFoodItem';
 import MealPlanner from './pages/MealPlanner';
 import ExpiryAlerts from './pages/ExpiryAlerts';
 import Settings from './pages/Settings';
+import Notifications from './pages/Notifications';
+import { notificationApi } from '../../services/api';
 
 export default function Dashboard({ onNavigate }) {
   const [activePage, setActivePage] = useState('inventory');
   const [editingItem, setEditingItem] = useState(null);
-  // Bumped whenever the profile is updated in Settings, so DashboardLayout
-  // re-reads the cached user (e.g. updated full name in the header) even
-  // though the user hasn't navigated away from the Settings page.
   const [profileVersion, setProfileVersion] = useState(0);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const refreshUnreadCount = async () => {
+    try {
+      const data = await notificationApi.getUnreadCount();
+      setUnreadCount(data?.count || 0);
+    } catch {
+      // Non-critical — badge just stays at its last known value.
+    }
+  };
+
+  useEffect(() => {
+    if (activePage === 'notifications') return;
+    refreshUnreadCount();
+  }, [activePage]);
 
   const handleFoodAdded = () => {
     setActivePage('inventory');
@@ -26,10 +40,17 @@ export default function Dashboard({ onNavigate }) {
     setEditingItem(null);
   };
 
-  // Extended navigate: supports ('edit-food', item)
   const handleNavigate = (page, data) => {
     if (page === 'edit-food' && data) {
       setEditingItem(data);
+    }
+    if (page === 'notifications') {
+      // Like opening a YouTube-style notification tray: clear the red badge
+      // the instant you open it, rather than waiting for an explicit "Mark
+      // all as read" click. Notifications.jsx does the actual mark-all-read
+      // call itself before it loads the list, so there's no race between
+      // the two.
+      setUnreadCount(0);
     }
     setActivePage(page);
   };
@@ -54,6 +75,8 @@ export default function Dashboard({ onNavigate }) {
         return <MealPlanner />;
       case 'settings':
         return <Settings onProfileUpdated={() => setProfileVersion((v) => v + 1)} />;
+      case 'notifications':
+        return <Notifications onUnreadCountChange={setUnreadCount} />;
       default:
         return <DashboardHome />;
     }
@@ -65,6 +88,7 @@ export default function Dashboard({ onNavigate }) {
       activePage={activePage}
       onPageChange={handleNavigate}
       onNavigate={onNavigate}
+      unreadCount={unreadCount}
     >
       {renderPage()}
     </DashboardLayout>

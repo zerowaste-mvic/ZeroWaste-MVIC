@@ -4,8 +4,10 @@ import com.zerowaste.zerowaste.dto.DonateRequest;
 import com.zerowaste.zerowaste.dto.FoodItemRequest;
 import com.zerowaste.zerowaste.dto.FoodItemResponse;
 import com.zerowaste.zerowaste.exception.ApiException;
+import com.zerowaste.zerowaste.model.DonationClaimRequest;
 import com.zerowaste.zerowaste.model.FoodItem;
 import com.zerowaste.zerowaste.model.User;
+import com.zerowaste.zerowaste.repository.DonationClaimRequestRepository;
 import com.zerowaste.zerowaste.repository.FoodItemRepository;
 import com.zerowaste.zerowaste.repository.UserRepository;
 import org.springframework.http.HttpStatus;
@@ -24,10 +26,14 @@ public class FoodItemService {
 
     private final FoodItemRepository foodItemRepository;
     private final UserRepository userRepository;
+    private final DonationClaimRequestRepository claimRequestRepository;
 
-    public FoodItemService(FoodItemRepository foodItemRepository, UserRepository userRepository) {
+    public FoodItemService(FoodItemRepository foodItemRepository,
+                            UserRepository userRepository,
+                            DonationClaimRequestRepository claimRequestRepository) {
         this.foodItemRepository = foodItemRepository;
         this.userRepository = userRepository;
+        this.claimRequestRepository = claimRequestRepository;
     }
 
     public List<FoodItemResponse> getAllForUser(Long userId) {
@@ -49,7 +55,7 @@ public class FoodItemService {
         Map<Long, User> donorsById = userRepository.findAllById(donorIds).stream()
                 .collect(Collectors.toMap(User::getId, u -> u));
 
-        return donatedItems.stream()
+        List<FoodItem> visible = donatedItems.stream()
                 .filter(item -> {
                     boolean isOwn = item.getUserId().equals(userId);
                     if (isOwn) {
@@ -58,12 +64,23 @@ public class FoodItemService {
                     User donor = donorsById.get(item.getUserId());
                     return donor != null && Boolean.TRUE.equals(donor.getDonationPublic());
                 })
+                .toList();
+
+        Set<Long> visibleIds = visible.stream().map(FoodItem::getId).collect(Collectors.toSet());
+        Set<Long> requestedByMe = claimRequestRepository
+                .findByFoodItemIdInAndRequesterIdAndStatus(visibleIds, userId, "PENDING")
+                .stream()
+                .map(DonationClaimRequest::getFoodItemId)
+                .collect(Collectors.toSet());
+
+        return visible.stream()
                 .map(item -> {
                     boolean isOwn = item.getUserId().equals(userId);
                     User donor = donorsById.get(item.getUserId());
                     String donorName = donor != null ? donor.getFullName() : "Anonymous";
                     Boolean donorPublic = donor != null ? donor.getDonationPublic() : null;
-                    return FoodItemResponse.from(item, donorName, isOwn, donorPublic);
+                    boolean alreadyRequested = requestedByMe.contains(item.getId());
+                    return FoodItemResponse.from(item, donorName, isOwn, donorPublic, alreadyRequested);
                 })
                 .toList();
     }
@@ -113,38 +130,6 @@ public class FoodItemService {
             item.setAvailableTime(blankToNull(request.getAvailableTime()));
             item.setContactDetail(blankToNull(request.getContactDetail()));
         }
-
-        return FoodItemResponse.from(foodItemRepository.save(item));
-    }
-
-    /**
-     * Claiming a donated item transfers it into the claimer's own Food Inventory:
-     * ownership (userId) moves to the claimer and the donated flag is cleared so
-     * it shows up under their "Food Inventory" / getAllForUser(...) list, and
-     * disappears from everyone else's Browse Food Item list.
-     */
-    public FoodItemResponse claim(Long id, Long claimingUserId) {
-        FoodItem item = foodItemRepository.findById(id)
-                .orElseThrow(() -> new ApiException("Food item not found.", HttpStatus.NOT_FOUND));
-
-        if (!Boolean.TRUE.equals(item.getDonated())) {
-            throw new ApiException("This item is not available for claiming.", HttpStatus.BAD_REQUEST);
-        }
-
-        if (item.getUserId().equals(claimingUserId)) {
-            throw new ApiException("You cannot claim your own donation.", HttpStatus.BAD_REQUEST);
-        }
-
-        User donor = userRepository.findById(item.getUserId()).orElse(null);
-        if (donor == null || !Boolean.TRUE.equals(donor.getDonationPublic())) {
-            throw new ApiException("This item is not available for claiming.", HttpStatus.BAD_REQUEST);
-        }
-
-        item.setUserId(claimingUserId);
-        item.setDonated(false);
-        item.setPickupLocation(null);
-        item.setAvailableTime(null);
-        item.setContactDetail(null);
 
         return FoodItemResponse.from(foodItemRepository.save(item));
     }
