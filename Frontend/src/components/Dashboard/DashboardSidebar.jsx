@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { id: 'browse', label: 'Browse Food Item', icon: Search },
   { id: 'expiry', label: 'Expiry Alerts', icon: Bell },
   { id: 'meal-planner', label: 'Meal Planner', icon: CalendarDays },
-  { id: 'analytics', label: 'Analytics', icon: BarChart2, disabled: true },
+  { id: 'analytics', label: 'Analytics', icon: BarChart2 },
   { id: 'settings', label: 'Settings', icon: Settings },
 ];
 

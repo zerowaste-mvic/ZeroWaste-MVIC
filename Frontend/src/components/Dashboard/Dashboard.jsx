@@ -9,6 +9,7 @@ import MealPlanner from './pages/MealPlanner';
 import ExpiryAlerts from './pages/ExpiryAlerts';
 import Settings from './pages/Settings';
 import Notifications from './pages/Notifications';
+import Analytics from './pages/Analytics';
 import { notificationApi } from '../../services/api';
 
 export default function Dashboard({ onNavigate }) {
@@ -77,6 +78,8 @@ export default function Dashboard({ onNavigate }) {
         return <Settings onProfileUpdated={() => setProfileVersion((v) => v + 1)} />;
       case 'notifications':
         return <Notifications onUnreadCountChange={setUnreadCount} />;
+      case 'analytics':
+        return <Analytics />;
       default:
         return <DashboardHome />;
     }
