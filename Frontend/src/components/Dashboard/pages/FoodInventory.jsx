@@ -51,12 +51,12 @@ export default function FoodInventory({ onNavigate }) {
   };
 
   const handleUsed = async (id) => {
-    if (!window.confirm('Mark this item as used? It will be removed from your inventory.')) return;
+    if (!window.confirm('Mark this item as used? It will be removed from your inventory and counted toward Food Saved.')) return;
     try {
-      await foodApi.delete(id);
+      await foodApi.markUsed(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
     } catch (err) {
-      setErrMsg(err.message || 'Failed to remove item.');
+      setErrMsg(err.message || 'Failed to mark item as used.');
     }
   };
 

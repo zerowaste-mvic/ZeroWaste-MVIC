@@ -73,6 +73,10 @@ export const foodApi = {
     return request(`/api/food-items/${id}/claim`, { method: 'POST' });
   },
 
+  markUsed(id) {
+    return request(`/api/food-items/${id}/use`, { method: 'POST' });
+  },
+
   delete(id) {
     return request(`/api/food-items/${id}`, { method: 'DELETE' });
   },
@@ -135,5 +139,18 @@ export const notificationApi = {
 
   decline(id) {
     return request(`/api/notifications/${id}/decline`, { method: 'POST' });
+  },
+};
+export const analyticsApi = {
+  getSummary(period) {
+    return request(`/api/analytics/summary?period=${encodeURIComponent(period)}`, { method: 'GET' });
+  },
+
+  getInventoryOverview() {
+    return request('/api/analytics/inventory-overview', { method: 'GET' });
+  },
+
+  getFoodSavedBreakdown(period) {
+    return request(`/api/analytics/food-saved-breakdown?period=${encodeURIComponent(period)}`, { method: 'GET' });
   },
 };

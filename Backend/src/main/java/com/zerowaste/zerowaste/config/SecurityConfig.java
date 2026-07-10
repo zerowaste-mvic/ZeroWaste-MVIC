@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/food-items/**").authenticated()
                         .requestMatchers("/api/users/**").authenticated()
                         .requestMatchers("/api/notifications/**").authenticated()
+                        .requestMatchers("/api/analytics/**").authenticated()
                         .anyRequest().permitAll()
                         
                 )

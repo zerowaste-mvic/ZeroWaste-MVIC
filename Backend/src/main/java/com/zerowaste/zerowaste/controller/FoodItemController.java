@@ -58,6 +58,11 @@ public class FoodItemController {
         return foodItemService.update(id, request, userId);
     }
 
+    @PostMapping("/{id}/use")
+    public FoodItemResponse markUsed(@PathVariable Long id, @AuthenticationPrincipal Long userId) {
+        return foodItemService.markUsed(id, userId);
+    }
+
     @PostMapping("/{id}/donate")
     public FoodItemResponse donate(
             @PathVariable Long id,
