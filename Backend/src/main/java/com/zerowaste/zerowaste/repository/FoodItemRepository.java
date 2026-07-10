@@ -8,5 +8,7 @@ import java.util.Optional;
 
 public interface FoodItemRepository extends JpaRepository<FoodItem, Long> {
     List<FoodItem> findByUserIdOrderByExpiryDateAsc(Long userId);
+    List<FoodItem> findByDonatedTrueAndUserIdNotOrderByExpiryDateAsc(Long userId);
+    List<FoodItem> findByDonatedTrueOrderByExpiryDateAsc();
     Optional<FoodItem> findByIdAndUserId(Long id, Long userId);
 }
