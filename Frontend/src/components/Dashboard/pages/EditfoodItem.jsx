@@ -128,7 +128,7 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
             <label htmlFor="edit-imageUrl" className="form-label fw-semibold small">
               Image URL <span className="text-muted fw-normal">(optional)</span>
             </label>
-            <input id="edit-imageUrl" name="imageUrl" type="url" className="form-control"
+            <input id="edit-imageUrl" name="imageUrl" type="text" className="form-control"
               style={inputStyle} placeholder="https://..." value={form.imageUrl} onChange={handleChange} />
           </div>
 

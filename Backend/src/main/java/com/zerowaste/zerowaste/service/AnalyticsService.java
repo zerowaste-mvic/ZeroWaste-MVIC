@@ -33,15 +33,32 @@ public class AnalyticsService {
     }
 
     public AnalyticsSummaryResponse getSummary(Long userId, String period) {
-        Instant since = startOfPeriod(period);
+        LocalDate today = LocalDate.now();
+        LocalDate periodStart = startOfPeriod(period);
+        Instant sinceInstant = periodStart.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
-        long used = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "USED", since).size();
-        long donated = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "DONATED", since).size();
-        long wasted = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "WASTED", since).size();
+        long used = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "USED", sinceInstant).size();
+        long donated = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "DONATED", sinceInstant).size();
+
+        // "Wasted" combines two things:
+        //  1) items already removed after expiring (logged at delete time), and
+        //  2) items that are *currently* sitting in the inventory past their
+        //     expiry date but haven't been used, donated, or removed yet —
+        //     these count as waste immediately, without waiting for the user
+        //     to delete them.
+        long wastedLogged = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "WASTED", sinceInstant).size();
+        long wastedLive = foodItemRepository.findByUserIdOrderByExpiryDateAsc(userId).stream()
+                .filter(item -> !Boolean.TRUE.equals(item.getDonated()))
+                .filter(item -> item.getExpiryDate() != null && item.getExpiryDate().isBefore(today))
+                .filter(item -> !item.getExpiryDate().isBefore(periodStart))
+                .count();
+        long wasted = wastedLogged + wastedLive;
 
         long saved = used + donated;
         long denominator = saved + wasted;
-        int wasteReducedPercent = denominator == 0 ? 0 : (int) Math.round(saved * 100.0 / denominator);
+        // No activity and nothing currently spoiling yet = a clean 100%,
+        // not 0% — the percentage only drops once waste actually happens.
+        int wasteReducedPercent = denominator == 0 ? 100 : (int) Math.round(saved * 100.0 / denominator);
 
         return new AnalyticsSummaryResponse(used, donated, wasteReducedPercent, normalizePeriod(period));
     }
@@ -64,7 +81,7 @@ public class AnalyticsService {
      * this is what backs the Food Saved bar chart.
      */
     public ChartBreakdownResponse getFoodSavedBreakdown(Long userId, String period) {
-        Instant since = startOfPeriod(period);
+        Instant since = startOfPeriod(period).atStartOfDay(ZoneId.systemDefault()).toInstant();
         List<String> categories = activityLogRepository
                 .findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "USED", since).stream()
                 .map(FoodActivityLog::getCategory)
@@ -89,10 +106,9 @@ public class AnalyticsService {
         return new ChartBreakdownResponse(breakdown, total);
     }
 
-    private Instant startOfPeriod(String period) {
+    private LocalDate startOfPeriod(String period) {
         LocalDate today = LocalDate.now();
-        LocalDate start = "year".equalsIgnoreCase(period) ? today.withDayOfYear(1) : today.withDayOfMonth(1);
-        return start.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        return "year".equalsIgnoreCase(period) ? today.withDayOfYear(1) : today.withDayOfMonth(1);
     }
 
     private String normalizePeriod(String period) {

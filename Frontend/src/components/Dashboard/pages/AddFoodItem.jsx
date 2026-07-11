@@ -1,6 +1,6 @@
 // src/components/Dashboard/pages/AddFoodItem.jsx
 import { useRef, useState } from 'react';
-import { ArrowLeft, ChevronRight, Calendar, ImagePlus, Camera, Link2 } from 'lucide-react';
+import { ArrowLeft, ChevronRight, Calendar, ImagePlus, Link2 } from 'lucide-react';
 import { colors, fonts, btnPrimaryStyle, btnOutlineStyle } from '../../../theme';
 import { foodApi } from '../../../services/api';
 
@@ -104,7 +104,6 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
   // filled with a giant base64 string.
   const [uploadedImageData, setUploadedImageData] = useState('');
   const galleryInputRef = useRef(null);
-  const cameraInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -299,7 +298,7 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
               <div className="d-flex align-items-center gap-2 mb-2">
                 <Link2 size={16} style={{ color: colors.muted, flexShrink: 0 }} />
                 <input
-                  type="url"
+                  type="text"
                   name="imageUrl"
                   className="form-control"
                   style={{ ...inputStyle, maxWidth: 560 }}
@@ -316,14 +315,6 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
                 className="d-none"
                 onChange={handleFileSelect}
               />
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="d-none"
-                onChange={handleFileSelect}
-              />
 
               <div className="d-flex gap-2 flex-wrap">
                 <button
@@ -333,14 +324,6 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
                   onClick={() => galleryInputRef.current?.click()}
                 >
                   <ImagePlus size={16} /> Choose from gallery
-                </button>
-                <button
-                  type="button"
-                  className="btn d-inline-flex align-items-center gap-2"
-                  style={{ ...btnOutlineStyle, background: '#eef0e6' }}
-                  onClick={() => cameraInputRef.current?.click()}
-                >
-                  <Camera size={16} /> Take Photo
                 </button>
               </div>
 
