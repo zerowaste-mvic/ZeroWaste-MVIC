@@ -17,9 +17,8 @@ const cardStyle = {
 };
 
 const illustrationFrameStyle = {
-  background: colors.authIllustrationBg,
+  background: colors.greenLrgb,
   borderRadius: "130px 10px 130px 10px",
-  boxShadow: "0 0px 20px rgba(0,0,0, 0.25)",
   position: "relative",
 };
 
@@ -106,7 +105,7 @@ export default function Signup({ onNavigate }) {
   return (
     <div
       className="min-vh-100 d-flex align-items-center justify-content-center p-3 p-md-5"
-      style={{ background: colors.authBg }}
+      style={{ background: colors.white }}
     >
       <div
         className="signup-card row g-0 w-100"
@@ -117,14 +116,6 @@ export default function Signup({ onNavigate }) {
         }}
       >
         <style>{`
-          .signup-illustration {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-          }
-          .signup-illustration:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 14px 34px rgba(61, 140, 49, 0.18);
-          }
-
           .back-to-home {
             position: relative;
             overflow: visible;
@@ -138,7 +129,7 @@ export default function Signup({ onNavigate }) {
             width: 0;
             height: 2px;
             border-radius: 5px;
-            background: ${colors.authGreen};
+            background: ${colors.greenD};
             transition: width 0.25s ease;
           }
 
@@ -155,7 +146,7 @@ export default function Signup({ onNavigate }) {
           .signup-btn:hover:not(:disabled) {
             opacity: 1 !important;
             transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
           }
 
           .signup-input:focus {
@@ -170,8 +161,7 @@ export default function Signup({ onNavigate }) {
         <div
           className="col-12 col-lg-6 order-lg-1 d-flex align-items-center justify-content-center px-4 px-xl-5 py-4 py-xl-5 border-end border-2 h-100"
           style={{
-            background: colors.authBg,
-            borderColor: colors.authGreen,
+            background: colors.white,
           }}
         >
           <div className="mx-auto" style={{ maxWidth: 400, width: "100%" }}>
@@ -194,7 +184,7 @@ export default function Signup({ onNavigate }) {
             <div className="text-center mb-4">
               <img
                 draggable="false"
-                src="/images/ZeroWaste_logo_transparent_bg.png"
+                src="/images/zerowaste-logo.png"
                 alt="ZeroWaste"
                 className="img-fluid"
                 style={{ maxWidth: 130 }}
@@ -366,7 +356,7 @@ export default function Signup({ onNavigate }) {
                   marginTop: "0.5rem",
                   height: "3.5rem",
                   opacity: "0.75",
-                  background: colors.authGreen,
+                  background: colors.greenL,
                   fontSize: "0.95rem",
                   letterSpacing: "0.08em",
                   fontWeight: 600,
@@ -404,7 +394,7 @@ export default function Signup({ onNavigate }) {
                   padding: "0 0 1px 0",
                   ...bodyTextStyle,
                   fontSize: "0.95rem",
-                  color: colors.authGreen,
+                  color: colors.greenD,
                 }}
                 onClick={() => onNavigate?.("login")}
               >
@@ -418,7 +408,8 @@ export default function Signup({ onNavigate }) {
         <div
           className="col-lg-6 order-lg-2 d-none d-lg-flex flex-column justify-content-between px-5 py-5"
           style={{
-            background: colors.registerBG,
+            background: colors.white,
+            borderLeft: `2px solid ${colors.greenD}`,
             minHeight: "100%",
           }}
         >
@@ -459,7 +450,7 @@ export default function Signup({ onNavigate }) {
                 ...illustrationFrameStyle,
                 maxWidth: 380,
                 maxHeight: 480,
-                boxShadow: "0 0px 20px rgba(0,0,0, 0.25)",
+                boxShadow: "0 0px 10px rgba(0,0,0, 0.15)",
               }}
             >
               <img

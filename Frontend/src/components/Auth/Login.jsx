@@ -15,7 +15,7 @@ const cardStyle = {
 };
 
 const illustrationFrameStyle = {
-  background: colors.authIllustrationBg,
+  background: colors.greenLrgb,
   borderRadius: "10px 130px 10px 130px",
   boxShadow: "0 0px 10px rgba(0,0,0, 0.15)",
   position: "relative",
@@ -102,7 +102,7 @@ export default function Login({ onNavigate }) {
   return (
     <div
       className="min-vh-100 d-flex align-items-center justify-content-center p-3 p-md-5"
-      style={{ background: colors.authBg }}
+      style={{ background: colors.white }}
     >
       <div
         className="login-card row g-0 w-100"
@@ -113,14 +113,6 @@ export default function Login({ onNavigate }) {
         }}
       >
         <style>{`
-        
-          .login-illustration {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-          }
-          .login-illustration:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 14px 34px rgba(61, 140, 49, 0.18);
-          }
 
           .back-to-home-btn {
             position: relative;
@@ -135,7 +127,7 @@ export default function Login({ onNavigate }) {
             width: 0;
             height: 2px;
             border-radius: 5px;
-            background: ${colors.authGreen};
+            background: ${colors.greenD};
             transition: width 0.25s ease;
           }
 
@@ -152,7 +144,7 @@ export default function Login({ onNavigate }) {
           .login-btn:hover:not(:disabled) {
             opacity: 1 !important;
             transform: translateY(-1px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.16);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
           }
 
           .login-input:focus {
@@ -167,7 +159,7 @@ export default function Login({ onNavigate }) {
         <div
           className="col-lg-6 d-none d-lg-flex flex-column justify-content-between px-5 py-5"
           style={{
-            background: colors.registerBG,
+            background: colors.white,
             minHeight: "100%",
           }}
         >
@@ -208,7 +200,6 @@ export default function Login({ onNavigate }) {
                 ...illustrationFrameStyle,
                 maxWidth: 380,
                 maxHeight: 480,
-                boxShadow: "0 0px 20px rgba(0,0,0, 0.25)",
               }}
             >
               <img
@@ -232,9 +223,9 @@ export default function Login({ onNavigate }) {
         <div
           className="col-12 col-lg-6 d-flex flex-column justify-content-center px-4 px-xl-5 py-5"
           style={{
-            background: colors.registerBG,
+            background: colors.white,
             minHeight: "100%",
-            borderLeft: `2px solid ${colors.authGreen}`,
+            borderLeft: `2px solid ${colors.greenD}`,
           }}
         >
           <div className="mx-auto" style={{ maxWidth: 400, width: "100%" }}>
@@ -257,7 +248,7 @@ export default function Login({ onNavigate }) {
             <div className="text-center mb-4">
               <img
                 draggable="false"
-                src="/images/ZeroWaste_logo_transparent_bg.png"
+                src="/images/zerowaste-logo.png"
                 alt="ZeroWaste"
                 className="img-fluid"
                 style={{ maxWidth: 130 }}
@@ -396,7 +387,7 @@ export default function Login({ onNavigate }) {
                   ...bodyTextStyle,
                   height: "3.5rem",
                   opacity: "0.75",
-                  background: colors.authGreen,
+                  background: colors.green,
                   fontSize: "0.95rem",
                   letterSpacing: "0.08em",
                   fontWeight: 600,
@@ -423,7 +414,7 @@ export default function Login({ onNavigate }) {
                   padding: "0 0 1px 0",
                   ...bodyTextStyle,
                   fontSize: "0.95rem",
-                  color: colors.authGreen,
+                  color: colors.greenD,
                 }}
                 onClick={() => onNavigate?.("signup")}
               >
