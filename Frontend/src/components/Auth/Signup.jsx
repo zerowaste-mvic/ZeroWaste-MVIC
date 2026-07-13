@@ -92,8 +92,7 @@ export default function Signup({ onNavigate }) {
       }
 
       const data = await res.json();
-      sessionStorage.setItem("zw_token", data.token);
-      sessionStorage.setItem("zw_user", JSON.stringify(data.user));
+
       setForm(INITIAL);
       onNavigate?.("login");
     } catch (err) {
