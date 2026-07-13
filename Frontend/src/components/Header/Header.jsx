@@ -35,7 +35,7 @@ export default function Header({ onNavigate }) {
 
           .btn-outline:hover{
             opacity: 1 !important;
-            background:${colors.green};
+            background:${colors.greenL};
             border-color: transparent;
           }
 
@@ -84,7 +84,7 @@ export default function Header({ onNavigate }) {
             <button
               className="btn btn-outline btn-lg"
               style={{
-                opacity: 0.75,
+                opacity: "0.70",
                 borderColor: colors.green,
                 color: colors.charcoal,
                 fontWeight: 600,

@@ -3,29 +3,30 @@ import { Heart, Eye, Sprout, Handshake } from "lucide-react";
 import heroImage from "../../../../Assets/image gallery/hero_image02.png";
 import {
   colors,
+  sectionh1_style,
   sectionHeadingStyle,
   btnPrimaryStyle,
-  shadows,
+  sectionSubStyle,
 } from "../../theme";
 
 const values = [
   {
-    icon: <Heart size={20} strokeWidth={2} />,
+    icon: <Heart size={22} strokeWidth={2} />,
     title: "Community First",
     text: "Every decision is measured by its impact on people and planet.",
   },
   {
-    icon: <Eye size={20} strokeWidth={2} />,
+    icon: <Eye size={22} strokeWidth={2} />,
     title: "Full Transparency",
     text: "Open reporting on food rescued, carbon saved, and funds donated.",
   },
   {
-    icon: <Sprout size={20} strokeWidth={2} />,
+    icon: <Sprout size={22} strokeWidth={2} />,
     title: "Sustainable Design",
     text: "Built to grow without extracting more than we give back.",
   },
   {
-    icon: <Handshake size={20} strokeWidth={2} />,
+    icon: <Handshake size={22} strokeWidth={2} />,
     title: "Fair Distribution",
     text: "We succeed only when our community partners and members do too.",
   },
@@ -34,19 +35,37 @@ const values = [
 export default function About({ onNavigate }) {
   return (
     <section
-      className="py-5 bg-white"
+      className="py-5"
       id="about"
-      style={{ paddingTop: "5rem", paddingBottom: "5rem" }}
+      style={{
+        paddingTop: "5rem",
+        paddingBottom: "5rem",
+        background: colors.authGreen,
+      }}
     >
+      <style>
+        {`.btn-register {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .btn-register:hover:not(:disabled) {
+            opacity: 1 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+          `}
+      </style>
       <div className="container" style={{ maxWidth: "1180px" }}>
         <div className="row align-items-center g-5">
           <div className="col-lg-6">
             <div
               className="overflow-hidden"
               style={{
-                borderRadius: 20,
-                aspectRatio: "1/1",
-                boxShadow: shadows.lg,
+                borderRadius: 12,
+                height: "600px",
+                boxShadow: "0 0px 15px rgb(131, 130, 130)",
+                width: "550px",
               }}
             >
               <img
@@ -58,6 +77,26 @@ export default function About({ onNavigate }) {
           </div>
 
           <div className="col-lg-6">
+            <div
+              className="label"
+              style={{
+                margin: "1rem 0",
+                position: "relative",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <h1
+                id="label"
+                style={{
+                  ...sectionh1_style,
+                  position: "relative",
+                }}
+              >
+                Our mission
+              </h1>
+            </div>
             <h2
               style={{
                 ...sectionHeadingStyle,
@@ -69,11 +108,10 @@ export default function About({ onNavigate }) {
             </h2>
 
             <p
+              className="content"
               style={{
-                fontSize: "1.05rem",
-                color: colors.muted,
-                marginBottom: "2rem",
-                lineHeight: 1.75,
+                ...sectionSubStyle,
+                textAlign: "justify",
               }}
             >
               We are convinced that the gap between food waste and food need can
@@ -91,8 +129,8 @@ export default function About({ onNavigate }) {
                       style={{
                         width: 40,
                         height: 40,
-                        background: "#eaf5ef",
-                        borderRadius: 10,
+                        background: colors.showcase_green,
+                        borderRadius: 8,
                         color: colors.green,
                       }}
                     >
@@ -125,13 +163,13 @@ export default function About({ onNavigate }) {
             </div>
 
             <button
-              className="btn btn-primary btn-lg"
+              className="btn btn-primary btn-register"
               style={{
                 ...btnPrimaryStyle,
-                padding: "0.85rem 2rem",
-                fontSize: "1rem",
+                padding: "0.85rem 1.60rem",
+                fontSize: "0.95rem",
                 fontWeight: 600,
-                borderRadius: 10,
+                borderRadius: 6,
               }}
               onClick={() => onNavigate?.("signup")}
             >

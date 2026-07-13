@@ -1,4 +1,3 @@
-// src/components/Body/Features.jsx
 import {
   ClipboardList,
   Search,
@@ -9,6 +8,7 @@ import {
 } from "lucide-react";
 import {
   colors,
+  sectionh1_style,
   sectionHeadingStyle,
   sectionSubStyle,
   shadows,
@@ -16,32 +16,38 @@ import {
 
 const features = [
   {
-    icon: <ClipboardList size={22} strokeWidth={2} />,
+    tag: "Track Food",
+    icon: <ClipboardList size={32} strokeWidth={2} />,
     title: "Smart Food Inventory",
     desc: "Track everything in your kitchen with expiry dates, quantities, and smart reminders.",
   },
   {
-    icon: <Search size={22} strokeWidth={2} />,
+    tag: "Find Food",
+    icon: <Search size={32} strokeWidth={2} />,
     title: "Search & Claim Donations",
     desc: "Browse surplus food shared by your community and claim items before they go to waste.",
   },
   {
-    icon: <Handshake size={22} strokeWidth={2} />,
+    tag: "Give Food",
+    icon: <Handshake size={32} strokeWidth={2} />,
     title: "Share food with community",
     desc: "List extra food you won't use and connect with neighbours who can put it to good use.",
   },
   {
-    icon: <Calendar size={22} strokeWidth={2} />,
+    tag: "Plan Meals",
+    icon: <Calendar size={32} strokeWidth={2} />,
     title: "Weekly Meal Planner",
     desc: "Plan meals around what you already have and cut down on unnecessary grocery trips.",
   },
   {
-    icon: <BarChart2 size={22} strokeWidth={2} />,
+    tag: "Measure Impact",
+    icon: <BarChart2 size={32} strokeWidth={2} />,
     title: "Food Impact Analytics",
     desc: "See how much food you've saved, money you've kept, and waste you've prevented.",
   },
   {
-    icon: <Bell size={22} strokeWidth={2} />,
+    tag: "Stay Informed",
+    icon: <Bell size={32} strokeWidth={2} />,
     title: "Real-time Notifications",
     desc: "Get alerts for expiring items, new donations nearby, and meal plan reminders.",
   },
@@ -55,11 +61,93 @@ export default function Features() {
       style={{
         paddingTop: "5rem",
         paddingBottom: "5rem",
-        background: "#f8fbf9",
+        background: colors.authGreen,
       }}
     >
+      <style>
+        {`
+          .feature-card {
+            justify-content: space-between;
+            background: ${colors.white};
+            border: "none";
+            border-radius: 12px;
+            padding: 1.5rem;
+            height: 300px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.28s ease;
+            box-shadow: 0 0px 15px rgba(195, 194, 194, 0.25);
+          }
+          .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: ${shadows.md};
+          }
+
+          .feature-tag {
+            opacity: 0.85;
+            display: inline-block;
+            border-left: 1px solid ${colors.greenL};
+            border-right: 1px solid ${colors.greenL};
+            padding: 2px 10px;
+            font-size: 0.75rem;
+            color: ${colors.muted};
+            line-height: 1.4;
+          }
+          .feature-icon-circle {
+            width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: 2px solid ${colors.greenLrgb};
+            color: ${colors.green};
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+          }
+          .feature-title-wrap {
+            text-align: center;
+            margin: 1.25rem 0 0.75rem;
+          }
+          .feature-title {
+            display: inline-block;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: ${colors.greenD};
+            cursor: default;
+          }
+
+          .feature-desc {
+            text-align: start;
+            font-size: 1.1rem;
+            color: ${colors.muted};
+            line-height: 1.65;
+            margin:0;
+          }
+        `}
+      </style>
       <div className="container" style={{ maxWidth: "1180px" }}>
-        <div className="text-center mx-auto mb-5" style={{ maxWidth: 680 }}>
+        <div
+          className="label"
+          style={{
+            margin: "1rem 0",
+            position: "relative",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <h1
+            id="label"
+            style={{
+              ...sectionh1_style,
+              position: "relative",
+            }}
+          >
+            Platform features
+          </h1>
+        </div>
+        <div className="text-center mx-auto mb-5" style={{ width: "800px" }}>
           <h2
             style={{
               ...sectionHeadingStyle,
@@ -73,64 +161,30 @@ export default function Features() {
             className="mx-auto"
             style={{ ...sectionSubStyle, margin: "0 auto" }}
           >
-            From tracking what&apos;s in your fridge to sharing surplus with
-            your neighbors, ZeroWaste brings it all together in one simple app.
+            From tracking what's in your fridge to sharing surplus with your
+            neighbors, ZeroWaste brings it all together in one simple app.
           </p>
         </div>
 
         <div className="row g-4">
           {features.map((f) => (
             <div key={f.title} className="col-md-6 col-lg-4">
-              <div
-                className="h-100 p-4 bg-white border"
-                style={{
-                  borderColor: colors.border,
-                  borderRadius: 16,
-                  padding: "2rem",
-                  boxShadow: shadows.sm,
-                  transition: "transform 0.28s ease, box-shadow 0.28s ease",
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = shadows.md;
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "none";
-                  e.currentTarget.style.boxShadow = shadows.sm;
-                }}
-              >
+              <div className="feature-card">
                 <div
-                  className="d-flex align-items-center justify-content-center mb-4"
                   style={{
-                    width: 54,
-                    height: 54,
-                    borderRadius: 14,
-                    background: "#eaf5ef",
-                    color: colors.green,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
                   }}
                 >
-                  {f.icon}
+                  <span className="feature-tag">{f.tag}</span>
+                  <div className="feature-icon-circle">{f.icon}</div>
                 </div>
-                <h3
-                  style={{
-                    fontSize: "1.1rem",
-                    fontWeight: 700,
-                    color: colors.charcoal,
-                    marginBottom: "0.7rem",
-                  }}
-                >
-                  {f.title}
-                </h3>
-                <p
-                  style={{
-                    fontSize: "0.9rem",
-                    color: colors.muted,
-                    lineHeight: 1.65,
-                    marginBottom: 0,
-                  }}
-                >
-                  {f.desc}
-                </p>
+
+                <div className="feature-title-wrap">
+                  <h3 className="feature-title">{f.title}</h3>
+                  <p className="feature-desc">{f.desc}</p>
+                </div>
               </div>
             </div>
           ))}
