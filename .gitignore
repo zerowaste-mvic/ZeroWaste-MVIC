@@ -51,7 +51,8 @@ psd
 thumb
 sketch
 
-
+.env
+.env.local
 
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Git,Java,react,2FA,SQL,POSTGRESQL

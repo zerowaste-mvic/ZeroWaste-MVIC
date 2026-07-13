@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?><project name="SavePlate" company="MVIC" webLink="http://" view-date="2026-05-17" view-index="0" gantt-divider-location="691" resource-divider-location="447" version="3.3.3322" locale="en_AU">
+<?xml version="1.0" encoding="UTF-8"?><project name="SavePlate" company="MVIC" webLink="http://" view-date="2026-05-17" view-index="0" gantt-divider-location="661" resource-divider-location="447" version="3.3.3322" locale="en_US">
     <description><![CDATA[A food waste reduction app that helps households track what they have, know when things are about to expire, plan meals around existing ingredients, and pass on surplus food to people who actually need it.]]></description>
     <view zooming-state="default:6" id="gantt-chart">
-        <field id="tpd3" name="Name" width="435" order="0"/>
-        <field id="tpd4" name="Begin date" width="91" order="1"/>
-        <field id="tpd5" name="End date" width="149" order="2"/>
+        <field id="tpd3" name="Name" width="425" order="0"/>
+        <field id="tpd4" name="Begin date" width="89" order="1"/>
+        <field id="tpd5" name="End date" width="146" order="2"/>
         <field id="tpd15" name="Notes" width="20" order="3"/>
         <option id="filter.completedTasks" value="false"/>
         <option id="filter.dueTodayTasks" value="false"/>
         <option id="filter.overdueTasks" value="false"/>
         <option id="filter.inProgressTodayTasks" value="false"/>
-        <timeline><![CDATA[9,4,13,0,11,14,6,15,22,24,5]]></timeline>
+        <timeline><![CDATA[11,24,0,6,9,4,22,14,13,5,15]]></timeline>
         <option id="color.recent"><![CDATA[#000000 #99ffff]]></option>
     </view>
     <view id="resource-table">
@@ -87,7 +87,7 @@
             </task>
         </task>
         <task id="19" uid="a0105646789348e7b077cfdaf25a8f10" name="Design" meeting="false" start="2026-06-12" duration="9" complete="0" expand="true">
-            <task id="23" uid="0efbb7e5eea549eea45e11a18af85060" name="Requirements Specifications" meeting="false" start="2026-06-12" duration="6" complete="0" expand="true">
+            <task id="23" uid="0efbb7e5eea549eea45e11a18af85060" name="Requirements Specifications" meeting="false" start="2026-06-12" duration="6" complete="0" expand="false">
                 <task id="24" uid="8901d8c87d794dcd9d8f56725013e2f5" name="Functional Requirements" meeting="false" start="2026-06-12" duration="4" complete="0" expand="true">
                     <depend id="25" type="1" difference="0" hardness="Strong"/>
                     <depend id="26" type="2" difference="0" hardness="Strong"/>
@@ -199,7 +199,7 @@
             </task>
         </task>
         <task id="12" uid="a650a6da671546a99dd38d10071812d8" name="Testing &amp; Documentation" meeting="false" start="2026-08-11" duration="8" complete="0" expand="true">
-            <task id="13" uid="1ae81a56c37e47df9281f08a943960ee" name="System Testing" meeting="false" start="2026-08-11" duration="4" complete="0" expand="false">
+            <task id="13" uid="1ae81a56c37e47df9281f08a943960ee" name="System Testing" meeting="false" start="2026-08-11" duration="4" complete="0" expand="true">
                 <depend id="14" type="2" difference="0" hardness="Strong"/>
                 <task id="41" uid="9a40f5c2b0b541dcb7bb377cd279c869" name="Black box Testing" meeting="false" start="2026-08-11" duration="2" complete="0" expand="true"/>
                 <task id="42" uid="6796b86f8cf44a08852dd40b5727f4cf" name="White box Testing" meeting="false" start="2026-08-11" duration="3" complete="0" expand="true"/>
