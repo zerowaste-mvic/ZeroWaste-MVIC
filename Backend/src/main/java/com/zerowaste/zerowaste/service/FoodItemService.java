@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @Service
 public class FoodItemService {
 
-    private static final Set<String> ALLOWED_CATEGORIES = Set.of("Dairy", "Meat", "Fruits", "Vegetable");
+    private static final Set<String> ALLOWED_CATEGORIES = Set.of("Dairy", "Meat", "Fruits", "Vegetable","Custom:");
     private static final Set<String> ALLOWED_UNITS = Set.of("Kg", "Ltr");
 
     private final FoodItemRepository foodItemRepository;
@@ -98,13 +98,14 @@ public class FoodItemService {
     }
 
     public FoodItemResponse create(FoodItemRequest request, Long userId) {
-        validateCategory(request.getCategory());
         validateUnit(request.getQuantityUnit());
 
         FoodItem item = FoodItem.builder()
                 .name(request.getName().trim())
-                .category(request.getCategory())
+            .category(request.getCategory())
+            .storage(request.getStorage())
                 .quantity(request.getQuantity())
+            .notes(blankToNull(request.getNotes()))
                 .quantityUnit(request.getQuantityUnit())
                 .expiryDate(request.getExpiryDate())
                 .imageUrl(blankToNull(request.getImageUrl()))
@@ -115,7 +116,6 @@ public class FoodItemService {
     }
 
     public FoodItemResponse update(Long id, FoodItemRequest request, Long userId) {
-        validateCategory(request.getCategory());
         validateUnit(request.getQuantityUnit());
 
         FoodItem item = foodItemRepository.findByIdAndUserId(id, userId)
@@ -123,10 +123,12 @@ public class FoodItemService {
 
         item.setName(request.getName().trim());
         item.setCategory(request.getCategory());
+        item.setStorage(request.getStorage());
         item.setQuantity(request.getQuantity());
         item.setQuantityUnit(request.getQuantityUnit());
         item.setExpiryDate(request.getExpiryDate());
         item.setImageUrl(blankToNull(request.getImageUrl()));
+        item.setNotes(blankToNull(request.getNotes()));
 
         return FoodItemResponse.from(foodItemRepository.save(item));
     }
@@ -148,7 +150,7 @@ public class FoodItemService {
         activityLogRepository.save(FoodActivityLog.builder()
                 .userId(userId)
                 .type("DONATED")
-                .category(saved.getCategory())
+            .category(saved.getCategory())
                 .quantity(saved.getQuantity())
                 .build());
 
@@ -242,10 +244,12 @@ public class FoodItemService {
         foodItemRepository.delete(item);
     }
 
-    private void validateCategory(String category) {
-        if (!ALLOWED_CATEGORIES.contains(category)) {
-            throw new ApiException("Invalid category.", HttpStatus.BAD_REQUEST);
-        }
+    public java.util.List<String> getDistinctCategories() {
+        return foodItemRepository.findDistinctCategories();
+    }
+
+    public java.util.List<String> getDistinctStorages() {
+        return foodItemRepository.findDistinctStorages();
     }
 
     private void validateUnit(String unit) {

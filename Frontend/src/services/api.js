@@ -62,6 +62,10 @@ export const foodApi = {
     return request('/api/food-items/browse', { method: 'GET' });
   },
 
+  getMeta() {
+    return request('/api/food-items/meta', { method: 'GET' });
+  },
+
   donate(id, details) {
     return request(`/api/food-items/${id}/donate`, {
       method: 'POST',

@@ -29,4 +29,9 @@ public class FoodItemRequest {
     private LocalDate expiryDate;
 
     private String imageUrl;
+    
+    @NotBlank(message = "Storage is required.")
+    private String storage;
+
+    private String notes;
 }

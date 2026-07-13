@@ -4,7 +4,7 @@ import { Search, ChevronRight, ChevronsLeft, ChevronsRight, User } from 'lucide-
 import { colors, fonts, btnPrimaryStyle, btnOutlineStyle } from '../../../theme';
 import { foodApi } from '../../../services/api';
 
-const CATEGORIES = ['All Categories', 'Fruits', 'Vegetable', 'Dairy', 'Meat'];
+const DEFAULT_CATEGORIES = ['All Categories'];
 const PAGE_SIZE = 6;
 
 const DEFAULT_IMAGE_BY_CATEGORY = {
@@ -56,6 +56,7 @@ export default function BrowseFoodItem({ onNavigate }) {
   const [search, setSearch] = useState(''); 
   const [category, setCategory] = useState('All Categories');
   const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState('');
   const [page, setPage] = useState(1);
@@ -80,6 +81,13 @@ export default function BrowseFoodItem({ onNavigate }) {
 
   useEffect(() => {
     loadItems();
+    let mounted = true;
+    foodApi.getMeta().then((data) => {
+      if (!mounted) return;
+      const cats = Array.isArray(data?.categories) ? data.categories : [];
+      setCategories(['All Categories', ...cats.filter(Boolean)]);
+    }).catch(() => {});
+    return () => { mounted = false; };
   }, []);
 
   const filtered = useMemo(() => {
@@ -287,7 +295,7 @@ const handleClaim = async () => {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
           >
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            {categories.map((c) => <option key={c} value={c}>{c}</option>)}
           </select>
           <ChevronRight size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
         </div>

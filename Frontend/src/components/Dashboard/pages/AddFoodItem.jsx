@@ -1,12 +1,12 @@
 // src/components/Dashboard/pages/AddFoodItem.jsx
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { ArrowLeft, ChevronRight, Calendar, ImagePlus, Link2 } from 'lucide-react';
 import { colors, fonts, btnPrimaryStyle, btnOutlineStyle } from '../../../theme';
 import { foodApi } from '../../../services/api';
 
-const CATEGORIES = ['Fruits', 'Vegetable', 'Dairy', 'Meat'];
+// categories and storage options are loaded from the server
 const UNITS = ['Kg', 'Ltr'];
-const STORAGE_LOCATIONS = ['Fridge', 'Freezer', 'Pantry', 'Counter'];
+
 
 const inputStyle = {
   borderColor: colors.border,
@@ -96,6 +96,10 @@ function compressImageFile(file) {
 
 export default function AddFoodItem({ onSuccess, onCancel }) {
   const [form, setForm] = useState(INITIAL);
+  const [categories, setCategories] = useState([]);
+  const [storages, setStorages] = useState([]);
+  const [customCategory, setCustomCategory] = useState('');
+  const [customStorage, setCustomStorage] = useState('');
   const [errMsg, setErrMsg] = useState('');
   const [status, setStatus] = useState('idle');
   const [imagePreview, setImagePreview] = useState('');
@@ -138,15 +142,19 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
     setForm(INITIAL);
     setImagePreview('');
     setUploadedImageData('');
+    setCustomCategory('');
+    setCustomStorage('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name.trim()) return setErrMsg('Food name is required.');
     if (!form.category) return setErrMsg('Please select a category.');
+    if (form.category === 'Custom' && !customCategory.trim()) return setErrMsg('Please enter a custom category.');
     if (!form.quantity.trim() || Number(form.quantity) <= 0) return setErrMsg('Enter a valid quantity.');
     if (!form.expiryDate) return setErrMsg('Expiry date is required.');
     if (!form.storage) return setErrMsg('Please select a storage location.');
+    if (form.storage === 'Custom' && !customStorage.trim()) return setErrMsg('Please enter a custom storage location.');
 
     setErrMsg('');
     setStatus('loading');
@@ -154,11 +162,13 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
     try {
       await foodApi.create({
         name: form.name.trim(),
-        category: form.category,
+        category: form.category === 'Custom' ? customCategory.trim() : form.category,
         quantity: Number(form.quantity),
         quantityUnit: form.quantityUnit,
         expiryDate: form.expiryDate,
         imageUrl: uploadedImageData || form.imageUrl.trim() || null,
+        storage: form.storage === 'Custom' ? customStorage.trim() : form.storage,
+        notes: form.notes?.trim() || null,
       });
       resetForm();
       onSuccess?.();
@@ -167,6 +177,16 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
       setStatus('idle');
     }
   };
+
+  useEffect(() => {
+    let mounted = true;
+    foodApi.getMeta().then((data) => {
+      if (!mounted) return;
+      setCategories(Array.isArray(data?.categories) ? data.categories : []);
+      setStorages(Array.isArray(data?.storages) ? data.storages : []);
+    }).catch(() => {});
+    return () => { mounted = false; };
+  }, []);
 
   return (
     <div>
@@ -217,10 +237,16 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
                   onChange={handleChange}
                 >
                   <option value="">Select category</option>
-                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+                  <option value="Custom">Custom</option>
                 </select>
                 <ChevronRight size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: colors.muted }} />
               </div>
+              {form.category === 'Custom' && (
+                <div className="mt-2">
+                  <input type="text" name="customCategory" className="form-control" placeholder="Enter custom category" value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} style={inputStyle} />
+                </div>
+              )}
             </div>
 
             <div className="col-12 col-md-4">
@@ -275,10 +301,16 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
                   onChange={handleChange}
                 >
                   <option value="">Storage Location</option>
-                  {STORAGE_LOCATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                  {storages.map((s) => <option key={s} value={s}>{s}</option>)}
+                  <option value="Custom">Custom</option>
                 </select>
                 <ChevronRight size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: colors.muted }} />
               </div>
+              {form.storage === 'Custom' && (
+                <div className="mt-2">
+                  <input type="text" name="customStorage" className="form-control" placeholder="Enter custom storage location" value={customStorage} onChange={(e) => setCustomStorage(e.target.value)} style={inputStyle} />
+                </div>
+              )}
             </div>
 
             <div className="col-12 col-md-4">

@@ -33,6 +33,9 @@ public class FoodItem {
     @Column(nullable = false)
     private String category;
 
+    @Column
+    private String storage;
+
     @Column(nullable = false)
     private Double quantity;
 
@@ -44,6 +47,9 @@ public class FoodItem {
 
     @Column(columnDefinition = "TEXT")
     private String imageUrl;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
 
     @Column(nullable = false)
     private Long userId;
