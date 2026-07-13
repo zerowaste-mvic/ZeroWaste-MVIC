@@ -153,13 +153,13 @@ export default function Login({ onNavigate }) {
           }
 
           .create-account-btn:hover {
-            border-bottom: 1px solid ${colors.authGreen};
+            border-bottom: 1px solid ${colors.greenD};
           }
         `}</style>
         <div
           className="col-lg-6 d-none d-lg-flex flex-column justify-content-between px-5 py-5"
           style={{
-            background: colors.white,
+            background: colors.authGreen,
             minHeight: "100%",
           }}
         >
@@ -223,7 +223,7 @@ export default function Login({ onNavigate }) {
         <div
           className="col-12 col-lg-6 d-flex flex-column justify-content-center px-4 px-xl-5 py-5"
           style={{
-            background: colors.white,
+            background: colors.authGreen,
             minHeight: "100%",
             borderLeft: `2px solid ${colors.greenD}`,
           }}
