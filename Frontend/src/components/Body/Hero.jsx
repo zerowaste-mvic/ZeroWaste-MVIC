@@ -1,4 +1,3 @@
-// src/components/Body/Hero.jsx
 import { Recycle, Users, Calendar, Bold } from "lucide-react";
 import heroImage from "../../../../Assets/image gallery/hero_image.png";
 import { colors, btnPrimaryStyle } from "../../theme";
@@ -26,7 +25,7 @@ export default function Hero() {
         width: "100%",
         height: "70% !important",
         background: colors.white,
-        backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e8f0ea' fill-opacity='0.6'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        // backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e8f0ea' fill-opacity='0.6'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       }}
     >
       <style>
@@ -43,6 +42,16 @@ export default function Hero() {
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
           }
 
+            .btn-outline:hover:not(:disabled) {
+            opacity: 1;
+            bordercolor: transparent;
+            background:${colors.green};
+            }
+
+            .sw-label:hover:not(:disabled) {
+              opacity: 1 !important; 
+              border-top: 2px solid ${colors.green} !important;
+            }
           
           `}
       </style>
@@ -81,7 +90,7 @@ export default function Hero() {
                 className="btn btn-primary btn-browse"
                 style={{
                   ...btnPrimaryStyle,
-                  padding: "0.95rem 1.60rem",
+                  padding: "0.85rem 1.60rem",
                   fontSize: "0.95rem",
                   fontWeight: 600,
                   borderRadius: 6,
@@ -91,13 +100,12 @@ export default function Hero() {
               </a>
               <a
                 href="#how-it-works"
-                className="btn btn-howIt"
+                className="btn btn-outline"
                 style={{
                   opacity: 0.75,
-                  background: colors.white,
                   border: `2px solid ${colors.green}`,
                   color: colors.charcoal,
-                  padding: "0.95rem 1.60rem",
+                  padding: "0.85rem 1.60rem",
                   fontSize: "0.95rem",
                   fontWeight: 600,
                   borderRadius: 6,
@@ -119,13 +127,18 @@ export default function Hero() {
                 {stats.map(({ icon: Icon, label, value }) => (
                   <div
                     key={label}
-                    className="d-flex align-items-center gap-3 flex-grow-1"
+                    className="d-flex align-items-center gap-3 flex-grow-1 sw-label"
                     style={{
+                      cursor: "default",
+                      opacity: "0.70",
+                      border: "2px solid transparent",
                       background: colors.showcase_green,
                       borderRadius: 6,
-                      padding: "0.85rem 1rem",
+                      padding: "0.85rem 0.95rem",
                       minWidth: 140,
                       flex: "1 1 0",
+                      boxShadow: "0 0px 5px rgb(169, 169, 169)",
+                      transition: "all 0.01s ease-in-out",
                     }}
                   >
                     <div
@@ -136,6 +149,7 @@ export default function Hero() {
                     </div>
                     <div>
                       <div
+                        className="text-label"
                         style={{
                           fontSize: "0.78rem",
                           color: colors.muted,
@@ -166,7 +180,7 @@ export default function Hero() {
               style={{
                 borderRadius: 12,
                 height: "600px",
-                boxShadow: "0 0px 25px rgb(101, 100, 100)",
+                boxShadow: "0 0px 15px rgb(131, 130, 130)",
                 width: "550px",
               }}
             >

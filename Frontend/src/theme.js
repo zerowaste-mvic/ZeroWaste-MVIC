@@ -55,11 +55,20 @@ export let sectionHeadingStyle = {
   marginBottom: "1rem",
 };
 
+export let sectionh1_style = {
+  fontFamily: fonts.body,
+  fontSize: "1rem",
+  fontWeight: 800,
+  letterSpacing: "0.02rem",
+  color: colors.greenD,
+  textTransform: "uppercase",
+};
+
 export let sectionSubStyle = {
-  fontSize: "1.05rem",
+  fontSize: "1.03rem",
   color: colors.muted,
   maxWidth: "520px",
-  fontWeight: 300,
+  fontWeight: 400,
   lineHeight: 1.7,
 };
 
@@ -68,7 +77,7 @@ export let btnPrimaryStyle = {
   borderColor: colors.green,
   fontFamily: fonts.body,
   fontWeight: 500,
-  borderRadius: "6px",
+  borderRadius: "8px",
 };
 
 export let btnOutlineStyle = {
