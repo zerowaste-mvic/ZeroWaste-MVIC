@@ -95,7 +95,7 @@ export default function Signup({ onNavigate }) {
       sessionStorage.setItem("zw_token", data.token);
       sessionStorage.setItem("zw_user", JSON.stringify(data.user));
       setForm(INITIAL);
-      onNavigate?.("dashboard");
+      onNavigate?.("login");
     } catch (err) {
       setErrMsg(err.message || "Something went wrong. Please try again.");
       setStatus("error");
