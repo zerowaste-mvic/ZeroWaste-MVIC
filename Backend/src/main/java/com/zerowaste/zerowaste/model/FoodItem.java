@@ -42,6 +42,7 @@ public class FoodItem {
     @Column(nullable = false)
     private LocalDate expiryDate;
 
+    @Column(columnDefinition = "TEXT")
     private String imageUrl;
 
     @Column(nullable = false)

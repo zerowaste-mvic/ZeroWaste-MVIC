@@ -1,16 +1,17 @@
 export const colors = {
   green: "#4ead77",
-  greenL: "#3ea066",
+  greenL: "rgb(62, 160, 102)",
   greenD: "#1e5538",
   greenXd: "#143b28",
   authGreen: "#3D8C31",
-  registerBG: "rgba(53, 137, 39, 0.03)",
+  greenLrgb: "rgba(62, 160, 102,0.40)",
+  registerBG: "rgba(161,188,152,0.9)",
   dashboardAccent: "#bbf8bb",
   authBg: "rgb(240, 244, 239)",
   authBgLeft: "rgb(240, 244, 239)",
   authBgRight: "rgb(240, 244, 239)",
   authBgSignup: "#F1F8F1",
-  authIllustrationBg: "rgba(53, 137, 39, 0.15)",
+  low_greenFade: "rgba(53, 137, 39, 0.15)",
   authInputBg: "#E4E4E4",
   cream: "#faf7f2",
   warm: "#f5ede0",
@@ -66,7 +67,7 @@ export const btnPrimaryStyle = {
   borderColor: colors.green,
   fontFamily: fonts.body,
   fontWeight: 500,
-  borderRadius: "8px",
+  borderRadius: "6px",
 };
 
 export const btnOutlineStyle = {
@@ -74,6 +75,6 @@ export const btnOutlineStyle = {
   color: colors.charcoal,
   fontFamily: fonts.body,
   fontWeight: 500,
-  borderRadius: "8px",
+  borderRadius: "6px",
   borderWidth: "1.5px",
 };
