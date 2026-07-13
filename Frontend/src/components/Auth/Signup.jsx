@@ -112,7 +112,7 @@ export default function Signup({ onNavigate }) {
         style={{
           ...cardStyle,
           minHeight: "min(860px, calc(100vh - 3rem))",
-          background: colors.registerBG,
+          background: "transparent",
         }}
       >
         <style>{`
@@ -149,19 +149,14 @@ export default function Signup({ onNavigate }) {
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
           }
 
-          .signup-input:focus {
-            border-color: ${colors.authGreen};
-            outline: none;
-          }
-
           .login-btn:hover{
-            border-bottom: 1px solid ${colors.authGreen};
+            border-bottom: 1px solid ${colors.greenD};
           }
         `}</style>
         <div
           className="col-12 col-lg-6 order-lg-1 d-flex align-items-center justify-content-center px-4 px-xl-5 py-4 py-xl-5 border-end border-2 h-100"
           style={{
-            background: colors.white,
+            background: colors.authGreen,
           }}
         >
           <div className="mx-auto" style={{ maxWidth: 400, width: "100%" }}>
@@ -408,7 +403,7 @@ export default function Signup({ onNavigate }) {
         <div
           className="col-lg-6 order-lg-2 d-none d-lg-flex flex-column justify-content-between px-5 py-5"
           style={{
-            background: colors.white,
+            background: colors.authGreen,
             borderLeft: `2px solid ${colors.greenD}`,
             minHeight: "100%",
           }}

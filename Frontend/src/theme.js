@@ -3,7 +3,7 @@ export const colors = {
   greenL: "rgb(62, 160, 102)",
   greenD: "#1e5538",
   greenXd: "#143b28",
-  authGreen: "#3D8C31",
+  authGreen: "rgba(62, 160, 102,0.05)",
   greenLrgb: "rgba(62, 160, 102,0.40)",
   registerBG: "rgba(161,188,152,0.9)",
   dashboardAccent: "#bbf8bb",
@@ -11,7 +11,8 @@ export const colors = {
   authBgLeft: "rgb(240, 244, 239)",
   authBgRight: "rgb(240, 244, 239)",
   authBgSignup: "#F1F8F1",
-  low_greenFade: "rgba(53, 137, 39, 0.15)",
+  low_greenFade: "rgba(62, 160, 102, 0.15)",
+  showcase_green: "rgba(62, 160, 102, 0.25)",
   authInputBg: "#E4E4E4",
   cream: "#faf7f2",
   warm: "#f5ede0",
@@ -24,18 +25,18 @@ export const colors = {
   white: "#ffffff",
 };
 
-export const fonts = {
+export let fonts = {
   display: '"Playfair Display", Georgia, serif',
   body: '"DM Sans", system-ui, sans-serif',
 };
 
-export const shadows = {
+export let shadows = {
   sm: "0 2px 10px rgba(0, 0, 0, 0.07)",
   md: "0 8px 32px rgba(0, 0, 0, 0.1)",
   lg: "0 24px 64px rgba(0, 0, 0, 0.14)",
 };
 
-export const sectionTagStyle = {
+export let sectionTagStyle = {
   fontSize: "0.78rem",
   fontWeight: 700,
   letterSpacing: "0.1em",
@@ -44,7 +45,7 @@ export const sectionTagStyle = {
   marginBottom: "1rem",
 };
 
-export const sectionHeadingStyle = {
+export let sectionHeadingStyle = {
   fontFamily: fonts.display,
   fontSize: "clamp(2rem, 3.5vw, 2.8rem)",
   fontWeight: 700,
@@ -54,7 +55,7 @@ export const sectionHeadingStyle = {
   marginBottom: "1rem",
 };
 
-export const sectionSubStyle = {
+export let sectionSubStyle = {
   fontSize: "1.05rem",
   color: colors.muted,
   maxWidth: "520px",
@@ -62,7 +63,7 @@ export const sectionSubStyle = {
   lineHeight: 1.7,
 };
 
-export const btnPrimaryStyle = {
+export let btnPrimaryStyle = {
   backgroundColor: colors.green,
   borderColor: colors.green,
   fontFamily: fonts.body,
@@ -70,7 +71,7 @@ export const btnPrimaryStyle = {
   borderRadius: "6px",
 };
 
-export const btnOutlineStyle = {
+export let btnOutlineStyle = {
   borderColor: colors.border,
   color: colors.charcoal,
   fontFamily: fonts.body,

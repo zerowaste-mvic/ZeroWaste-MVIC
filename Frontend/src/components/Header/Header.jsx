@@ -9,17 +9,6 @@ export default function Header({ onNavigate }) {
     { label: "Contact", href: "#contact" },
   ];
 
-  const loginOutlineStyle = {
-    opacity: 0.8,
-    borderColor: colors.green,
-    color: colors.charcoal,
-    fontWeight: 600,
-    borderRadius: "6px",
-    borderWidth: "2px",
-    padding: "0.45rem 1.25rem",
-    fontSize: "0.9rem",
-  };
-
   return (
     <header
       className="sticky-top border-bottom bg-white"
@@ -47,7 +36,6 @@ export default function Header({ onNavigate }) {
           .btn-outline:hover{
             opacity: 1 !important;
             background:${colors.green};
-            color:${colors.white};
             border-color: transparent;
           }
 
@@ -95,7 +83,16 @@ export default function Header({ onNavigate }) {
           <div className="d-flex align-items-center gap-3">
             <button
               className="btn btn-outline btn-lg"
-              style={loginOutlineStyle}
+              style={{
+                opacity: 0.75,
+                borderColor: colors.green,
+                color: colors.charcoal,
+                fontWeight: 600,
+                borderRadius: "6px",
+                borderWidth: "2px",
+                padding: "0.45rem 1.25rem",
+                fontSize: "0.9rem",
+              }}
               onClick={() => onNavigate?.("login")}
             >
               Login
