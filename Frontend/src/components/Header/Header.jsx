@@ -24,7 +24,7 @@ export default function Header({ onNavigate }) {
           }
 
           .btn-register:hover:not(:disabled) {
-            opacity: 1 !important;
+            opacity: 1;
             transform: translateY(-1px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
           }

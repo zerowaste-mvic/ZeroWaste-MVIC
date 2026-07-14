@@ -25,6 +25,7 @@ export default function DashboardSidebar({
   activePage,
   onNavigate,
   onAppNavigate,
+  collapsed = false,
 }) {
   const effectivePage =
     activePage === "edit-food" || activePage === "add-food"
@@ -38,68 +39,179 @@ export default function DashboardSidebar({
 
   return (
     <aside
-      className="d-flex flex-column flex-shrink-0 border-end min-vh-100"
+      className="d-flex flex-column flex-shrink-0 min-vh-100 position-sticky"
+      draggable="false"
       style={{
-        width: 260,
-        background: colors.dashboardAccent,
-        borderColor: "rgba(255,255,255,0.15) !important",
+        width: collapsed ? 76 : 200,
+        background: colors.showcase_green,
+        borderRight: `2px solid ${colors.greenL}`,
+        fontFamily: fonts.body,
+        transition: "width 0.22s cubic-bezier(0.4, 0, 0.2, 1)",
+        overflow: "hidden",
+        top: 0,
+        alignSelf: "flex-start",
       }}
     >
+      <style>{`
+        .sidebar-nav-btn {
+          width:90%;
+          padding: 0.70rem 0.45rem;
+          position: relative;
+          color: ${colors.charcoal};
+          background: transparent;
+          transition: all 0.15s ease;
+          opacity: 0.75;
+          overflow: hidden;
+          white-space: nowrap;
+        }
+
+        .sidebar-nav-btn::before {
+          content: "";
+          position: absolute;
+          left: 2px;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 3px;
+          height: 0%;
+          border-radius: 4px;
+          background: ${colors.greenD};
+          transition: height 0.18s ease;
+        }
+
+        .sidebar-nav-btn:hover:not(:disabled) {
+          background-color: ${colors.low_greenFade};
+          color: ${colors.greenD};
+          opacity: 1;
+        }
+
+        .sidebar-nav-btn:hover:not(:disabled)::before {
+          height: 45%;
+        }
+
+        .sidebar-nav-btn:active:not(:disabled) {
+          background-color: ${colors.greenLrgb};
+          transform: scale(0.99);
+        }
+
+        .sidebar-nav-btn:focus-visible {
+          outline: 2px solid ${colors.green};
+          outline-offset: 1px;
+          background-color: ${colors.low_greenFade};
+          color: ${colors.greenD};
+          opacity: 1;
+        }
+
+        .sidebar-nav-btn.is-active {
+          background-color: ${colors.greenLrgb};
+          color: ${colors.greenXd};
+          font-weight: 600;
+          opacity: 1;
+        }
+
+        .sidebar-nav-btn.is-active svg {
+          color: ${colors.greenXd};
+        }
+
+        .nav-label {
+          transition: opacity 0.15s ease, max-width 0.22s ease;
+          overflow: hidden;
+        }
+
+        .collapsed {
+          justify-content: center;
+        }
+
+        .collapsed .nav-label {
+          opacity: 0;
+          max-width: 0;
+        }
+
+        .sidebar-nav-btn.collapsed .nav-tooltip, 
+        .sidebar-logout-btn.collapsed .nav-tooltip {
+          position: absolute;
+          left: calc(100% + 10px);
+          top: 50%;
+          transform: translateY(-50%) translateX(-6px);
+          background: ${colors.greenXd};
+          padding: 6px 10px;
+          border-radius: 6px;
+          font-size: 0.78rem;
+          font-weight: 500;
+          white-space: nowrap;
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 0.15s ease, transform 0.15s ease;
+          z-index: 20;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+        }
+
+        .sidebar-nav-btn.collapsed:hover .nav-tooltip {
+          opacity: 0.75;
+          transform: translateY(-50%) translateX(0);
+        }
+
+        .sidebar-logout-btn {
+          opacity: 0.75;
+          transition: all 0.25s ease;
+          position: relative;
+        }
+
+        .sidebar-logout-btn:hover:not(:disabled) {
+          background-color: ${colors.green};
+          opacity: 1 !important;
+          color: ${colors.white};
+          transform: translateY(-1px);
+          box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+        }
+      `}</style>
+
       <div
-        className="d-flex align-items-center gap-2 px-4 py-4 border-bottom"
-        style={{ borderColor: "rgba(255,255,255,0.15) !important" }}
+        className="d-flex px-2 py-2"
+        style={{
+          margin: "2rem 0 1.5rem 0",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         <img
           src="/images/zerowaste-logo.png"
-          alt="ZeroWaste Logo"
+          alt="ZeroWaste logo"
           style={{
-            width: 40,
-            height: 40,
+            width: collapsed ? 45 : 90,
+            height: collapsed ? 45 : 90,
             objectFit: "contain",
-            background: "#fff",
-            borderRadius: 8,
+            transition: "width 0.22s ease, height 0.22s ease",
           }}
         />
-        <span
-          style={{
-            fontFamily: fonts.display,
-            fontSize: "1.2rem",
-            fontWeight: 700,
-            color: "rgba(0, 0, 0, 0.4)",
-          }}
-        >
-          ZeroWaste
-        </span>
       </div>
 
-      <nav className="flex-grow-1 p-3">
-        <ul className="list-unstyled d-flex flex-column gap-1 mb-0">
+      <nav className="flex-grow-1">
+        <ul
+          className="list-unstyled d-flex flex-column gap-2 mb-0 p-2"
+          style={{
+            width: "100%",
+          }}
+        >
           {NAV_ITEMS.map(({ id, label, icon: Icon, disabled }) => {
             const isActive = effectivePage === id;
             return (
               <li key={id}>
                 <button
                   type="button"
-                  className="btn w-100 d-flex align-items-center gap-3 border-0 text-start"
+                  className={`sidebar-nav-btn btn d-flex align-items-center gap-2 border-0 text-start ${
+                    isActive ? "is-active" : ""
+                  } ${collapsed ? "collapsed" : ""}`}
                   disabled={disabled}
                   onClick={() => !disabled && onNavigate(id)}
                   style={{
-                    padding: "0.65rem 1rem",
-                    borderRadius: 10,
+                    borderRadius: 6,
                     fontSize: "0.9rem",
                     fontWeight: isActive ? 600 : 500,
-                    color: disabled
-                      ? "rgba(0, 0, 0, 0.25)"
-                      : "rgba(0, 0, 0, 0.4)",
-                    background: isActive
-                      ? "rgba(255,255,255,0.18)"
-                      : "transparent",
-                    opacity: disabled ? 0.6 : 1,
-                    cursor: disabled ? "not-allowed" : "pointer",
                   }}
                 >
-                  <Icon size={18} strokeWidth={isActive ? 2.5 : 2} />
-                  {label}
+                  <Icon size={18} strokeWidth={2} />
+                  <span className="nav-label">{label}</span>
+                  {collapsed && <span className="nav-tooltip">{label}</span>}
                 </button>
               </li>
             );
@@ -107,25 +219,26 @@ export default function DashboardSidebar({
         </ul>
       </nav>
 
-      <div
-        className="p-3 border-top"
-        style={{ borderColor: "rgba(255,255,255,0.15) !important" }}
-      >
+      <div className="p-3" style={{ borderTop: `2px solid ${colors.greenL}` }}>
         <button
           type="button"
-          className="btn w-100 d-flex align-items-center gap-3 border-0 text-start"
+          className={`sidebar-logout-btn btn w-100 d-flex align-items-center gap-2 border-0 text-start ${
+            collapsed ? "collapsed" : ""
+          }`}
           style={{
-            padding: "0.65rem 1rem",
-            borderRadius: 10,
+            backgroundColor: colors.showcase_green,
+            fontFamily: fonts.body,
+            fontWeight: 600,
+            borderRadius: "8px",
+            color: colors.greenD,
+            padding: "0.65rem 0.45rem",
             fontSize: "0.9rem",
-            fontWeight: 500,
-            color: "rgba(0, 0, 0, 0.4)",
-            background: "transparent",
           }}
           onClick={handleLogout}
         >
-          <LogOut size={18} />
-          Log out
+          <LogOut size={18} style={{ flexShrink: 0 }} />
+          <span className="nav-label">Log out</span>
+          {collapsed && <span className="nav-tooltip">Log out</span>}
         </button>
       </div>
     </aside>
