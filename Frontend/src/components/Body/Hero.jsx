@@ -1,5 +1,5 @@
 import { Recycle, Users, Calendar, Bold } from "lucide-react";
-import heroImage from "../../../../Assets/image gallery/hero_image.png";
+import heroImage from "/images/hero_image.png";
 import { colors, btnPrimaryStyle } from "../../theme";
 
 const stats = [
@@ -20,17 +20,23 @@ const headingStyle = {
 export default function Hero() {
   return (
     <section
-      className="position-relative overflow-hidden"
+      className="position-relative overflow-hidden hero-section"
       style={{
         width: "100%",
-        height: "70% !important",
-        background: colors.white,
         // backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e8f0ea' fill-opacity='0.6'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       }}
     >
       <style>
         {`
-        
+          .hero-section::before{
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: ${colors.authGreen};
+            z-index: 0;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+          }
+
           .btn-browse {
             opacity: 0.75;
             transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;

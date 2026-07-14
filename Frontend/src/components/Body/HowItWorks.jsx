@@ -29,13 +29,15 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-5 bg-white how-it-works-section" id="how">
+    <section className="py-5 bg-white how-it-works-section" id="how-it-works">
       <style>
         {`
+
           .how-it-works-section{
             position:relative;
             padding: 5rem 0;
             overflow:hidden;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
           }
 
           .how-it-works-section::before{
@@ -46,7 +48,7 @@ export default function HowItWorks() {
             background-size:cover;
             background-position:center;
             background-repeat:no-repeat;
-            opacity: 0.13;
+            opacity: 0.10;
             z-index:0;
             pointer-events: none;
           }
@@ -85,7 +87,7 @@ export default function HowItWorks() {
           <div
             className="label"
             style={{
-              margin: "1rem 0",
+              margin: " 0 0 1rem 0",
               position: "relative",
               display: "flex",
               justifyContent: "center",

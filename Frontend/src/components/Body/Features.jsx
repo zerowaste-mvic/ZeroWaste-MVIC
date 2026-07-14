@@ -56,16 +56,29 @@ const features = [
 export default function Features() {
   return (
     <section
-      className="py-5"
+      className="py-5 feature-section"
       id="features"
       style={{
         paddingTop: "5rem",
         paddingBottom: "5rem",
-        background: colors.authGreen,
       }}
     >
       <style>
         {`
+      .feature-section{
+        position: relative;
+        overflow: hidden;
+      }
+
+      .feature-section::before{
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: ${colors.authGreen};
+        z-index: 0;
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+      }
+
           .feature-card {
             justify-content: space-between;
             background: ${colors.white};

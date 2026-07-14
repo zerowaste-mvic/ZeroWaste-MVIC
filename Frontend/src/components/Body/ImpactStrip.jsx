@@ -11,12 +11,15 @@ export default function ImpactStrip() {
     <section className="py-5 impact-strip-section">
       <style>
         {`
+
           .impact-strip-section{
             height:425px;
             align-content:center;
             position:relative;
             padding: 5rem 0;
             overflow:hidden;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+
           }
 
           .impact-strip-section::before{
@@ -27,7 +30,7 @@ export default function ImpactStrip() {
             background-size:cover;
             background-position:center;
             background-repeat:no-repeat;
-            opacity: 0.13;
+            opacity: 0.10;
             z-index:0;
             pointer-events: none;
           }

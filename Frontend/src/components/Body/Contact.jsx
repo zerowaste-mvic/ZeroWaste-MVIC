@@ -1,29 +1,29 @@
-// src/components/Body/Contact.jsx
 import { useState } from "react";
-import { Mail, Phone, MapPin, Send } from "lucide-react";
+import { Mail, Phone, MapPin } from "lucide-react";
 import {
   colors,
   sectionHeadingStyle,
   sectionSubStyle,
   btnPrimaryStyle,
+  sectionh1_style,
   shadows,
 } from "../../theme";
 
 const contactMethods = [
   {
-    icon: <Mail size={19} strokeWidth={2} />,
+    icon: <Mail size={24} strokeWidth={2} />,
     label: "Email us",
-    value: "hello@zerowaste.co",
+    value: "zerowaste@gmail.com",
   },
   {
-    icon: <Phone size={19} strokeWidth={2} />,
+    icon: <Phone size={24} strokeWidth={2} />,
     label: "Call us",
-    value: "+44 20 7946 0831",
+    value: "+01 12345678",
   },
   {
-    icon: <MapPin size={19} strokeWidth={2} />,
+    icon: <MapPin size={24} strokeWidth={2} />,
     label: "Visit us",
-    value: "12 Bermondsey St, London SE1",
+    value: "MVIC, Gyaneshwor, Nepal",
   },
 ];
 
@@ -68,12 +68,15 @@ export default function Contact() {
     <section className="py-5 contact-section" id="contact">
       <style>
         {`
+
           .contact-section{
             height: auto;
             align-content:center;
             position:relative;
             padding: 5rem 0;
             overflow:hidden;
+            -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+
           }
 
           .contact-section::before{
@@ -84,15 +87,48 @@ export default function Contact() {
             background-size:cover;
             background-position:center;
             background-repeat:no-repeat;
-            opacity: 0.13;
+            opacity: 0.10;
             z-index:0;
             pointer-events: none;
           }
+            .btn-send-msg {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .btn-send-msg:hover:not(:disabled) {
+            opacity: 1 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
         `}
       </style>
-      <div className="container" style={{ maxWidth: "1180px" }}>
+      <div
+        className="container"
+        style={{ maxWidth: "1180px", position: "relative", zIndex: 1 }}
+      >
         <div className="row g-5 align-items-start">
           <div className="col-lg-5">
+            <div
+              className="label"
+              style={{
+                margin: "1rem 0",
+                position: "relative",
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <h1
+                id="label"
+                style={{
+                  ...sectionh1_style,
+                  position: "relative",
+                }}
+              >
+                Get in touch
+              </h1>
+            </div>
             <h2
               style={{
                 ...sectionHeadingStyle,
@@ -114,10 +150,10 @@ export default function Contact() {
                   <div
                     className="d-flex align-items-center justify-content-center flex-shrink-0"
                     style={{
-                      width: 44,
-                      height: 44,
-                      background: "#eaf5ef",
-                      borderRadius: 12,
+                      width: 48,
+                      height: 48,
+                      background: colors.showcase_green,
+                      borderRadius: 8,
                       color: colors.green,
                     }}
                   >
@@ -148,11 +184,16 @@ export default function Contact() {
             </div>
           </div>
 
-          <div className="col-lg-7">
+          <div
+            className="col-lg-7"
+            style={{
+              padding: 0,
+            }}
+          >
             <div
-              className="p-4 p-lg-5 bg-white border"
+              className="p-4 p-lg-5 border"
               style={{
-                backgroundColor: colors.white,
+                background: colors.white,
                 borderRadius: 20,
                 boxShadow: shadows.sm,
               }}
@@ -172,7 +213,7 @@ export default function Contact() {
                     type="text"
                     className="form-control"
                     style={inputStyle}
-                    placeholder="Jane"
+                    placeholder="John"
                     value={form.firstName}
                     onChange={handleChange}
                   />
@@ -204,7 +245,7 @@ export default function Contact() {
                   className="form-label fw-semibold"
                   style={{ fontSize: "0.82rem", color: colors.charcoal }}
                 >
-                  Email Address
+                  Email
                 </label>
                 <input
                   id="email"
@@ -212,7 +253,7 @@ export default function Contact() {
                   type="email"
                   className="form-control"
                   style={inputStyle}
-                  placeholder="jane@example.com"
+                  placeholder="johnsmith@gmail.com"
                   value={form.email}
                   onChange={handleChange}
                 />
@@ -232,7 +273,7 @@ export default function Contact() {
                   type="tel"
                   className="form-control"
                   style={inputStyle}
-                  placeholder="+44 7700 900000"
+                  placeholder="+977 012345678"
                   value={form.phone}
                   onChange={handleChange}
                 />
@@ -262,23 +303,18 @@ export default function Contact() {
               )}
 
               <button
-                className="btn btn-primary w-100 d-inline-flex align-items-center justify-content-center gap-2"
+                className="btn btn-send-msg w-100 d-inline-flex align-items-center justify-content-center gap-2"
                 style={{
                   ...btnPrimaryStyle,
                   padding: "0.9rem",
                   fontSize: "1rem",
+                  color: colors.white,
                   fontWeight: 600,
                   borderRadius: 10,
                 }}
                 onClick={handleSubmit}
-                disabled={status === "loading" || status === "success"}
               >
-                <Send size={16} strokeWidth={2.5} />
-                {status === "loading"
-                  ? "Sending…"
-                  : status === "success"
-                    ? "✓ Sent! We'll be in touch soon."
-                    : "Send Message"}
+                Send Message
               </button>
             </div>
           </div>

@@ -2,18 +2,18 @@
 import { colors } from "../../theme";
 
 const quickLinks = [
-  { label: "How it works", href: "#how" },
+  { label: "How it works", href: "#how-it-works" },
   { label: "Features", href: "#features" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ];
 
 const platformLinks = [
-  { label: "Add Food Item", href: "#" },
-  { label: "Browse Food", href: "#" },
-  { label: "Plan Meals", href: "#" },
-  { label: "View Analytics", href: "#" },
-  { label: "Notifications", href: "#" },
+  { label: "Add Food Item", href: "#login" },
+  { label: "Browse Food", href: "#login" },
+  { label: "Plan Meals", href: "#login" },
+  { label: "View Analytics", href: "#login" },
+  { label: "Notifications", href: "#login" },
 ];
 
 const supportLinks = [
@@ -24,12 +24,12 @@ const supportLinks = [
 
 const socialLinks = [
   {
-    href: "#",
+    href: "#https://www.facebook.com/",
     label: "Facebook",
     icon: (
       <svg
-        width="16"
-        height="16"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="currentColor"
         aria-hidden="true"
@@ -39,12 +39,12 @@ const socialLinks = [
     ),
   },
   {
-    href: "#",
+    href: "#https://www.linkedin.com/",
     label: "LinkedIn",
     icon: (
       <svg
-        width="16"
-        height="16"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="currentColor"
         aria-hidden="true"
@@ -54,12 +54,12 @@ const socialLinks = [
     ),
   },
   {
-    href: "#",
+    href: "#https://www.instagram.com/",
     label: "Instagram",
     icon: (
       <svg
-        width="16"
-        height="16"
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
         fill="currentColor"
         aria-hidden="true"
@@ -104,11 +104,18 @@ function LinkColumn({ title, links }) {
 
 export default function Footer() {
   return (
-    <footer style={{ background: colors.white, padding: "3.5rem 0 2rem" }}>
+    <footer
+      style={{
+        background: colors.white,
+        padding: "3.5rem 0 2rem",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       <div className="container" style={{ maxWidth: "1180px" }}>
         <div
-          className="row g-4 pb-4 mb-4 border-bottom"
-          style={{ borderColor: `${colors.border} !important` }}
+          className="row g-4 pb-4 mb-4"
+          style={{ borderBottom: `2px solid ${colors.greenL}` }}
         >
           <div className="col-lg-4">
             <img
@@ -164,11 +171,38 @@ export default function Footer() {
 
         <div
           className="text-center"
-          style={{ fontSize: "0.82rem", color: colors.muted }}
+          style={{
+            fontSize: "0.82rem",
+            color: colors.muted,
+            marginBottom: "2rem",
+          }}
         >
           © 2024 ZeroWaste. All rights reserved.
         </div>
       </div>
+      <svg
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          width: "100%",
+          height: "90px",
+          lineHeight: 0,
+        }}
+        viewBox="0 0 1440 100"
+        preserveAspectRatio="none"
+      >
+        <path
+          fill={colors.showcase_green}
+          fillOpacity="0.75"
+          d="M0,40 C240,90 480,10 720,40 C960,70 1200,10 1440,50 L1440,100 L0,100 Z"
+        />
+        <path
+          fill={colors.greenLrgb}
+          d="M0,60 C240,20 480,90 720,55 C960,20 1200,90 1440,60 L1440,100 L0,100 Z"
+        />
+      </svg>
     </footer>
   );
 }
