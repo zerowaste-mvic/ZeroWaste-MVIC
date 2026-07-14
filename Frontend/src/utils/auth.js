@@ -1,3 +1,21 @@
+function getCookie(name) {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
+function setCookie(name, value, days = 30) {
+  if (typeof document === 'undefined') return;
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  const maxAge = `; Max-Age=${days * 24 * 60 * 60}`;
+  document.cookie = `${name}=${encodeURIComponent(value)}; Path=/; SameSite=Lax${secure}${maxAge}`;
+}
+
+function eraseCookie(name) {
+  if (typeof document === 'undefined') return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Lax`;
+}
+
 export function getStoredUser() {
   const raw = localStorage.getItem('zw_user') || sessionStorage.getItem('zw_user');
   if (!raw) return null;
@@ -25,11 +43,42 @@ export function getStoredToken() {
   return localStorage.getItem('zw_token') || sessionStorage.getItem('zw_token');
 }
 
+export function getUserEmailCookie() {
+  return getCookie('zw_user_email');
+}
+
+export function setUserEmailCookie(email) {
+  if (!email) return;
+  setCookie('zw_user_email', email);
+}
+
+export function getDonationDetailsCookie() {
+  const raw = getCookie('zw_recent_donation_details');
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+export function setDonationDetailsCookie(details) {
+  if (!details) return;
+  const payload = {
+    location: details.location || '',
+    availableTime: details.availableTime || '',
+    contactDetail: details.contactDetail || '',
+  };
+  setCookie('zw_recent_donation_details', JSON.stringify(payload));
+}
+
 export function clearAuth() {
   localStorage.removeItem('zw_token');
   localStorage.removeItem('zw_user');
   sessionStorage.removeItem('zw_token');
   sessionStorage.removeItem('zw_user');
+  eraseCookie('zw_user_email');
+  eraseCookie('zw_recent_donation_details');
 }
 
 export function isLoggedIn() {

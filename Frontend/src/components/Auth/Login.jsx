@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { colors, fonts } from "../../theme";
+import { setUserEmailCookie } from "../../utils/auth";
 
 const SPRING_BOOT_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
@@ -92,6 +93,7 @@ export default function Login({ onNavigate }) {
       const data = await res.json();
       sessionStorage.setItem("zw_token", data.token);
       sessionStorage.setItem("zw_user", JSON.stringify(data.user));
+      setUserEmailCookie(data.user?.email || form.email.trim());
       onNavigate?.("dashboard");
     } catch (err) {
       setErrMsg(err.message || "Something went wrong. Please try again.");
