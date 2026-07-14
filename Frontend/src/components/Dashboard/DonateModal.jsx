@@ -1,7 +1,7 @@
 // src/components/Dashboard/DonateModal.jsx
 import { useEffect, useState } from 'react';
 import { colors, fonts } from '../../theme';
-import { getStoredUser } from '../../utils/auth';
+import { getDonationDetailsCookie, getStoredUser, setDonationDetailsCookie } from '../../utils/auth';
 
 const fieldBoxStyle = {
   border: `1.5px solid ${colors.border}`,
@@ -29,24 +29,38 @@ export default function DonateModal({ item, onCancel, onConfirm }) {
   // as an effect dependency, the effect would re-fire on every keystroke and
   // wipe out whatever you just typed. This is what was happening before.
   const [user] = useState(() => getStoredUser());
+  const [savedDetails] = useState(() => getDonationDetailsCookie());
 
-  const [location, setLocation] = useState('');
-  const [availableTime, setAvailableTime] = useState('');
-  const [contactDetail, setContactDetail] = useState('');
+  const [location, setLocation] = useState(savedDetails?.location || '');
+  const [availableTime, setAvailableTime] = useState(savedDetails?.availableTime || '');
+  const [contactDetail, setContactDetail] = useState(savedDetails?.contactDetail || '');
   const [submitting, setSubmitting] = useState(false);
   const [errMsg, setErrMsg] = useState('');
 
   // Only reset the form when a NEW item is opened for donation — not on every render.
   useEffect(() => {
     if (item) {
-      setLocation(user?.location || user?.address || '');
-      setAvailableTime('');
-      setContactDetail(user?.phone || user?.contact || '');
+      const cookieDetails = getDonationDetailsCookie();
+      setLocation(cookieDetails?.location || user?.location || user?.address || '');
+      setAvailableTime(cookieDetails?.availableTime || '');
+      setContactDetail(cookieDetails?.contactDetail || user?.phone || user?.contact || '');
       setErrMsg('');
       setSubmitting(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [item?.id]);
+
+  useEffect(() => {
+    if (!item) return;
+    const draft = {
+      location: location.trim(),
+      availableTime: availableTime.trim(),
+      contactDetail: contactDetail.trim(),
+    };
+    if (draft.location || draft.availableTime || draft.contactDetail) {
+      setDonationDetailsCookie(draft);
+    }
+  }, [item, location, availableTime, contactDetail]);
 
   if (!item) return null;
 
