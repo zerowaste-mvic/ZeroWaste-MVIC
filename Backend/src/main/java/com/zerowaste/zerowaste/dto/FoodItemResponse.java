@@ -12,9 +12,7 @@ public class FoodItemResponse {
     private Long id;
     private String name;
     private String category;
-    private String storage;
     private Double quantity;
-    private String notes;
     private String quantityUnit;
     private LocalDate expiryDate;
     private String imageUrl;
@@ -44,9 +42,7 @@ public class FoodItemResponse {
                 item.getId(),
                 item.getName(),
                 item.getCategory(),
-                item.getStorage(),
                 item.getQuantity(),
-                item.getNotes(),
                 item.getQuantityUnit(),
                 item.getExpiryDate(),
                 item.getImageUrl(),

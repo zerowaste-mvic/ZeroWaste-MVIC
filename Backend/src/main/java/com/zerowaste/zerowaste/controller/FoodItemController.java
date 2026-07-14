@@ -37,14 +37,6 @@ public class FoodItemController {
         return foodItemService.getAllForUser(userId);
     }
 
-    @GetMapping("/meta")
-    public java.util.Map<String, java.util.List<String>> meta() {
-        return java.util.Map.of(
-                "categories", foodItemService.getDistinctCategories(),
-                "storages", foodItemService.getDistinctStorages()
-        );
-    }
-
     @GetMapping("/browse")
     public List<FoodItemResponse> browse(@AuthenticationPrincipal Long userId) {
         return foodItemService.getAvailableForBrowse(userId);

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { colors, fonts, btnPrimaryStyle, btnOutlineStyle } from '../../../theme';
 import { foodApi } from '../../../services/api';
 
-// categories and storages loaded from server
+const CATEGORIES = ['Dairy', 'Meat', 'Fruits', 'Vegetable'];
 const UNITS = ['Kg', 'Ltr'];
 
 const inputStyle = {
@@ -18,17 +18,11 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
   const [form, setForm] = useState({
     name: item.name || '',
     category: item.category || '',
-    storage: item.storage || '',
     quantity: item.quantity ?? '',
     quantityUnit: item.quantityUnit || 'Kg',
     expiryDate: item.expiryDate ? item.expiryDate.split('T')[0] : '',
     imageUrl: item.imageUrl || '',
-    notes: item.notes || '',
   });
-  const [categories, setCategories] = useState([]);
-  const [storages, setStorages] = useState([]);
-  const [customCategory, setCustomCategory] = useState('');
-  const [customStorage, setCustomStorage] = useState('');
   const [status, setStatus] = useState('idle');
   const [errMsg, setErrMsg] = useState('');
 
@@ -41,7 +35,6 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
     e.preventDefault();
     if (!form.name.trim()) { setErrMsg('Food name is required.'); setStatus('error'); return; }
     if (!form.category) { setErrMsg('Please select a category.'); setStatus('error'); return; }
-    if (form.category === 'Custom' && !customCategory.trim()) { setErrMsg('Please enter a custom category.'); setStatus('error'); return; }
     if (!form.quantity || Number(form.quantity) <= 0) { setErrMsg('Enter a valid quantity.'); setStatus('error'); return; }
     if (!form.expiryDate) { setErrMsg('Expiry date is required.'); setStatus('error'); return; }
 
@@ -50,13 +43,11 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
     try {
       await foodApi.update(item.id, {
         name: form.name.trim(),
-        category: form.category === 'Custom' ? customCategory.trim() : form.category,
-        storage: form.storage === 'Custom' ? customStorage.trim() : form.storage,
+        category: form.category,
         quantity: Number(form.quantity),
         quantityUnit: form.quantityUnit,
         expiryDate: form.expiryDate,
         imageUrl: form.imageUrl.trim() || null,
-        notes: form.notes?.trim() || null,
       });
       setStatus('success');
       setTimeout(() => onSuccess?.(), 600);
@@ -65,16 +56,6 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
       setStatus('error');
     }
   };
-
-  useEffect(() => {
-    let mounted = true;
-    foodApi.getMeta().then((data) => {
-      if (!mounted) return;
-      setCategories(Array.isArray(data?.categories) ? data.categories : []);
-      setStorages(Array.isArray(data?.storages) ? data.storages : []);
-    }).catch(() => {});
-    return () => { mounted = false; };
-  }, []);
 
   return (
     <div>
@@ -117,14 +98,8 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
             <select id="edit-category" name="category" className="form-select" style={inputStyle}
               value={form.category} onChange={handleChange}>
               <option value="">Select category</option>
-              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
-              <option value="Custom">Custom</option>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            {form.category === 'Custom' && (
-              <div className="mt-2">
-                <input type="text" name="customCategory" className="form-control" placeholder="Enter custom category" value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} style={inputStyle} />
-              </div>
-            )}
           </div>
 
           <div className="row g-3">
@@ -150,26 +125,11 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
           </div>
 
           <div>
-            <label htmlFor="edit-storage" className="form-label fw-semibold small">Storage</label>
-            <select id="edit-storage" name="storage" className="form-select mb-2" style={inputStyle} value={form.storage} onChange={handleChange}>
-              <option value="">Select storage</option>
-              {storages.map((s) => <option key={s} value={s}>{s}</option>)}
-              <option value="Custom">Custom</option>
-            </select>
-            {form.storage === 'Custom' && (
-              <div className="mb-2">
-                <input type="text" name="customStorage" className="form-control" placeholder="Enter custom storage" value={customStorage} onChange={(e) => setCustomStorage(e.target.value)} style={inputStyle} />
-              </div>
-            )}
-
             <label htmlFor="edit-imageUrl" className="form-label fw-semibold small">
               Image URL <span className="text-muted fw-normal">(optional)</span>
             </label>
             <input id="edit-imageUrl" name="imageUrl" type="text" className="form-control"
               style={inputStyle} placeholder="https://..." value={form.imageUrl} onChange={handleChange} />
-
-            <label htmlFor="edit-notes" className="form-label fw-semibold small mt-2">Notes <span className="text-muted fw-normal">(optional)</span></label>
-            <textarea id="edit-notes" name="notes" className="form-control" style={{ ...inputStyle, minHeight: 80 }} placeholder="Notes" value={form.notes || ''} onChange={handleChange} />
           </div>
 
           <div className="d-flex gap-2 mt-2">

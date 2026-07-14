@@ -103,20 +103,6 @@ public class AnalyticsService {
                 })
                 .toList();
 
-        // Include any additional (custom) categories that weren't in the fixed order
-        List<String> others = counts.keySet().stream()
-            .filter(k -> !CATEGORY_ORDER.contains(k))
-            .sorted()
-            .toList();
-        List<CategoryBreakdownResponse> otherResponses = others.stream()
-            .map(cat -> {
-                long count = counts.getOrDefault(cat, 0L);
-                int percent = total == 0 ? 0 : (int) Math.round(count * 100.0 / total);
-                return new CategoryBreakdownResponse(cat, count, percent);
-            })
-            .toList();
-
-        breakdown = java.util.stream.Stream.concat(breakdown.stream(), otherResponses.stream()).toList();
         return new ChartBreakdownResponse(breakdown, total);
     }
 
