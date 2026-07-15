@@ -1,19 +1,19 @@
-import { useEffect, useState } from 'react';
-import DashboardLayout from './DashboardLayout';
-import DashboardHome from './pages/DashboardHome';
-import FoodInventory from './pages/FoodInventory';
-import BrowseFoodItem from './pages/BrowseFoodItem';
-import AddFoodItem from './pages/AddFoodItem';
-import EditFoodItem from './pages/EditFoodItem';
-import MealPlanner from './pages/MealPlanner';
-import ExpiryAlerts from './pages/ExpiryAlerts';
-import Settings from './pages/Settings';
-import Notifications from './pages/Notifications';
-import Analytics from './pages/Analytics';
-import { notificationApi } from '../../services/api';
+import { useEffect, useState } from "react";
+import DashboardLayout from "./DashboardLayout";
+import DashboardHome from "./pages/DashboardHome";
+import FoodInventory from "./pages/FoodInventory";
+import BrowseFoodItem from "./pages/BrowseFoodItem";
+import AddFoodItem from "./pages/AddFoodItem";
+import EditFoodItem from "./pages/EditfoodItem";
+import MealPlanner from "./pages/MealPlanner";
+import ExpiryAlerts from "./pages/ExpiryAlerts";
+import Settings from "./pages/Settings";
+import Notifications from "./pages/Notifications";
+import Analytics from "./pages/Analytics";
+import { notificationApi } from "../../services/api";
 
 export default function Dashboard({ onNavigate }) {
-  const [activePage, setActivePage] = useState('inventory');
+  const [activePage, setActivePage] = useState("inventory");
   const [editingItem, setEditingItem] = useState(null);
   const [profileVersion, setProfileVersion] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -28,24 +28,24 @@ export default function Dashboard({ onNavigate }) {
   };
 
   useEffect(() => {
-    if (activePage === 'notifications') return;
-    refreshUnreadCount();
+    if (activePage === "notifications") return;
+    refreshUnreadCount;
   }, [activePage]);
 
   const handleFoodAdded = () => {
-    setActivePage('inventory');
+    setActivePage("inventory");
   };
 
   const handleFoodEdited = () => {
-    setActivePage('inventory');
+    setActivePage("inventory");
     setEditingItem(null);
   };
 
   const handleNavigate = (page, data) => {
-    if (page === 'edit-food' && data) {
+    if (page === "edit-food" && data) {
       setEditingItem(data);
     }
-    if (page === 'notifications') {
+    if (page === "notifications") {
       // Like opening a YouTube-style notification tray: clear the red badge
       // the instant you open it, rather than waiting for an explicit "Mark
       // all as read" click. Notifications.jsx does the actual mark-all-read
@@ -58,27 +58,40 @@ export default function Dashboard({ onNavigate }) {
 
   const renderPage = () => {
     switch (activePage) {
-      case 'overview':
+      case "overview":
         return <DashboardHome />;
-      case 'inventory':
+      case "inventory":
         return <FoodInventory onNavigate={handleNavigate} />;
-      case 'browse':
+      case "browse":
         return <BrowseFoodItem onNavigate={handleNavigate} />;
-      case 'expiry':
+      case "expiry":
         return <ExpiryAlerts onNavigate={handleNavigate} />;
-      case 'add-food':
-        return <AddFoodItem onSuccess={handleFoodAdded} onCancel={() => setActivePage('inventory')} />;
-      case 'edit-food':
-        return editingItem
-          ? <EditFoodItem item={editingItem} onSuccess={handleFoodEdited} onCancel={() => setActivePage('inventory')} />
-          : <FoodInventory onNavigate={handleNavigate} />;
-      case 'meal-planner':
+      case "add-food":
+        return (
+          <AddFoodItem
+            onSuccess={handleFoodAdded}
+            onCancel={() => setActivePage("inventory")}
+          />
+        );
+      case "edit-food":
+        return editingItem ? (
+          <EditFoodItem
+            item={editingItem}
+            onSuccess={handleFoodEdited}
+            onCancel={() => setActivePage("inventory")}
+          />
+        ) : (
+          <FoodInventory onNavigate={handleNavigate} />
+        );
+      case "meal-planner":
         return <MealPlanner />;
-      case 'settings':
-        return <Settings onProfileUpdated={() => setProfileVersion((v) => v + 1)} />;
-      case 'notifications':
+      case "settings":
+        return (
+          <Settings onProfileUpdated={() => setProfileVersion((v) => v + 1)} />
+        );
+      case "notifications":
         return <Notifications onUnreadCountChange={setUnreadCount} />;
-      case 'analytics':
+      case "analytics":
         return <Analytics />;
       default:
         return <DashboardHome />;

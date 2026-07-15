@@ -1,6 +1,6 @@
 // src/components/Body/About.jsx
 import { Heart, Eye, Sprout, Handshake } from "lucide-react";
-import heroImage from "../../../../Assets/image gallery/hero_image02.png";
+import heroImage from "/images/hero_image02.png";
 import {
   colors,
   sectionh1_style,
@@ -35,16 +35,30 @@ const values = [
 export default function About({ onNavigate }) {
   return (
     <section
-      className="py-5"
+      className="py-5 about-section"
       id="about"
       style={{
         paddingTop: "5rem",
         paddingBottom: "5rem",
-        background: colors.authGreen,
       }}
     >
       <style>
-        {`.btn-register {
+        {`
+        .about-section{
+        position: relative;
+        overflow: hidden;
+      }
+
+      .about-section::before{
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: ${colors.authGreen};
+        z-index: 0;
+        -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
+      }
+
+        .btn-register {
             opacity: 0.75;
             transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
           }
@@ -56,7 +70,10 @@ export default function About({ onNavigate }) {
           }
           `}
       </style>
-      <div className="container" style={{ maxWidth: "1180px" }}>
+      <div
+        className="container"
+        style={{ maxWidth: "1180px", position: "relative", zIndex: 1 }}
+      >
         <div className="row align-items-center g-5">
           <div className="col-lg-6">
             <div

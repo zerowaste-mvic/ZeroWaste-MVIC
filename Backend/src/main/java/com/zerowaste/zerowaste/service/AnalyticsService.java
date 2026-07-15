@@ -1,14 +1,5 @@
 package com.zerowaste.zerowaste.service;
 
-import com.zerowaste.zerowaste.dto.AnalyticsSummaryResponse;
-import com.zerowaste.zerowaste.dto.CategoryBreakdownResponse;
-import com.zerowaste.zerowaste.dto.ChartBreakdownResponse;
-import com.zerowaste.zerowaste.model.FoodActivityLog;
-import com.zerowaste.zerowaste.model.FoodItem;
-import com.zerowaste.zerowaste.repository.FoodActivityLogRepository;
-import com.zerowaste.zerowaste.repository.FoodItemRepository;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -16,6 +7,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+
+import com.zerowaste.zerowaste.dto.AnalyticsSummaryResponse;
+import com.zerowaste.zerowaste.dto.CategoryBreakdownResponse;
+import com.zerowaste.zerowaste.dto.ChartBreakdownResponse;
+import com.zerowaste.zerowaste.model.FoodActivityLog;
+import com.zerowaste.zerowaste.model.FoodItem;
+import com.zerowaste.zerowaste.repository.FoodActivityLogRepository;
+import com.zerowaste.zerowaste.repository.FoodItemRepository;
 
 @Service
 public class AnalyticsService {
@@ -64,9 +65,9 @@ public class AnalyticsService {
     }
 
     /**
-     * Live snapshot of what's currently sitting in the user's Food
-     * Inventory, grouped by category — not filtered by period, since it
-     * reflects "right now", not history.
+     * Live snapshot of what's currently sitting in the user's Food Inventory,
+     * grouped by category — not filtered by period, since it reflects "right
+     * now", not history.
      */
     public ChartBreakdownResponse getInventoryOverview(Long userId) {
         List<String> categories = foodItemRepository.findByUserIdOrderByExpiryDateAsc(userId).stream()

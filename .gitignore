@@ -56,3 +56,10 @@ sketch
 
 
 # End of https://mrkandreev.name/snippets/gitignore-generator/#Git,Java,react,2FA,SQL,POSTGRESQL
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
