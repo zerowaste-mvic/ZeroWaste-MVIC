@@ -1,5 +1,5 @@
 package com.zerowaste.zerowaste.security;
-
+import org.springframework.lang.NonNull;
 import com.zerowaste.zerowaste.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -25,9 +25,10 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
+            throws ServletException, IOException {
 
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 

@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 public class AuthService {
 
@@ -36,7 +38,7 @@ public class AuthService {
                 .role("USER")
                 .build();
 
-        User saved = userRepository.save(user);
+        User saved = Objects.requireNonNull(userRepository.save(user), "Failed to save user");
         return buildAuthResponse(saved);
     }
 

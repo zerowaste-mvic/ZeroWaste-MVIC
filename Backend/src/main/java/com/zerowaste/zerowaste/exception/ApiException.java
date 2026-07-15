@@ -1,16 +1,20 @@
 package com.zerowaste.zerowaste.exception;
 
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.lang.NonNull;
 
 public class ApiException extends RuntimeException {
-    private final HttpStatus status;
 
-    public ApiException(String message, HttpStatus status) {
+    @NonNull
+    private final HttpStatusCode status;
+
+    public ApiException(@NonNull String message, @NonNull HttpStatusCode status) {
         super(message);
         this.status = status;
     }
 
-    public HttpStatus getStatus() {
+    @NonNull
+    public HttpStatusCode getStatus() {
         return status;
     }
 }

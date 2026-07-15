@@ -41,7 +41,8 @@ public class UserService {
         user.setGender(blankToNull(request.getGender()));
         user.setAddress(blankToNull(request.getAddress()));
 
-        return UserResponse.from(userRepository.save(user));
+        User saved = userRepository.save(user);
+        return UserResponse.from(saved);
     }
 
     public UserResponse updatePrivacy(Long userId, PrivacyRequest request) {
@@ -88,7 +89,7 @@ public class UserService {
     }
 
     private void notify(Long userId, String type, String category, String title, String message) {
-        notificationRepository.save(Notification.builder()
+        Notification notification = Notification.builder()
                 .userId(userId)
                 .type(type)
                 .category(category)
@@ -96,7 +97,9 @@ public class UserService {
                 .message(message)
                 .read(false)
                 .resolved(true)
-                .build());
+                .build();
+
+        notificationRepository.save(notification);
     }
 
     private User findUser(Long userId) {

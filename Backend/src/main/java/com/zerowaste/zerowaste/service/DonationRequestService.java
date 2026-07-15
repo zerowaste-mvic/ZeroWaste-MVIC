@@ -76,7 +76,7 @@ public class DonationRequestService {
                         .build()
         );
 
-        notificationRepository.save(Notification.builder()
+        Notification newNotification = Notification.builder()
                 .userId(donor.getId())
                 .type("DONATION_REQUEST")
                 .category("Donations")
@@ -87,7 +87,8 @@ public class DonationRequestService {
                 .claimRequestId(claimRequest.getId())
                 .requesterName(requester.getFullName())
                 .itemName(item.getName())
-                .build());
+                .build();
+        notificationRepository.save(newNotification);
     }
 
     /**
@@ -125,7 +126,7 @@ public class DonationRequestService {
         notification.setRead(true);
         notificationRepository.save(notification);
 
-        notificationRepository.save(Notification.builder()
+        Notification acceptedNotification = Notification.builder()
                 .userId(claimRequest.getRequesterId())
                 .type("DONATION_ACCEPTED")
                 .category("Donations")
@@ -134,7 +135,8 @@ public class DonationRequestService {
                 .read(false)
                 .resolved(true)
                 .itemName(item.getName())
-                .build());
+                .build();
+        notificationRepository.save(acceptedNotification);
 
         // Auto-decline every other still-pending request for this item.
         List<DonationClaimRequest> others = claimRequestRepository.findByFoodItemIdAndStatus(item.getId(), "PENDING");
@@ -143,11 +145,12 @@ public class DonationRequestService {
             claimRequestRepository.save(other);
 
             notificationRepository.findFirstByClaimRequestId(other.getId()).ifPresent(reqNotif -> {
-                reqNotif.setResolved(true);
-                notificationRepository.save(reqNotif);
+                Notification existingNotification = reqNotif;
+                existingNotification.setResolved(true);
+                notificationRepository.save(existingNotification);
             });
 
-            notificationRepository.save(Notification.builder()
+            Notification declinedNotification = Notification.builder()
                     .userId(other.getRequesterId())
                     .type("DONATION_DECLINED")
                     .category("Donations")
@@ -156,7 +159,8 @@ public class DonationRequestService {
                     .read(false)
                     .resolved(true)
                     .itemName(item.getName())
-                    .build());
+                    .build();
+            notificationRepository.save(declinedNotification);
         }
     }
 
@@ -181,10 +185,10 @@ public class DonationRequestService {
         notificationRepository.save(notification);
 
         String itemName = foodItemRepository.findById(claimRequest.getFoodItemId())
-                .map(FoodItem::getName)
+                .map(item -> item != null ? item.getName() : null)
                 .orElse("the item");
 
-        notificationRepository.save(Notification.builder()
+        Notification declinedNotification = Notification.builder()
                 .userId(claimRequest.getRequesterId())
                 .type("DONATION_DECLINED")
                 .category("Donations")
@@ -193,7 +197,8 @@ public class DonationRequestService {
                 .read(false)
                 .resolved(true)
                 .itemName(itemName)
-                .build());
+                .build();
+        notificationRepository.save(declinedNotification);
     }
 
     private Notification requireOwnActionableNotification(Long notificationId, Long donorUserId) {

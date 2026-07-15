@@ -71,7 +71,8 @@ public class AnalyticsService {
     public ChartBreakdownResponse getInventoryOverview(Long userId) {
         List<String> categories = foodItemRepository.findByUserIdOrderByExpiryDateAsc(userId).stream()
                 .filter(item -> !Boolean.TRUE.equals(item.getDonated()))
-                .map(FoodItem::getCategory)
+                // .map(FoodItem::getCategory)
+                .map(item -> item != null? item.getCategory() : null)
                 .toList();
         return buildBreakdown(categories);
     }
@@ -84,7 +85,8 @@ public class AnalyticsService {
         Instant since = startOfPeriod(period).atStartOfDay(ZoneId.systemDefault()).toInstant();
         List<String> categories = activityLogRepository
                 .findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "USED", since).stream()
-                .map(FoodActivityLog::getCategory)
+                // .map(FoodActivityLog::getCategory)
+                .map(item -> item != null? item.getCategory() : null)
                 .filter(Objects::nonNull)
                 .toList();
         return buildBreakdown(categories);

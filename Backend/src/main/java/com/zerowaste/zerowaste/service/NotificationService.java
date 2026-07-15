@@ -30,14 +30,18 @@ public class NotificationService {
 
     public void markAllRead(Long userId) {
         List<Notification> unread = notificationRepository.findByUserIdAndReadFalse(userId);
-        unread.forEach(n -> n.setRead(true));
+        unread.stream()
+                .filter(n -> n != null)
+                .forEach(n -> n.setRead(true));
         notificationRepository.saveAll(unread);
     }
 
     public NotificationResponse markRead(Long id, Long userId) {
         Notification notification = notificationRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ApiException("Notification not found.", HttpStatus.NOT_FOUND));
-        notification.setRead(true);
-        return NotificationResponse.from(notificationRepository.save(notification));
+        Notification updated = notification;
+        updated.setRead(true);
+        Notification saved = notificationRepository.save(updated);
+        return NotificationResponse.from(saved);
     }
 }

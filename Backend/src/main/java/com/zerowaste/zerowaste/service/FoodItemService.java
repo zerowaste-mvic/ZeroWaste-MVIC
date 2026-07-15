@@ -21,6 +21,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,9 +63,11 @@ public class FoodItemService {
         }
 
         Set<Long> donorIds = donatedItems.stream()
-                .map(FoodItem::getUserId)
+                .map(item -> item != null ? item.getUserId() : null)
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         Map<Long, User> donorsById = userRepository.findAllById(donorIds).stream()
+                .filter(Objects::nonNull)
                 .collect(Collectors.toMap(User::getId, u -> u));
 
         List<FoodItem> visible = donatedItems.stream()
@@ -78,10 +81,14 @@ public class FoodItemService {
                 })
                 .toList();
 
-        Set<Long> visibleIds = visible.stream().map(FoodItem::getId).collect(Collectors.toSet());
+        Set<Long> visibleIds = visible.stream()
+                .filter(Objects::nonNull)
+                .map(FoodItem::getId)
+                .collect(Collectors.toSet());
         Set<Long> requestedByMe = claimRequestRepository
                 .findByFoodItemIdInAndRequesterIdAndStatus(visibleIds, userId, "PENDING")
                 .stream()
+                .filter(Objects::nonNull)
                 .map(DonationClaimRequest::getFoodItemId)
                 .collect(Collectors.toSet());
 
@@ -111,7 +118,8 @@ public class FoodItemService {
                 .userId(userId)
                 .build();
 
-        return FoodItemResponse.from(foodItemRepository.save(item));
+        FoodItem savedItem = foodItemRepository.save(item);
+        return FoodItemResponse.from(savedItem);
     }
 
     public FoodItemResponse update(Long id, FoodItemRequest request, Long userId) {
@@ -128,7 +136,8 @@ public class FoodItemService {
         item.setExpiryDate(request.getExpiryDate());
         item.setImageUrl(blankToNull(request.getImageUrl()));
 
-        return FoodItemResponse.from(foodItemRepository.save(item));
+        FoodItem savedItem = foodItemRepository.save(item);
+        return FoodItemResponse.from(savedItem);
     }
 
     public FoodItemResponse donate(Long id, Long userId, DonateRequest request) {
@@ -145,12 +154,13 @@ public class FoodItemService {
 
         FoodItem saved = foodItemRepository.save(item);
 
-        activityLogRepository.save(FoodActivityLog.builder()
+        FoodActivityLog activityLog = FoodActivityLog.builder()
                 .userId(userId)
                 .type("DONATED")
                 .category(saved.getCategory())
                 .quantity(saved.getQuantity())
-                .build());
+                .build();
+        activityLogRepository.save(activityLog);
 
         notifyEveryoneOfNewDonation(saved, userId);
 
@@ -170,12 +180,13 @@ public class FoodItemService {
             throw new ApiException("This item has already been donated.", HttpStatus.BAD_REQUEST);
         }
 
-        activityLogRepository.save(FoodActivityLog.builder()
+        FoodActivityLog activityLog = FoodActivityLog.builder()
                 .userId(userId)
                 .type("USED")
                 .category(item.getCategory())
                 .quantity(item.getQuantity())
-                .build());
+                .build();
+        activityLogRepository.save(activityLog);
 
         FoodItemResponse response = FoodItemResponse.from(item);
         foodItemRepository.delete(item);
@@ -190,7 +201,7 @@ public class FoodItemService {
      * including the fact that it exists.
      */
     private void notifyEveryoneOfNewDonation(FoodItem item, Long donorId) {
-        User donor = userRepository.findById(donorId).orElse(null);
+        User donor = userRepository.findById(donorId).orElseThrow(() -> new ApiException("User not found.", HttpStatus.NOT_FOUND));
         if (donor == null || !Boolean.TRUE.equals(donor.getDonationPublic())) {
             return;
         }
