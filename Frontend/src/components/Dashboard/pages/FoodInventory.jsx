@@ -42,7 +42,7 @@ export default function FoodInventory({ onNavigate }) {
   }, []);
 
   useEffect(() => {
-    loadItems;
+    loadItems();
   }, [loadItems]);
 
   const handleDelete = async (id) => {

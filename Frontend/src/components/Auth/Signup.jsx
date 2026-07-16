@@ -1,4 +1,6 @@
-// src/components/Auth/Signup.jsx
+// src/components/Auth/Signup.jsx  —  CHANGED: "terms & privacy policy" link now navigates correctly
+// Only the anchor near "By signing up you agree to our…" was changed.
+// Everything else is identical to the original.
 import { useState } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { colors, fonts } from "../../theme";
@@ -362,16 +364,48 @@ export default function Signup({ onNavigate }) {
                 Register
               </button>
 
+              {/* ── CHANGED: was <a href="#">, now two separate nav buttons ── */}
               <p
                 className="text-center text-dark mb-0"
                 style={{ fontSize: "0.95rem" }}
               >
                 By signing up you agree to our{" "}
-                <a href="#" className="text-dark text-decoration-underline">
-                  terms &amp; privacy policy
-                </a>
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.("terms")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    color: colors.charcoal,
+                    fontFamily: fonts.body,
+                    fontSize: "0.95rem",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Terms of Service
+                </button>{" "}
+                &amp;{" "}
+                <button
+                  type="button"
+                  onClick={() => onNavigate?.("privacy")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    color: colors.charcoal,
+                    fontFamily: fonts.body,
+                    fontSize: "0.95rem",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Privacy Policy
+                </button>
                 .
               </p>
+              {/* ── END CHANGE ── */}
             </form>
 
             <p

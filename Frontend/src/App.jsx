@@ -12,6 +12,8 @@ import Footer from "./components/Footer/Footer";
 import Login from "./components/Auth/Login";
 import Signup from "./components/Auth/Signup";
 import Dashboard from "./components/Dashboard/Dashboard";
+import PrivacyPolicy from "./components/Dashboard/pages/PrivacyPolicy";
+import TermsOfService from "./components/Dashboard/pages/TermsOfService";
 import { colors, fonts } from "./theme";
 import { isLoggedIn } from "./utils/auth";
 
@@ -19,6 +21,8 @@ const getPageFromPath = () => {
   const pathname = window.location.pathname.replace(/\/+$/, "");
   if (pathname === "/login") return "login";
   if (pathname === "/signup") return "signup";
+  if (pathname === "/privacy-policy") return "privacy";
+  if (pathname === "/terms-of-service") return "terms";
   if (pathname === "/dashboard") return isLoggedIn() ? "dashboard" : "home";
   return isLoggedIn() ? "dashboard" : "home";
 };
@@ -26,6 +30,8 @@ const getPageFromPath = () => {
 const getPathFromPage = (page) => {
   if (page === "login") return "/login";
   if (page === "signup") return "/signup";
+  if (page === "privacy") return "/privacy-policy";
+  if (page === "terms") return "/terms-of-service";
   if (page === "dashboard") return "/dashboard";
   return "/";
 };
@@ -49,6 +55,11 @@ export default function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
+  // Scroll to top whenever the page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [page]);
+
   const navigate = (nextPage) => {
     const nextPath = getPathFromPage(nextPage);
     if (window.location.pathname !== nextPath) {
@@ -60,6 +71,8 @@ export default function App() {
   if (page === "login") return <Login onNavigate={navigate} />;
   if (page === "signup") return <Signup onNavigate={navigate} />;
   if (page === "dashboard") return <Dashboard onNavigate={navigate} />;
+  if (page === "privacy") return <PrivacyPolicy onNavigate={navigate} />;
+  if (page === "terms") return <TermsOfService onNavigate={navigate} />;
 
   return (
     <>
@@ -74,7 +87,7 @@ export default function App() {
         <Contact />
       </main>
 
-      <Footer />
+      <Footer onNavigate={navigate} />
     </>
   );
 }

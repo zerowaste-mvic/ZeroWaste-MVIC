@@ -16,12 +16,6 @@ const platformLinks = [
   { label: "Notifications", href: "#login" },
 ];
 
-const supportLinks = [
-  { label: "Help Centre", href: "#" },
-  { label: "Privacy Policy", href: "#" },
-  { label: "Terms of Service", href: "#" },
-];
-
 const socialLinks = [
   {
     href: "#https://www.facebook.com/",
@@ -70,7 +64,7 @@ const socialLinks = [
   },
 ];
 
-function LinkColumn({ title, links }) {
+function LinkColumn({ title, links, onNavigate }) {
   return (
     <div className="col-6 col-md-4 col-lg-2">
       <h6
@@ -82,19 +76,46 @@ function LinkColumn({ title, links }) {
       <ul className="list-unstyled d-flex flex-column gap-2 mb-0">
         {links.map((link) => (
           <li key={link.label}>
-            <a
-              href={link.href}
-              className="text-decoration-none"
-              style={{ fontSize: "0.85rem", color: colors.muted }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = colors.green;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = colors.muted;
-              }}
-            >
-              {link.label}
-            </a>
+            {link.page ? (
+              // Internal navigation via onNavigate
+              <button
+                type="button"
+                onClick={() => onNavigate?.(link.page)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  color: colors.muted,
+                  fontFamily: "inherit",
+                  textAlign: "left",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = colors.green;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = colors.muted;
+                }}
+              >
+                {link.label}
+              </button>
+            ) : (
+              // Regular anchor link
+              <a
+                href={link.href}
+                className="text-decoration-none"
+                style={{ fontSize: "0.85rem", color: colors.muted }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.color = colors.green;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.color = colors.muted;
+                }}
+              >
+                {link.label}
+              </a>
+            )}
           </li>
         ))}
       </ul>
@@ -102,7 +123,14 @@ function LinkColumn({ title, links }) {
   );
 }
 
-export default function Footer() {
+export default function Footer({ onNavigate }) {
+  // Support links use onNavigate for internal page routing
+  const supportLinks = [
+    { label: "Help Centre", href: "#" },
+    { label: "Privacy Policy", page: "privacy" },
+    { label: "Terms of Service", page: "terms" },
+  ];
+
   return (
     <footer
       style={{
@@ -164,9 +192,9 @@ export default function Footer() {
             </div>
           </div>
 
-          <LinkColumn title="Quick Links" links={quickLinks} />
-          <LinkColumn title="Platform" links={platformLinks} />
-          <LinkColumn title="Support & Legal" links={supportLinks} />
+          <LinkColumn title="Quick Links" links={quickLinks} onNavigate={onNavigate} />
+          <LinkColumn title="Platform" links={platformLinks} onNavigate={onNavigate} />
+          <LinkColumn title="Support & Legal" links={supportLinks} onNavigate={onNavigate} />
         </div>
 
         <div
