@@ -216,7 +216,13 @@ export default function TermsOfService({ onNavigate }) {
           >
             Terms of Service
           </h1>
-          <p style={{ color: colors.muted, fontSize: "0.95rem", marginBottom: 0 }}>
+          <p
+            style={{
+              color: colors.muted,
+              fontSize: "0.95rem",
+              marginBottom: 0,
+            }}
+          >
             Last updated: July 16, 2026 &nbsp;·&nbsp; Effective: July 16, 2026
           </p>
         </div>
@@ -238,10 +244,10 @@ export default function TermsOfService({ onNavigate }) {
             borderBottom: `1px solid ${colors.border}`,
           }}
         >
-          Welcome to ZeroWaste. These Terms of Service govern your access to
-          and use of the ZeroWaste web application — a smart food waste
-          management and household food inventory platform. Please read them
-          carefully before creating an account or using any of our features.
+          Welcome to ZeroWaste. These Terms of Service govern your access to and
+          use of the ZeroWaste web application — a smart food waste management
+          and household food inventory platform. Please read them carefully
+          before creating an account or using any of our features.
         </p>
 
         {/* Table of contents */}

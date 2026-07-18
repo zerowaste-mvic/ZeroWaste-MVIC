@@ -190,7 +190,13 @@ export default function PrivacyPolicy({ onNavigate }) {
           >
             Privacy Policy
           </h1>
-          <p style={{ color: colors.muted, fontSize: "0.95rem", marginBottom: 0 }}>
+          <p
+            style={{
+              color: colors.muted,
+              fontSize: "0.95rem",
+              marginBottom: 0,
+            }}
+          >
             Last updated: July 16, 2026 &nbsp;·&nbsp; Effective: July 16, 2026
           </p>
         </div>
@@ -215,8 +221,8 @@ export default function PrivacyPolicy({ onNavigate }) {
           ZeroWaste ("we", "us", or "our") is committed to protecting your
           personal information and your right to privacy. This Privacy Policy
           explains what information we collect, how we use it, and the choices
-          you have regarding your data when you use the ZeroWaste platform —
-          a smart food waste management and household food inventory web
+          you have regarding your data when you use the ZeroWaste platform — a
+          smart food waste management and household food inventory web
           application.
         </p>
 

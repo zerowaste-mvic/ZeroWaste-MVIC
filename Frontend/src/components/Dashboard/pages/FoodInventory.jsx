@@ -1,11 +1,19 @@
-// src/components/Dashboard/pages/FoodInventory.jsx
 import { useCallback, useEffect, useState } from "react";
 import { Search, ChevronRight, Plus, Pencil, Trash2 } from "lucide-react";
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
 import DonateModal from "../DonateModal";
 
-const CATEGORIES = ["All Categories", "Fruits", "Vegetable", "Dairy", "Meat"];
+const CATEGORIES = [
+  "All Categories",
+  "Fruits",
+  "Vegetable",
+  "Dairy",
+  "Meat",
+  "Other",
+];
+
+const ITEMS_PER_PAGE = 10;
 
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop";
@@ -26,6 +34,8 @@ export default function FoodInventory({ onNavigate }) {
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
   const [donateTarget, setDonateTarget] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -44,6 +54,10 @@ export default function FoodInventory({ onNavigate }) {
   useEffect(() => {
     loadItems();
   }, [loadItems]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, category]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this food item?")) return;
@@ -85,12 +99,18 @@ export default function FoodInventory({ onNavigate }) {
     return matchesSearch && matchesCategory;
   });
 
+  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const paginatedItems = filtered.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  );
+
   return (
     <div>
       <h1
         style={{
-          fontFamily: fonts.display,
-          fontSize: "1.85rem",
+          fontFamily: fonts.body,
+          fontSize: "1.60rem",
           fontWeight: 700,
           color: colors.charcoal,
           marginBottom: "0.25rem",
@@ -106,16 +126,63 @@ export default function FoodInventory({ onNavigate }) {
         <div className="alert alert-danger py-2 small mb-3">{errMsg}</div>
       )}
 
+      <style>
+        {`
+          .search{
+          outline:none;
+            border-color: ${colors.greenL};
+          }
+          .search:focus{
+            border-color: ${colors.greenLrgb};
+            box-shadow: 0 0 0 0.23rem ${colors.greenLrgb};
+          }
+          
+            .add-item {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .add-item:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+
+          .page-btn{
+            transition: all 0.15s ease;
+          }
+
+          .page-btn:hover:not(:disabled){
+            opacity:0.85;
+          }
+
+          .donate-btn {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .donate-btn:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+
+          .used-btn:hover:not(:disabled){
+            opacity:1 !important;
+          }
+        `}
+      </style>
+
       <div className="d-flex flex-wrap align-items-center gap-3 mb-4">
         <div
           className="position-relative flex-grow-1"
-          style={{ maxWidth: 380 }}
+          style={{ maxWidth: 300 }}
         >
           <Search
-            size={16}
+            size={22}
             style={{
               position: "absolute",
-              left: 14,
+              left: 10,
               top: "50%",
               transform: "translateY(-50%)",
               color: colors.muted,
@@ -123,12 +190,12 @@ export default function FoodInventory({ onNavigate }) {
           />
           <input
             type="text"
-            className="form-control"
+            className="form-control search"
             style={{
+              borderWidth: "2px",
               paddingLeft: "2.4rem",
-              borderRadius: 10,
-              borderColor: colors.border,
-              height: 44,
+              borderRadius: 7,
+              height: 50,
             }}
             placeholder="Search"
             value={search}
@@ -138,17 +205,23 @@ export default function FoodInventory({ onNavigate }) {
 
         <div className="position-relative">
           <select
-            className="form-select fw-semibold"
+            className="form-select fw-semibold category"
             style={{
-              background: "#f6f0c8",
-              borderColor: "#f6f0c8",
-              borderRadius: 10,
-              height: 44,
+              borderColor: colors.green,
+              borderWidth: "2px",
+              opacity: 0.7,
+              borderRadius: 4,
+              height: 50,
+              width: 170,
               paddingRight: "2.2rem",
-              appearance: "none",
+              transition: "all 0.15s ease",
+              boxShadow: "none",
+              backgroundImage: "none",
             }}
             value={category}
             onChange={(e) => setCategory(e.target.value)}
+            onFocus={() => setIsOpen(true)}
+            onBlur={() => setIsOpen(false)}
           >
             {CATEGORIES.map((c) => (
               <option key={c} value={c}>
@@ -156,13 +229,18 @@ export default function FoodInventory({ onNavigate }) {
               </option>
             ))}
           </select>
+
           <ChevronRight
-            size={16}
+            className="category"
+            size={20}
             style={{
+              background: colors.white,
+              opacity: 0.8,
               position: "absolute",
               right: 12,
               top: "50%",
-              transform: "translateY(-50%)",
+              transform: `translateY(-50%) rotate(${isOpen ? 90 : 0}deg)`,
+              transition: "transform 0.15s ease",
               pointerEvents: "none",
             }}
           />
@@ -170,13 +248,15 @@ export default function FoodInventory({ onNavigate }) {
 
         <button
           type="button"
-          className="btn ms-auto d-inline-flex align-items-center gap-2"
+          className="btn ms-auto d-inline-flex align-items-center gap-2 add-item"
           style={{
             ...btnPrimaryStyle,
-            background: colors.authGreen,
-            borderColor: colors.authGreen,
-            height: 44,
-            padding: "0 1.25rem",
+            color: colors.white,
+            fontWeight: 600,
+            padding: "0.45rem 1.15rem",
+            fontSize: "0.9rem",
+            height: 50,
+            borderRadius: 4,
           }}
           onClick={() => onNavigate?.("add-food")}
         >
@@ -186,7 +266,10 @@ export default function FoodInventory({ onNavigate }) {
 
       <div
         className="rounded-4 p-4"
-        style={{ background: "#fbfaf4", border: `1px solid ${colors.border}` }}
+        style={{
+          background: colors.authGreen,
+          border: `2px solid ${colors.greenLrgb}`,
+        }}
       >
         {loading ? (
           <div className="text-center py-5" style={{ color: colors.muted }}>
@@ -199,25 +282,30 @@ export default function FoodInventory({ onNavigate }) {
               : "No items match your search or filter."}
           </div>
         ) : (
-          <div className="row g-4">
-            {filtered.map((item) => (
+          <div
+            className="row g-4"
+            style={{ alignSelf: "flex-start", width: "100%" }}
+          >
+            {paginatedItems.map((item) => (
               <div className="col-12 col-md-6 col-lg-4" key={item.id}>
                 <div
                   className="d-flex gap-3 p-3 rounded-4 h-100"
-                  style={{ background: "#eef2e3" }}
+                  style={{
+                    background: colors.low_greenFade,
+                    boxShadow: "0 0px 5px rgb(169, 169, 169)",
+                  }}
                 >
                   <img
                     src={item.imageUrl || DEFAULT_IMAGE}
                     alt={item.name}
                     className="rounded-3 flex-shrink-0"
-                    style={{ width: 84, height: 84, objectFit: "cover" }}
+                    style={{ width: 90, height: 84, objectFit: "contain" }}
                   />
                   <div className="flex-grow-1">
                     <div
                       className="fw-bold"
                       style={{
-                        textDecoration: "underline",
-                        color: colors.charcoal,
+                        color: colors.greenD,
                       }}
                     >
                       {item.name}
@@ -233,11 +321,11 @@ export default function FoodInventory({ onNavigate }) {
                       <button
                         type="button"
                         className="btn btn-link p-0"
-                        style={{ color: colors.authGreen }}
+                        style={{ color: colors.greenL }}
                         onClick={() => onNavigate?.("edit-food", item)}
                         title="Edit"
                       >
-                        <Pencil size={16} />
+                        <Pencil size={18} />
                       </button>
                       <button
                         type="button"
@@ -246,19 +334,24 @@ export default function FoodInventory({ onNavigate }) {
                         onClick={() => handleDelete(item.id)}
                         title="Delete"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={18} />
                       </button>
                     </div>
 
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-4">
                       <button
                         type="button"
-                        className="btn btn-sm flex-grow-1"
+                        className="btn btn-sm flex-grow-1 used-btn"
                         style={{
-                          background: "#e4e9d8",
-                          border: `1px solid ${colors.border}`,
-                          borderRadius: 6,
-                          fontWeight: 500,
+                          opacity: 0.65,
+                          borderColor: colors.green,
+                          color: colors.charcoal,
+                          fontWeight: 600,
+                          borderRadius: 4,
+                          borderWidth: "2px",
+                          padding: "0.45rem 1.25rem",
+                          fontSize: "0.9rem",
+                          transition: "all 0.5s ease",
                         }}
                         onClick={() => handleUsed(item.id)}
                       >
@@ -266,11 +359,15 @@ export default function FoodInventory({ onNavigate }) {
                       </button>
                       <button
                         type="button"
-                        className="btn btn-sm flex-grow-1 text-white"
+                        className="btn btn-sm flex-grow-1 donate-btn"
                         style={{
-                          background: colors.authGreen,
-                          borderRadius: 6,
-                          fontWeight: 500,
+                          ...btnPrimaryStyle,
+                          borderRadius: 4,
+                          fontWeight: 600,
+                          padding: "0.45rem 1.15rem",
+                          fontSize: "0.9rem",
+                          color: colors.white,
+                          transition: "all 0.5s ease",
                         }}
                         onClick={() => setDonateTarget(item)}
                       >
@@ -284,6 +381,57 @@ export default function FoodInventory({ onNavigate }) {
           </div>
         )}
       </div>
+      {!loading && filtered.length > 0 && (
+        <div className="d-flex justify-content-end align-items-center gap-2 mt-4">
+          <button
+            type="button"
+            className="btn btn-sm page-btn"
+            style={{
+              borderRadius: 4,
+              border: `2px solid ${colors.greenLrgb || colors.category}`,
+              opacity: currentPage === 1 ? 0.5 : 1,
+            }}
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          >
+            Prev
+          </button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              type="button"
+              className="btn btn-sm page-btn"
+              style={{
+                borderRadius: 4,
+                minWidth: 34,
+                fontWeight: page === currentPage ? 700 : 400,
+                background:
+                  page === currentPage ? colors.authGreen : "transparent",
+                color: page === currentPage ? colors.greenL : colors.charcoal,
+                border: `2px solid ${colors.border || colors.category}`,
+              }}
+              onClick={() => setCurrentPage(page)}
+            >
+              {page}
+            </button>
+          ))}
+
+          <button
+            type="button"
+            className="btn btn-sm page-btn"
+            style={{
+              borderRadius: 4,
+              border: `2px solid ${colors.greenLrgb || colors.category}`,
+              opacity: currentPage === totalPages ? 0.5 : 1,
+            }}
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Next
+          </button>
+        </div>
+      )}
 
       <DonateModal
         item={donateTarget}

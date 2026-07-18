@@ -129,8 +129,8 @@ export default function MealPlanner() {
       <div className="mb-4">
         <h1
           style={{
-            fontFamily: fonts.display,
-            fontSize: "1.75rem",
+            fontFamily: fonts.body,
+            fontSize: "1.60rem",
             fontWeight: 700,
             color: colors.charcoal,
             marginBottom: "0.25rem",

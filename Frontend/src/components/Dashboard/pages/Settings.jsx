@@ -1,28 +1,28 @@
 // src/components/Dashboard/pages/Settings.jsx
-import { useEffect, useState } from 'react';
-import { User } from 'lucide-react';
-import { colors, fonts, btnPrimaryStyle } from '../../../theme';
-import { userApi } from '../../../services/api';
-import { getStoredUser, setStoredUser } from '../../../utils/auth';
+import { useEffect, useState } from "react";
+import { User } from "lucide-react";
+import { colors, fonts, btnPrimaryStyle } from "../../../theme";
+import { userApi } from "../../../services/api";
+import { getStoredUser, setStoredUser } from "../../../utils/auth";
 
 const inputStyle = {
   borderColor: colors.border,
-  borderWidth: '1.5px',
+  borderWidth: "1.5px",
   borderRadius: 8,
-  fontSize: '0.9rem',
-  padding: '0.6rem 0.9rem',
-  background: '#fbf8f2',
+  fontSize: "0.9rem",
+  padding: "0.6rem 0.9rem",
+  background: "#fbf8f2",
 };
 
 const labelStyle = {
   fontWeight: 500,
-  fontSize: '0.88rem',
+  fontSize: "0.88rem",
   color: colors.charcoal,
-  marginBottom: '0.35rem',
+  marginBottom: "0.35rem",
 };
 
 const cardStyle = {
-  background: '#f7f2df',
+  background: "#f7f2df",
   border: `1px solid ${colors.border}`,
 };
 
@@ -33,10 +33,10 @@ function SectionHeading({ children }) {
         fontFamily: fonts.display,
         fontWeight: 700,
         color: colors.charcoal,
-        display: 'inline-block',
+        display: "inline-block",
         borderBottom: `2px solid ${colors.green}`,
         paddingBottom: 4,
-        marginBottom: '1.25rem',
+        marginBottom: "1.25rem",
       }}
     >
       {children}
@@ -59,25 +59,25 @@ function ToggleSwitch({ checked, onChange, disabled }) {
         height: 26,
         borderRadius: 999,
         border: `1.5px solid ${checked ? colors.green : colors.border}`,
-        background: checked ? colors.green : '#fff',
-        position: 'relative',
+        background: checked ? colors.green : "#fff",
+        position: "relative",
         padding: 0,
-        cursor: disabled ? 'not-allowed' : 'pointer',
+        cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.6 : 1,
         flexShrink: 0,
-        transition: 'background 0.15s, border-color 0.15s',
+        transition: "background 0.15s, border-color 0.15s",
       }}
     >
       <span
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: 2,
           left: checked ? 22 : 2,
           width: 20,
           height: 20,
-          borderRadius: '50%',
-          background: checked ? '#fff' : colors.muted,
-          transition: 'left 0.15s',
+          borderRadius: "50%",
+          background: checked ? "#fff" : colors.muted,
+          transition: "left 0.15s",
         }}
       />
     </button>
@@ -88,9 +88,19 @@ function PreferenceRow({ title, description, checked, onChange, disabled }) {
   return (
     <div className="d-flex align-items-start justify-content-between gap-3 mb-3">
       <div>
-        <div style={{ fontWeight: 700, fontSize: '0.9rem', color: colors.charcoal }}>{title}</div>
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: "0.9rem",
+            color: colors.charcoal,
+          }}
+        >
+          {title}
+        </div>
         {description && (
-          <div style={{ fontSize: '0.8rem', color: colors.muted }}>{description}</div>
+          <div style={{ fontSize: "0.8rem", color: colors.muted }}>
+            {description}
+          </div>
         )}
       </div>
       <ToggleSwitch checked={checked} onChange={onChange} disabled={disabled} />
@@ -100,24 +110,29 @@ function PreferenceRow({ title, description, checked, onChange, disabled }) {
 
 export default function Settings({ onProfileUpdated }) {
   // ---- Profile Information (backend-connected) ----
-  const [profile, setProfile] = useState({ fullName: '', email: '', gender: '', address: '' });
+  const [profile, setProfile] = useState({
+    fullName: "",
+    email: "",
+    gender: "",
+    address: "",
+  });
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
-  const [profileMsg, setProfileMsg] = useState({ type: '', text: '' });
+  const [profileMsg, setProfileMsg] = useState({ type: "", text: "" });
 
   // ---- Privacy (backend-connected: only this toggle is functional) ----
   const [donationPublic, setDonationPublic] = useState(true);
   const [savingPrivacy, setSavingPrivacy] = useState(false);
-  const [privacyMsg, setPrivacyMsg] = useState('');
+  const [privacyMsg, setPrivacyMsg] = useState("");
 
   // ---- Security & Alerts (backend-connected: generate notifications on change) ----
   const [twoFactor, setTwoFactor] = useState(true);
   const [savingTwoFactor, setSavingTwoFactor] = useState(false);
-  const [twoFactorMsg, setTwoFactorMsg] = useState('');
+  const [twoFactorMsg, setTwoFactorMsg] = useState("");
 
   const [expiryAlerts, setExpiryAlerts] = useState(true);
   const [savingExpiryAlerts, setSavingExpiryAlerts] = useState(false);
-  const [expiryAlertsMsg, setExpiryAlertsMsg] = useState('');
+  const [expiryAlertsMsg, setExpiryAlertsMsg] = useState("");
 
   // ---- Replica-only toggle (no backend, local state only) ----
   const [donationUpdates, setDonationUpdates] = useState(true);
@@ -130,21 +145,27 @@ export default function Settings({ onProfileUpdated }) {
         const data = await userApi.getProfile();
         if (cancelled) return;
         setProfile({
-          fullName: data.fullName || '',
-          email: data.email || '',
-          gender: data.gender || '',
-          address: data.address || '',
+          fullName: data.fullName || "",
+          email: data.email || "",
+          gender: data.gender || "",
+          address: data.address || "",
         });
         setDonationPublic(data.donationPublic !== false);
         setTwoFactor(data.twoFactorEnabled !== false);
         setExpiryAlerts(data.expiryAlertsEnabled !== false);
       } catch (err) {
-        if (!cancelled) setProfileMsg({ type: 'danger', text: err.message || 'Failed to load profile.' });
+        if (!cancelled)
+          setProfileMsg({
+            type: "danger",
+            text: err.message || "Failed to load profile.",
+          });
       } finally {
         if (!cancelled) setLoadingProfile(false);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleProfileChange = (e) => {
@@ -155,16 +176,16 @@ export default function Settings({ onProfileUpdated }) {
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     if (!profile.fullName.trim()) {
-      setProfileMsg({ type: 'danger', text: 'Full name is required.' });
+      setProfileMsg({ type: "danger", text: "Full name is required." });
       return;
     }
     if (!profile.email.trim()) {
-      setProfileMsg({ type: 'danger', text: 'Email is required.' });
+      setProfileMsg({ type: "danger", text: "Email is required." });
       return;
     }
 
     setSavingProfile(true);
-    setProfileMsg({ type: '', text: '' });
+    setProfileMsg({ type: "", text: "" });
     try {
       const updated = await userApi.updateProfile({
         fullName: profile.fullName.trim(),
@@ -173,18 +194,21 @@ export default function Settings({ onProfileUpdated }) {
         address: profile.address.trim(),
       });
       setProfile({
-        fullName: updated.fullName || '',
-        email: updated.email || '',
-        gender: updated.gender || '',
-        address: updated.address || '',
+        fullName: updated.fullName || "",
+        email: updated.email || "",
+        gender: updated.gender || "",
+        address: updated.address || "",
       });
       // Keep the cached user (used by the dashboard header, etc.) in sync.
       const cached = getStoredUser();
       setStoredUser({ ...cached, ...updated });
-      setProfileMsg({ type: 'success', text: 'Profile updated successfully.' });
+      setProfileMsg({ type: "success", text: "Profile updated successfully." });
       onProfileUpdated?.();
     } catch (err) {
-      setProfileMsg({ type: 'danger', text: err.message || 'Failed to update profile.' });
+      setProfileMsg({
+        type: "danger",
+        text: err.message || "Failed to update profile.",
+      });
     } finally {
       setSavingProfile(false);
     }
@@ -194,7 +218,7 @@ export default function Settings({ onProfileUpdated }) {
     const previous = donationPublic;
     setDonationPublic(nextValue); // optimistic
     setSavingPrivacy(true);
-    setPrivacyMsg('');
+    setPrivacyMsg("");
     try {
       const updated = await userApi.updatePrivacy(nextValue);
       setDonationPublic(updated.donationPublic !== false);
@@ -202,7 +226,7 @@ export default function Settings({ onProfileUpdated }) {
       setStoredUser({ ...cached, donationPublic: updated.donationPublic });
     } catch (err) {
       setDonationPublic(previous); // rollback
-      setPrivacyMsg(err.message || 'Failed to update privacy setting.');
+      setPrivacyMsg(err.message || "Failed to update privacy setting.");
     } finally {
       setSavingPrivacy(false);
     }
@@ -212,12 +236,14 @@ export default function Settings({ onProfileUpdated }) {
     const previous = twoFactor;
     setTwoFactor(nextValue); // optimistic
     setSavingTwoFactor(true);
-    setTwoFactorMsg('');
+    setTwoFactorMsg("");
     try {
       await userApi.updateTwoFactor(nextValue);
     } catch (err) {
       setTwoFactor(previous); // rollback
-      setTwoFactorMsg(err.message || 'Failed to update two-factor authentication.');
+      setTwoFactorMsg(
+        err.message || "Failed to update two-factor authentication.",
+      );
     } finally {
       setSavingTwoFactor(false);
     }
@@ -227,12 +253,12 @@ export default function Settings({ onProfileUpdated }) {
     const previous = expiryAlerts;
     setExpiryAlerts(nextValue); // optimistic
     setSavingExpiryAlerts(true);
-    setExpiryAlertsMsg('');
+    setExpiryAlertsMsg("");
     try {
       await userApi.updateExpiryAlerts(nextValue);
     } catch (err) {
       setExpiryAlerts(previous); // rollback
-      setExpiryAlertsMsg(err.message || 'Failed to update expiry alerts.');
+      setExpiryAlertsMsg(err.message || "Failed to update expiry alerts.");
     } finally {
       setSavingExpiryAlerts(false);
     }
@@ -241,7 +267,15 @@ export default function Settings({ onProfileUpdated }) {
   return (
     <div>
       <div className="mb-4">
-        <h1 style={{ fontFamily: fonts.display, fontSize: '1.75rem', fontWeight: 700, color: colors.charcoal, marginBottom: '0.25rem' }}>
+        <h1
+          style={{
+            fontFamily: fonts.display,
+            fontSize: "1.75rem",
+            fontWeight: 700,
+            color: colors.charcoal,
+            marginBottom: "0.25rem",
+          }}
+        >
           Settings
         </h1>
         <p className="mb-0" style={{ color: colors.muted }}>
@@ -258,24 +292,34 @@ export default function Settings({ onProfileUpdated }) {
             <div className="text-center mb-4">
               <div
                 className="d-inline-flex align-items-center justify-content-center rounded-circle mb-2"
-                style={{ width: 90, height: 90, background: '#d7e6cf' }}
+                style={{ width: 90, height: 90, background: "#d7e6cf" }}
               >
                 <User size={40} color={colors.muted} />
               </div>
-              <div style={{ fontFamily: '"Roboto Mono", monospace', fontWeight: 700, color: colors.charcoal }}>
-                {loadingProfile ? '...' : (profile.fullName || 'Your Name')}
+              <div
+                style={{
+                  fontFamily: '"Roboto Mono", monospace',
+                  fontWeight: 700,
+                  color: colors.charcoal,
+                }}
+              >
+                {loadingProfile ? "..." : profile.fullName || "Your Name"}
               </div>
             </div>
 
             {profileMsg.text && (
-              <div className={`alert alert-${profileMsg.type === 'success' ? 'success' : 'danger'} py-2 small`}>
+              <div
+                className={`alert alert-${profileMsg.type === "success" ? "success" : "danger"} py-2 small`}
+              >
                 {profileMsg.text}
               </div>
             )}
 
             <form onSubmit={handleSaveProfile}>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>Full Name:</label>
+                <label className="form-label" style={labelStyle}>
+                  Full Name:
+                </label>
                 <input
                   type="text"
                   name="fullName"
@@ -289,7 +333,9 @@ export default function Settings({ onProfileUpdated }) {
               </div>
 
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>Email:</label>
+                <label className="form-label" style={labelStyle}>
+                  Email:
+                </label>
                 <input
                   type="email"
                   name="email"
@@ -303,7 +349,9 @@ export default function Settings({ onProfileUpdated }) {
               </div>
 
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>Gender:</label>
+                <label className="form-label" style={labelStyle}>
+                  Gender:
+                </label>
                 <input
                   type="text"
                   name="gender"
@@ -317,7 +365,9 @@ export default function Settings({ onProfileUpdated }) {
               </div>
 
               <div className="mb-4">
-                <label className="form-label" style={labelStyle}>Address:</label>
+                <label className="form-label" style={labelStyle}>
+                  Address:
+                </label>
                 <input
                   type="text"
                   name="address"
@@ -334,10 +384,14 @@ export default function Settings({ onProfileUpdated }) {
                 <button
                   type="submit"
                   className="btn px-4"
-                  style={{ ...btnPrimaryStyle, background: colors.green, borderColor: colors.green }}
+                  style={{
+                    ...btnPrimaryStyle,
+                    background: colors.green,
+                    borderColor: colors.green,
+                  }}
                   disabled={loadingProfile || savingProfile}
                 >
-                  {savingProfile ? 'Saving…' : 'Save Changes'}
+                  {savingProfile ? "Saving…" : "Save Changes"}
                 </button>
               </div>
             </form>
@@ -353,12 +407,22 @@ export default function Settings({ onProfileUpdated }) {
             <button
               type="button"
               className="btn mb-4"
-              style={{ ...btnPrimaryStyle, background: '#c3d9b8', borderColor: '#c3d9b8', color: colors.charcoal, fontWeight: 700 }}
+              style={{
+                ...btnPrimaryStyle,
+                background: "#c3d9b8",
+                borderColor: "#c3d9b8",
+                color: colors.charcoal,
+                fontWeight: 700,
+              }}
             >
               Change Password
             </button>
 
-            {twoFactorMsg && <div className="alert alert-danger py-2 small mb-3">{twoFactorMsg}</div>}
+            {twoFactorMsg && (
+              <div className="alert alert-danger py-2 small mb-3">
+                {twoFactorMsg}
+              </div>
+            )}
 
             <PreferenceRow
               title="Two-Factor Authentication"
@@ -373,14 +437,18 @@ export default function Settings({ onProfileUpdated }) {
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Privacy</SectionHeading>
 
-            {privacyMsg && <div className="alert alert-danger py-2 small mb-3">{privacyMsg}</div>}
+            {privacyMsg && (
+              <div className="alert alert-danger py-2 small mb-3">
+                {privacyMsg}
+              </div>
+            )}
 
             <PreferenceRow
               title="Make my donation public"
               description={
                 donationPublic
-                  ? 'Visible to everyone in Browse Food Item.'
-                  : 'Only visible to you — hidden from everyone else.'
+                  ? "Visible to everyone in Browse Food Item."
+                  : "Only visible to you — hidden from everyone else."
               }
               checked={donationPublic}
               onChange={handleTogglePrivacy}
@@ -392,7 +460,11 @@ export default function Settings({ onProfileUpdated }) {
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Notification Preferences</SectionHeading>
 
-            {expiryAlertsMsg && <div className="alert alert-danger py-2 small mb-3">{expiryAlertsMsg}</div>}
+            {expiryAlertsMsg && (
+              <div className="alert alert-danger py-2 small mb-3">
+                {expiryAlertsMsg}
+              </div>
+            )}
 
             <PreferenceRow
               title="Expiry Alerts"

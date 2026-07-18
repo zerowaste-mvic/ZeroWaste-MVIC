@@ -46,11 +46,6 @@ export default function Dashboard({ onNavigate }) {
       setEditingItem(data);
     }
     if (page === "notifications") {
-      // Like opening a YouTube-style notification tray: clear the red badge
-      // the instant you open it, rather than waiting for an explicit "Mark
-      // all as read" click. Notifications.jsx does the actual mark-all-read
-      // call itself before it loads the list, so there's no race between
-      // the two.
       setUnreadCount(0);
     }
     setActivePage(page);

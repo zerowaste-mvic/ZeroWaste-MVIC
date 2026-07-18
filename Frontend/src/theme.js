@@ -23,6 +23,7 @@ export const colors = {
   muted: "#6b7280",
   border: "#e3d9cc",
   white: "#ffffff",
+  category: "rgba(255,249,210,1)",
 };
 
 export let fonts = {

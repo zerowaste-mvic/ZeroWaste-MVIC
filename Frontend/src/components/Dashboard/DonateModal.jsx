@@ -1,50 +1,55 @@
-// src/components/Dashboard/DonateModal.jsx
-import { useEffect, useState } from 'react';
-import { colors, fonts } from '../../theme';
-import { getDonationDetailsCookie, getStoredUser, setDonationDetailsCookie } from '../../utils/auth';
+import { useEffect, useState } from "react";
+import { colors, fonts, btnPrimaryStyle } from "../../theme";
+import {
+  getDonationDetailsCookie,
+  getStoredUser,
+  setDonationDetailsCookie,
+} from "../../utils/auth";
 
 const fieldBoxStyle = {
-  border: `1.5px solid ${colors.border}`,
+  border: `2px solid ${colors.greenLrgb}`,
   borderRadius: 10,
-  padding: '0.65rem 0.9rem',
-  fontFamily: '"Courier New", monospace',
-  fontSize: '0.95rem',
+  padding: "0.65rem 0.9rem",
+  fontFamily: fonts.body,
+  fontSize: "0.95rem",
   color: colors.charcoal,
-  background: '#fff',
-  width: '100%',
+  background: colors.white,
+  width: "100%",
 };
 
 const labelStyle = {
-  fontWeight: 700,
-  fontSize: '0.95rem',
+  fontWeight: 500,
+  fontSize: "1rem",
   color: colors.charcoal,
-  marginBottom: '0.5rem',
-  display: 'block',
+  marginBottom: "0.5rem",
+  display: "block",
 };
 
 export default function DonateModal({ item, onCancel, onConfirm }) {
-  // Read the stored user ONCE (lazy initializer), not on every render.
-  // getStoredUser() does JSON.parse() internally, which returns a brand-new
-  // object reference every call — if that were re-read every render and used
-  // as an effect dependency, the effect would re-fire on every keystroke and
-  // wipe out whatever you just typed. This is what was happening before.
   const [user] = useState(() => getStoredUser());
   const [savedDetails] = useState(() => getDonationDetailsCookie());
 
-  const [location, setLocation] = useState(savedDetails?.location || '');
-  const [availableTime, setAvailableTime] = useState(savedDetails?.availableTime || '');
-  const [contactDetail, setContactDetail] = useState(savedDetails?.contactDetail || '');
+  const [location, setLocation] = useState(savedDetails?.location || "");
+  const [availableTime, setAvailableTime] = useState(
+    savedDetails?.availableTime || "",
+  );
+  const [contactDetail, setContactDetail] = useState(
+    savedDetails?.contactDetail || "",
+  );
   const [submitting, setSubmitting] = useState(false);
-  const [errMsg, setErrMsg] = useState('');
+  const [errMsg, setErrMsg] = useState("");
 
-  // Only reset the form when a NEW item is opened for donation — not on every render.
   useEffect(() => {
     if (item) {
       const cookieDetails = getDonationDetailsCookie();
-      setLocation(cookieDetails?.location || user?.location || user?.address || '');
-      setAvailableTime(cookieDetails?.availableTime || '');
-      setContactDetail(cookieDetails?.contactDetail || user?.phone || user?.contact || '');
-      setErrMsg('');
+      setLocation(
+        cookieDetails?.location || user?.location || user?.address || "",
+      );
+      setAvailableTime(cookieDetails?.availableTime || "");
+      setContactDetail(
+        cookieDetails?.contactDetail || user?.phone || user?.contact || "",
+      );
+      setErrMsg("");
       setSubmitting(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -65,11 +70,13 @@ export default function DonateModal({ item, onCancel, onConfirm }) {
   if (!item) return null;
 
   const handleDonateClick = async () => {
-    if (!location.trim()) return setErrMsg('Please enter a pickup location.');
-    if (!availableTime.trim()) return setErrMsg('Please enter your available time.');
-    if (!contactDetail.trim()) return setErrMsg('Please enter a contact detail.');
+    if (!location.trim()) return setErrMsg("Please enter a pickup location.");
+    if (!availableTime.trim())
+      return setErrMsg("Please enter your available time.");
+    if (!contactDetail.trim())
+      return setErrMsg("Please enter a contact detail.");
 
-    setErrMsg('');
+    setErrMsg("");
     setSubmitting(true);
     try {
       await onConfirm({
@@ -78,7 +85,7 @@ export default function DonateModal({ item, onCancel, onConfirm }) {
         contactDetail: contactDetail.trim(),
       });
     } catch (err) {
-      setErrMsg(err.message || 'Failed to donate item. Please try again.');
+      setErrMsg(err.message || "Failed to donate item. Please try again.");
       setSubmitting(false);
     }
   };
@@ -86,23 +93,55 @@ export default function DonateModal({ item, onCancel, onConfirm }) {
   return (
     <div
       className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-      style={{ background: 'rgba(0,0,0,0.45)', zIndex: 1060 }}
+      style={{ background: "rgba(0,0,0,0.40)", zIndex: 99 }}
       onClick={() => !submitting && onCancel?.()}
     >
+      <style>
+        {`
+          .donate-btn {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .donate-btn:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+
+          .cancel-btn:hover:not(:disabled){
+            opacity:1 !important;
+          }
+        `}
+      </style>
       <div
         className="rounded-4 p-4 p-sm-5"
-        style={{ background: '#fbfaf1', border: `1px solid ${colors.border}`, maxWidth: 460, width: '92%' }}
+        style={{
+          background: colors.authBg,
+          border: "none",
+          maxWidth: 460,
+          width: "92%",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h4 style={{ fontFamily: fonts.display, color: colors.charcoal, marginBottom: '1.5rem' }}>
-          Donate {item.name ? `"${item.name}"` : 'Item'}
+        <h4
+          style={{
+            fontFamily: fonts.body,
+            color: colors.charcoal,
+            marginBottom: "1.2rem",
+          }}
+        >
+          Donate {item.name ? `"${item.name}"` : "Item"}
         </h4>
 
-        {errMsg && <div className="alert alert-danger py-2 small mb-3">{errMsg}</div>}
+        {errMsg && (
+          <div className="alert alert-danger py-2 small mb-3">{errMsg}</div>
+        )}
 
         <div className="mb-4">
           <label style={labelStyle}>Location</label>
           <input
+            className="textField"
             type="text"
             style={fieldBoxStyle}
             placeholder="Kathmandu, Nepal"
@@ -114,6 +153,7 @@ export default function DonateModal({ item, onCancel, onConfirm }) {
         <div className="mb-4">
           <label style={labelStyle}>Available Time</label>
           <input
+            className="textField"
             type="text"
             style={fieldBoxStyle}
             placeholder="10:00 AM - 5:00 PM"
@@ -123,9 +163,10 @@ export default function DonateModal({ item, onCancel, onConfirm }) {
         </div>
 
         <div className="mb-4">
-          <label style={labelStyle}>Contact Detail:</label>
+          <label style={labelStyle}>Contact Detail</label>
           <input
             type="text"
+            className="textField"
             style={fieldBoxStyle}
             placeholder="01 - 12345678"
             value={contactDetail}
@@ -136,17 +177,34 @@ export default function DonateModal({ item, onCancel, onConfirm }) {
         <div className="d-flex justify-content-center gap-3 mt-4">
           <button
             type="button"
-            className="btn px-4 fw-bold"
-            style={{ background: colors.authGreen, borderColor: colors.authGreen, color: 'white', borderRadius: 8, fontFamily: '"Courier New", monospace' }}
+            className="btn px-4 fw-bold donate-btn"
+            style={{
+              ...btnPrimaryStyle,
+              borderRadius: 4,
+              fontWeight: 600,
+              color: colors.white,
+              padding: "0.45rem 1.15rem",
+              fontSize: "0.9rem",
+            }}
             onClick={handleDonateClick}
             disabled={submitting}
           >
-            {submitting ? 'Donating…' : 'Donate'}
+            Donate
           </button>
           <button
             type="button"
-            className="btn px-4 fw-bold"
-            style={{ background: 'transparent', border: `1.5px solid ${colors.authGreen}`, color: colors.authGreen, borderRadius: 8, fontFamily: '"Courier New", monospace' }}
+            className="btn px-4 fw-bold cancel-btn"
+            style={{
+              opacity: 0.65,
+              borderColor: colors.green,
+              color: colors.charcoal,
+              fontWeight: 600,
+              borderRadius: 4,
+              borderWidth: "2px",
+              padding: "0.45rem 1.25rem",
+              fontSize: "0.9rem",
+              transition: "all 0.5s ease",
+            }}
             onClick={onCancel}
             disabled={submitting}
           >

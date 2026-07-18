@@ -1,52 +1,54 @@
-// src/components/Dashboard/pages/AddFoodItem.jsx
-import { useRef, useState } from 'react';
-import { ArrowLeft, ChevronRight, Calendar, ImagePlus, Link2 } from 'lucide-react';
-import { colors, fonts, btnPrimaryStyle, btnOutlineStyle } from '../../../theme';
-import { foodApi } from '../../../services/api';
+import { useRef, useState } from "react";
+import { ArrowLeft, ChevronRight, ImagePlus } from "lucide-react";
+import {
+  colors,
+  fonts,
+  btnPrimaryStyle,
+  btnOutlineStyle,
+} from "../../../theme";
+import { foodApi } from "../../../services/api";
 
-const CATEGORIES = ['Fruits', 'Vegetable', 'Dairy', 'Meat'];
-const UNITS = ['Kg', 'Ltr'];
-const STORAGE_LOCATIONS = ['Fridge', 'Freezer', 'Pantry', 'Counter'];
+const CATEGORIES = ["Fruits", "Vegetable", "Dairy", "Meat", "Other"];
+const UNITS = ["Kg", "Ltr", "Gram"];
+const STORAGE_LOCATIONS = ["Fridge", "Freezer", "Pantry", "Counter"];
 
 const inputStyle = {
-  borderColor: colors.border,
-  borderWidth: '1.5px',
+  borderColor: colors.greenLrgb,
+  borderWidth: "2px",
   borderRadius: 8,
-  fontSize: '0.9rem',
-  padding: '0.65rem 0.9rem',
-  background: '#fbf8f2',
+  fontSize: "0.9rem",
+  padding: "0.7rem 1rem",
+  background: colors.white,
 };
 
 const labelStyle = {
   fontWeight: 700,
-  fontSize: '0.95rem',
+  fontSize: "0.95rem",
   color: colors.charcoal,
-  marginBottom: '0.4rem',
+  marginBottom: "0.4rem",
 };
 
 const INITIAL = {
-  name: '',
-  category: '',
-  quantity: '',
-  quantityUnit: 'Kg',
-  expiryDate: '',
-  storage: '',
-  notes: '',
-  imageUrl: '',
+  name: "",
+  category: "",
+  quantity: "",
+  quantityUnit: "Kg",
+  expiryDate: "",
+  storage: "",
+  notes: "",
+  imageUrl: "",
 };
 
-// Photos straight off a phone/camera can be several MB, which is far bigger than most
-// backends allow for a single field/request body (this is what was causing "something
-// went wrong" when picking a photo from the device). Downscale + re-compress it in the
-// browser first so we send a small, predictable payload either way.
 const MAX_DIMENSION = 900;
 const JPEG_QUALITY = 0.75;
-const MAX_SOURCE_FILE_BYTES = 15 * 1024 * 1024; // 15MB raw upload cap, before compression
+const MAX_SOURCE_FILE_BYTES = 15 * 1024 * 1024;
 
 function compressImageFile(file) {
   return new Promise((resolve, reject) => {
     if (file.size > MAX_SOURCE_FILE_BYTES) {
-      reject(new Error('That image is too large. Please choose a photo under 15MB.'));
+      reject(
+        new Error("That image is too large. Please choose a photo under 15MB."),
+      );
       return;
     }
 
@@ -63,16 +65,16 @@ function compressImageFile(file) {
         height = Math.round(height * scale);
       }
 
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       canvas.width = width;
       canvas.height = height;
-      const ctx = canvas.getContext('2d');
+      const ctx = canvas.getContext("2d");
       ctx.drawImage(img, 0, 0, width, height);
 
       canvas.toBlob(
         (blob) => {
           if (!blob) {
-            reject(new Error('Could not process the selected image.'));
+            reject(new Error("Could not process the selected image."));
             return;
           }
           const compressedReader = new FileReader();
@@ -80,14 +82,14 @@ function compressImageFile(file) {
           compressedReader.onerror = reject;
           compressedReader.readAsDataURL(blob);
         },
-        'image/jpeg',
-        JPEG_QUALITY
+        "image/jpeg",
+        JPEG_QUALITY,
       );
     };
 
     img.onerror = () => {
       URL.revokeObjectURL(objectUrl);
-      reject(new Error('Could not read the selected image.'));
+      reject(new Error("Could not read the selected image."));
     };
 
     img.src = objectUrl;
@@ -96,20 +98,18 @@ function compressImageFile(file) {
 
 export default function AddFoodItem({ onSuccess, onCancel }) {
   const [form, setForm] = useState(INITIAL);
-  const [errMsg, setErrMsg] = useState('');
-  const [status, setStatus] = useState('idle');
-  const [imagePreview, setImagePreview] = useState('');
-  // Holds the compressed base64 image when a file/photo is picked from the device.
-  // Kept separate from form.imageUrl so the visible "paste a link" field never gets
-  // filled with a giant base64 string.
-  const [uploadedImageData, setUploadedImageData] = useState('');
+  const [errMsg, setErrMsg] = useState("");
+  const [status, setStatus] = useState("idle");
+  const [imagePreview, setImagePreview] = useState("");
+
+  const [uploadedImageData, setUploadedImageData] = useState("");
   const galleryInputRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
-    if (name === 'imageUrl') {
-      setUploadedImageData('');
+    if (name === "imageUrl") {
+      setUploadedImageData("");
       setImagePreview(value);
     }
   };
@@ -117,39 +117,40 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
   const handleFileSelect = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      setErrMsg('Please choose a valid image file.');
+    if (!file.type.startsWith("image/")) {
+      setErrMsg("Please choose a valid image file.");
       return;
     }
     try {
       const dataUrl = await compressImageFile(file);
       setUploadedImageData(dataUrl);
-      setForm((prev) => ({ ...prev, imageUrl: '' }));
+      setForm((prev) => ({ ...prev, imageUrl: "" }));
       setImagePreview(dataUrl);
-      setErrMsg('');
+      setErrMsg("");
     } catch (err) {
-      setErrMsg(err.message || 'Could not read the selected image.');
+      setErrMsg(err.message || "Could not read the selected image.");
     } finally {
-      e.target.value = '';
+      e.target.value = "";
     }
   };
 
   const resetForm = () => {
     setForm(INITIAL);
-    setImagePreview('');
-    setUploadedImageData('');
+    setImagePreview("");
+    setUploadedImageData("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.name.trim()) return setErrMsg('Food name is required.');
-    if (!form.category) return setErrMsg('Please select a category.');
-    if (!form.quantity.trim() || Number(form.quantity) <= 0) return setErrMsg('Enter a valid quantity.');
-    if (!form.expiryDate) return setErrMsg('Expiry date is required.');
-    if (!form.storage) return setErrMsg('Please select a storage location.');
+    if (!form.name.trim()) return setErrMsg("Food name is required.");
+    if (!form.category) return setErrMsg("Please select a category.");
+    if (!form.quantity.trim() || Number(form.quantity) <= 0)
+      return setErrMsg("Enter a valid quantity.");
+    if (!form.expiryDate) return setErrMsg("Expiry date is required.");
+    if (!form.storage) return setErrMsg("Please select a storage location.");
 
-    setErrMsg('');
-    setStatus('loading');
+    setErrMsg("");
+    setStatus("loading");
 
     try {
       await foodApi.create({
@@ -163,8 +164,8 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
       resetForm();
       onSuccess?.();
     } catch (err) {
-      setErrMsg(err.message || 'Failed to save item.');
-      setStatus('idle');
+      setErrMsg(err.message || "Failed to save item.");
+      setStatus("idle");
     }
   };
 
@@ -173,28 +174,67 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
       {onCancel && (
         <button
           type="button"
-          className="btn btn-link p-0 d-inline-flex align-items-center gap-1 mb-3 text-decoration-underline"
+          className="btn btn-link p-0 d-inline-flex align-items-center gap-1 mb-3"
           style={{ color: colors.charcoal, fontWeight: 600 }}
           onClick={onCancel}
         >
-          <ArrowLeft size={16} /> Back
+          <ArrowLeft size={18} /> Back
         </button>
       )}
 
-      <h1 style={{ fontFamily: fonts.display, fontSize: '1.85rem', fontWeight: 700, color: colors.charcoal, marginBottom: '0.25rem' }}>
+      <style>
+        {`
+
+          .save-btn {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .save-btn:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }            
+
+          .cancel-btn:hover:not(:disabled){
+            opacity:1 !important;
+          }
+          `}
+      </style>
+
+      <h1
+        style={{
+          fontFamily: fonts.body,
+          fontSize: "1.60em",
+          fontWeight: 700,
+          color: colors.charcoal,
+          marginBottom: "0.25rem",
+        }}
+      >
         Add Food Items
       </h1>
       <p className="mb-4" style={{ color: colors.muted }}>
         Add new food items to keep your inventory up to date.
       </p>
 
-      <div className="rounded-4 p-4 p-lg-5" style={{ background: '#faf6ea', border: `1px solid ${colors.border}` }}>
-        {errMsg && <div className="alert alert-danger py-2 small mb-3">{errMsg}</div>}
+      <div
+        className="rounded-4 p-4 p-lg-4"
+        style={{
+          background: colors.authBg,
+          border: "none",
+          boxShadow: "0 0px 5px rgb(169, 169, 169)",
+        }}
+      >
+        {errMsg && (
+          <div className="alert alert-danger py-2 small mb-3">{errMsg}</div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="row g-4">
             <div className="col-12 col-md-4">
-              <label className="form-label" style={labelStyle}>Food Name</label>
+              <label className="form-label" style={labelStyle}>
+                Food Name
+              </label>
               <input
                 type="text"
                 name="name"
@@ -207,24 +247,42 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
             </div>
 
             <div className="col-12 col-md-4">
-              <label className="form-label" style={labelStyle}>Category</label>
+              <label className="form-label" style={labelStyle}>
+                Category
+              </label>
               <div className="position-relative">
                 <select
                   name="category"
                   className="form-select"
-                  style={{ ...inputStyle, appearance: 'none' }}
+                  style={{ ...inputStyle, appearance: "none" }}
                   value={form.category}
                   onChange={handleChange}
                 >
                   <option value="">Select category</option>
-                  {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                  {CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
                 </select>
-                <ChevronRight size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: colors.muted }} />
+                <ChevronRight
+                  size={16}
+                  style={{
+                    position: "absolute",
+                    right: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    pointerEvents: "none",
+                    color: colors.muted,
+                  }}
+                />
               </div>
             </div>
 
             <div className="col-12 col-md-4">
-              <label className="form-label" style={labelStyle}>Quantity</label>
+              <label className="form-label" style={labelStyle}>
+                Quantity
+              </label>
               <div className="d-flex gap-2">
                 <input
                   type="number"
@@ -244,49 +302,72 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
                   value={form.quantityUnit}
                   onChange={handleChange}
                 >
-                  {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+                  {UNITS.map((u) => (
+                    <option key={u} value={u}>
+                      {u}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
 
             <div className="col-12 col-md-4">
-              <label className="form-label" style={labelStyle}>Expiry Date</label>
+              <label className="form-label" style={labelStyle}>
+                Expiry Date
+              </label>
               <div className="position-relative">
                 <input
                   type="date"
                   name="expiryDate"
                   className="form-control"
-                  style={{ ...inputStyle, paddingRight: '2.5rem' }}
+                  style={{ ...inputStyle, paddingRight: "2.5rem" }}
                   value={form.expiryDate}
                   onChange={handleChange}
                 />
-                <Calendar size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: colors.muted }} />
               </div>
             </div>
 
             <div className="col-12 col-md-4">
-              <label className="form-label" style={labelStyle}>Storage</label>
+              <label className="form-label" style={labelStyle}>
+                Storage
+              </label>
               <div className="position-relative">
                 <select
                   name="storage"
                   className="form-select"
-                  style={{ ...inputStyle, appearance: 'none' }}
+                  style={{ ...inputStyle, appearance: "none" }}
                   value={form.storage}
                   onChange={handleChange}
                 >
                   <option value="">Storage Location</option>
-                  {STORAGE_LOCATIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+                  {STORAGE_LOCATIONS.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
                 </select>
-                <ChevronRight size={16} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: colors.muted }} />
+                <ChevronRight
+                  size={16}
+                  style={{
+                    position: "absolute",
+                    right: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    pointerEvents: "none",
+                    color: colors.muted,
+                  }}
+                />
               </div>
             </div>
 
             <div className="col-12 col-md-4">
-              <label className="form-label" style={labelStyle}>Notes (Optional)</label>
+              <label className="form-label" style={labelStyle}>
+                Notes (Optional)
+              </label>
               <textarea
                 name="notes"
                 className="form-control"
-                style={{ ...inputStyle, minHeight: 100, resize: 'vertical' }}
+                style={{ ...inputStyle, minHeight: 100, resize: "vertical" }}
                 placeholder="Food is .."
                 value={form.notes}
                 onChange={handleChange}
@@ -294,9 +375,10 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
             </div>
 
             <div className="col-12">
-              <label className="form-label" style={labelStyle}>Browse Image</label>
+              <label className="form-label" style={labelStyle}>
+                Browse Image
+              </label>
               <div className="d-flex align-items-center gap-2 mb-2">
-                <Link2 size={16} style={{ color: colors.muted, flexShrink: 0 }} />
                 <input
                   type="text"
                   name="imageUrl"
@@ -320,7 +402,11 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
                 <button
                   type="button"
                   className="btn d-inline-flex align-items-center gap-2"
-                  style={{ ...btnOutlineStyle, background: '#eef0e6' }}
+                  style={{
+                    ...btnOutlineStyle,
+                    marginTop: "1rem",
+                    background: colors.showcase_green,
+                  }}
                   onClick={() => galleryInputRef.current?.click()}
                 >
                   <ImagePlus size={16} /> Choose from gallery
@@ -333,25 +419,53 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
                     src={imagePreview}
                     alt="Preview"
                     className="rounded-3 border"
-                    style={{ width: 120, height: 120, objectFit: 'cover', borderColor: colors.border }}
-                    onError={() => setImagePreview('')}
+                    style={{
+                      width: 120,
+                      height: 120,
+                      objectFit: "cover",
+                      borderColor: colors.border,
+                    }}
+                    onError={() => setImagePreview("")}
                   />
                 </div>
               )}
             </div>
           </div>
 
-          <div className="d-flex gap-3 justify-content-center mt-5">
+          <div className="d-flex gap-3 justify-content-center mt-4">
             <button
               type="submit"
-              className="btn px-4"
-              style={{ ...btnPrimaryStyle, background: colors.authGreen, borderColor: colors.authGreen }}
-              disabled={status === 'loading'}
+              className="btn px-4 save-btn"
+              style={{
+                ...btnPrimaryStyle,
+                borderRadius: 4,
+                fontWeight: 600,
+                padding: "0.45rem 1.15rem",
+                fontSize: "0.9rem",
+                color: colors.white,
+              }}
+              disabled={status === "loading"}
             >
-              {status === 'loading' ? 'Saving…' : 'Save Item'}
+              Save Item
             </button>
             {onCancel && (
-              <button type="button" className="btn px-4" style={btnOutlineStyle} onClick={onCancel}>
+              <button
+                type="button"
+                className="btn px-4 cancel-btn"
+                style={{
+                  ...btnOutlineStyle,
+                  opacity: 0.65,
+                  borderColor: colors.green,
+                  color: colors.charcoal,
+                  fontWeight: 600,
+                  borderRadius: 4,
+                  borderWidth: "2px",
+                  padding: "0.45rem 1.25rem",
+                  fontSize: "0.9rem",
+                  transition: "all 0.5s ease",
+                }}
+                onClick={onCancel}
+              >
                 Cancel
               </button>
             )}
