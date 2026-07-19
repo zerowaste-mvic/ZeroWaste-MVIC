@@ -1,7 +1,8 @@
 // src/components/Auth/Login.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { colors, fonts } from "../../theme";
+import { authApi } from "../../services/api";
 import { setUserEmailCookie } from "../../utils/auth";
 
 const SPRING_BOOT_URL =
@@ -43,6 +44,10 @@ export default function Login({ onNavigate }) {
     password: "",
     rememberMe: false,
   });
+  const [loginStage, setLoginStage] = useState("credentials");
+  const [pendingEmail, setPendingEmail] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [infoMsg, setInfoMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [status, setStatus] = useState("idle");
   const [fieldErrors, setFieldErrors] = useState({});
@@ -65,8 +70,31 @@ export default function Login({ onNavigate }) {
     return Object.keys(errors).length ? errors : null;
   };
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const email = params.get("email");
+    if (email) {
+      setForm((prev) => ({ ...prev, email }));
+    }
+  }, []);
+
+  const saveAuth = (data) => {
+    if (form.rememberMe) {
+      localStorage.setItem("zw_token", data.token);
+      localStorage.setItem("zw_user", JSON.stringify(data.user));
+    } else {
+      sessionStorage.setItem("zw_token", data.token);
+      sessionStorage.setItem("zw_user", JSON.stringify(data.user));
+    }
+    setUserEmailCookie(data.user?.email || form.email.trim());
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loginStage === "otp") {
+      return handleVerifyOtp();
+    }
+
     const validationErrors = validate();
     if (validationErrors) {
       setFieldErrors(validationErrors);
@@ -78,25 +106,41 @@ export default function Login({ onNavigate }) {
     setFieldErrors({});
     setStatus("loading");
     setErrMsg("");
+    setInfoMsg("");
     try {
-      const res = await fetch(`${SPRING_BOOT_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: form.email, password: form.password }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Invalid email or password.");
+      const data = await authApi.login(form.email, form.password);
+      if (data.twoFactorRequired) {
+        setPendingEmail(form.email.trim());
+        setLoginStage("otp");
+        setInfoMsg(data.message || "Enter the code sent to your email to finish signing in.");
+        setStatus("idle");
+        return;
       }
-
-      const data = await res.json();
-      sessionStorage.setItem("zw_token", data.token);
-      sessionStorage.setItem("zw_user", JSON.stringify(data.user));
-      setUserEmailCookie(data.user?.email || form.email.trim());
+      saveAuth(data);
       onNavigate?.("dashboard");
     } catch (err) {
       setErrMsg(err.message || "Something went wrong. Please try again.");
+      setStatus("error");
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otpCode.trim()) {
+      setErrMsg("Please enter the 6-digit verification code.");
+      setStatus("error");
+      return;
+    }
+
+    setFieldErrors({});
+    setStatus("loading");
+    setErrMsg("");
+    setInfoMsg("");
+    try {
+      const data = await authApi.verifyLoginOtp(pendingEmail || form.email, otpCode.trim());
+      saveAuth(data);
+      onNavigate?.("dashboard");
+    } catch (err) {
+      setErrMsg(err.message || "Invalid code. Please try again.");
       setStatus("error");
     }
   };
@@ -275,6 +319,14 @@ export default function Login({ onNavigate }) {
             </p>
 
             <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">
+              {infoMsg && (
+                <div
+                  className="alert alert-success py-2 mb-0"
+                  style={{ fontSize: "0.9rem" }}
+                >
+                  {infoMsg}
+                </div>
+              )}
               {errMsg && !Object.keys(fieldErrors).length && (
                 <div
                   className="alert alert-danger py-2 mb-0"
@@ -299,9 +351,10 @@ export default function Login({ onNavigate }) {
                   className="form-control rounded-3 py-2 login-input"
                   placeholder="someone@gmail.com"
                   style={{ ...inputStyle, fontFamily: fonts.body }}
-                  value={form.email}
+                  value={loginStage === "otp" ? pendingEmail || form.email : form.email}
                   onChange={handleChange}
                   required
+                  readOnly={loginStage === "otp"}
                 />
                 {fieldErrors.email && (
                   <p className="text-danger small mt-2 mb-0">
@@ -310,77 +363,106 @@ export default function Login({ onNavigate }) {
                 )}
               </div>
 
-              <div>
-                <label
-                  htmlFor="password"
-                  className="form-label fw-semibold text-dark mb-2"
-                  style={{ ...bodyTextStyle, fontSize: "0.95rem" }}
-                >
-                  Password
-                </label>
-                <div className="position-relative">
+              {loginStage === "otp" ? (
+                <div>
+                  <label
+                    htmlFor="otpCode"
+                    className="form-label fw-semibold text-dark mb-2"
+                    style={{ ...bodyTextStyle, fontSize: "0.95rem" }}
+                  >
+                    Verification code
+                  </label>
                   <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? "text" : "password"}
-                    className="form-control rounded-3 py-2 pe-5 login-input"
-                    style={{ ...inputStyle, paddingRight: "3rem" }}
-                    value={form.password}
-                    onChange={handleChange}
+                    id="otpCode"
+                    name="otpCode"
+                    type="text"
+                    inputMode="numeric"
+                    className="form-control rounded-3 py-2 login-input"
+                    style={{ ...inputStyle, fontFamily: fonts.body }}
+                    placeholder="123456"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
                     required
                   />
-                  <button
-                    type="button"
-                    className="btn btn-link position-absolute top-50 end-0 translate-middle-y p-0 me-3 border-0 text-secondary"
-                    onClick={() => setShowPassword((v) => !v)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                    style={{ color: colors.muted }}
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                {fieldErrors.password && (
-                  <p className="text-danger small mt-2 mb-0">
-                    {fieldErrors.password}
+                  <p className="text-muted small mt-2 mb-0">
+                    Enter the 6-digit code sent to your email.
                   </p>
-                )}
-              </div>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label
+                      htmlFor="password"
+                      className="form-label fw-semibold text-dark mb-2"
+                      style={{ ...bodyTextStyle, fontSize: "0.95rem" }}
+                    >
+                      Password
+                    </label>
+                    <div className="position-relative">
+                      <input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        className="form-control rounded-3 py-2 pe-5 login-input"
+                        style={{ ...inputStyle, paddingRight: "3rem" }}
+                        value={form.password}
+                        onChange={handleChange}
+                        required
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-link position-absolute top-50 end-0 translate-middle-y p-0 me-3 border-0 text-secondary"
+                        onClick={() => setShowPassword((v) => !v)}
+                        aria-label={
+                          showPassword ? "Hide password" : "Show password"
+                        }
+                        style={{ color: colors.muted }}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
+                    {fieldErrors.password && (
+                      <p className="text-danger small mt-2 mb-0">
+                        {fieldErrors.password}
+                      </p>
+                    )}
+                  </div>
 
-              <div className="d-flex align-items-center justify-content-between">
-                <label
-                  className="form-check-label d-flex align-items-center gap-2"
-                  style={{ ...bodyTextStyle, fontSize: "0.9rem" }}
-                >
-                  <input
-                    id="rememberMe"
-                    name="rememberMe"
-                    type="checkbox"
-                    className="form-check-input"
-                    checked={form.rememberMe}
-                    onChange={handleChange}
-                    style={{
-                      width: 18,
-                      height: 18,
-                      accentColor: colors.authGreen,
-                    }}
-                  />
-                  Remember Me
-                </label>
-                <button
-                  type="button"
-                  className="btn btn-link p-0 text-dark"
-                  style={{
-                    ...bodyTextStyle,
-                    fontSize: "0.9rem",
-                    textDecoration: "none",
-                    color: colors.charcoal,
-                  }}
-                >
-                  Forgot Password?
-                </button>
-              </div>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <label
+                      className="form-check-label d-flex align-items-center gap-2"
+                      style={{ ...bodyTextStyle, fontSize: "0.9rem" }}
+                    >
+                      <input
+                        id="rememberMe"
+                        name="rememberMe"
+                        type="checkbox"
+                        className="form-check-input"
+                        checked={form.rememberMe}
+                        onChange={handleChange}
+                        style={{
+                          width: 18,
+                          height: 18,
+                          accentColor: colors.authGreen,
+                        }}
+                      />
+                      Remember Me
+                    </label>
+                    <button
+                      type="button"
+                      className="btn btn-link p-0 text-dark"
+                      style={{
+                        ...bodyTextStyle,
+                        fontSize: "0.9rem",
+                        textDecoration: "none",
+                        color: colors.charcoal,
+                      }}
+                    >
+                      Forgot Password?
+                    </button>
+                  </div>
+                </>
+              )}
 
               <button
                 type="submit"
@@ -398,8 +480,24 @@ export default function Login({ onNavigate }) {
                 }}
                 disabled={status === "loading"}
               >
-                Login
+                {loginStage === "otp" ? "Verify Code" : "Login"}
               </button>
+
+              {loginStage === "otp" && (
+                <button
+                  type="button"
+                  className="btn btn-link text-dark px-0"
+                  style={{ ...bodyTextStyle, fontSize: "0.9rem" }}
+                  onClick={() => {
+                    setLoginStage("credentials");
+                    setInfoMsg("");
+                    setErrMsg("");
+                    setOtpCode("");
+                  }}
+                >
+                  Back to sign in
+                </button>
+              )}
             </form>
 
             <p

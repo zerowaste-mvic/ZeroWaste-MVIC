@@ -81,6 +81,22 @@ export const foodApi = {
     return request(`/api/food-items/${id}`, { method: "DELETE" });
   },
 };
+// 
+export const authApi = {
+  login(email, password) {
+    return request("/api/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ email, password }),
+    });
+  },
+
+  verifyLoginOtp(email, code) {
+    return request("/api/auth/login/verify", {
+      method: "POST",
+      body: JSON.stringify({ email, code }),
+    });
+  },
+};
 
 export const userApi = {
   getProfile() {
