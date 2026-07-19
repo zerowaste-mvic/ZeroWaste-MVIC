@@ -32,7 +32,7 @@ public class AuthController {
         return authService.login(request);
     }
 
-    @PostMapping("/login/verify-otp")
+    @PostMapping("/login/verify")
     public AuthResponse verifyLoginOtp(@Valid @RequestBody LoginOtpRequest request) {
         return authService.verifyLogin2FA(request);
     }
