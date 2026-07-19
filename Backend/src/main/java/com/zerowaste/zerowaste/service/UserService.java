@@ -1,5 +1,6 @@
 package com.zerowaste.zerowaste.service;
 
+import com.zerowaste.zerowaste.dto.ChangePasswordRequest;
 import com.zerowaste.zerowaste.dto.PrivacyRequest;
 import com.zerowaste.zerowaste.dto.UpdateProfileRequest;
 import com.zerowaste.zerowaste.dto.UserResponse;
@@ -9,6 +10,7 @@ import com.zerowaste.zerowaste.model.User;
 import com.zerowaste.zerowaste.repository.NotificationRepository;
 import com.zerowaste.zerowaste.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,10 +18,14 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final NotificationRepository notificationRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, NotificationRepository notificationRepository) {
+    public UserService(UserRepository userRepository,
+                       NotificationRepository notificationRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.notificationRepository = notificationRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserResponse getProfile(Long userId) {
@@ -57,20 +63,6 @@ public class UserService {
                 isPublic
                         ? "Your donations are now public and visible to everyone in Browse Food Item."
                         : "Your donations are now private and only visible to you.");
-
-        return UserResponse.from(saved);
-    }
-
-    public UserResponse updateTwoFactor(Long userId, boolean enabled) {
-        User user = findUser(userId);
-        user.setTwoFactorEnabled(enabled);
-        User saved = userRepository.save(user);
-
-        notify(userId, enabled ? "TWO_FACTOR_ON" : "TWO_FACTOR_OFF", "System",
-                "Two-Factor Authentication Updated",
-                enabled
-                        ? "Two-factor authentication has been turned on for your account."
-                        : "Two-factor authentication has been turned off for your account.");
 
         return UserResponse.from(saved);
     }
@@ -119,6 +111,24 @@ public class UserService {
         return UserResponse.from(saved);
     }
 
+    // For the protion of 2FA authentication, we will just toggle the boolean value for now. In a real-world application, you would implement a more robust 2FA system.
+
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = findUser(userId);
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new ApiException("Current password is incorrect.", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        notify(userId, "PASSWORD_CHANGED", "System",
+                "Password Changed",
+                "Your account password has been updated successfully.");
+    }
+
+
     private void notify(Long userId, String type, String category, String title, String message) {
         Notification notification = Notification.builder()
                 .userId(userId)
@@ -143,10 +153,13 @@ public class UserService {
         return value.trim();
     }
 
+
     private Integer normalizeHouseholdSize(Integer householdSize) {
         if (householdSize == null) {
             return null;
         }
         return Math.max(1, householdSize);
     }
-}   
+}
+
+

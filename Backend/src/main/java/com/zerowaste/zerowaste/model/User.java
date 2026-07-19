@@ -12,6 +12,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "users")
 @Getter
@@ -54,9 +56,10 @@ public class User {
     @Builder.Default
     @Column(name = "donation_public", columnDefinition = "boolean default true")
     private Boolean donationPublic = true;
+
     @Builder.Default
-    @Column(name = "two_factor_enabled", columnDefinition = "boolean default true")
-    private Boolean twoFactorEnabled = true;
+    @Column(name = "two_factor_enabled", columnDefinition = "boolean default false")
+    private Boolean twoFactorEnabled = false;
 
     @Builder.Default
     @Column(name = "notifications_enabled", columnDefinition = "boolean default true")
@@ -69,4 +72,24 @@ public class User {
     @Builder.Default
     @Column(name = "donation_updates_enabled", columnDefinition = "boolean default true")
     private Boolean donationUpdatesEnabled = true;
+
+    // ── 2FA OTP fields ──────────────────────────────────────────────────────
+    // - These fields are used for the 2FA OTP verification process. They are not used for regular authentication.
+
+    /** The 6-digit OTP currently pending verification (null when none). */
+    @Column(name = "otp_code", length = 6)
+    private String otpCode;
+
+    /** When the OTP expires (null when no OTP is pending). */
+    @Column(name = "otp_expires_at")
+    private Instant otpExpiresAt;
+
+    /**
+     * Whether the 2FA enable-flow has been fully confirmed.
+     * twoFactorEnabled may be false while pendingTwoFactor is true
+     * (the user triggered the OTP email but has not yet verified it).
+     */
+    @Builder.Default
+    @Column(name = "pending_two_factor", columnDefinition = "boolean default false")
+    private Boolean pendingTwoFactor = false;
 }

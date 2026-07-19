@@ -16,6 +16,7 @@ public class UserResponse {
     private Integer householdSize;
     private Boolean donationPublic;
     private Boolean twoFactorEnabled;
+    private Boolean pendingTwoFactor; // for 2FA OTP verification process, not for regular authentication
     private Boolean notificationsEnabled;
     private Boolean expiryAlertsEnabled;
     private Boolean donationUpdatesEnabled;
@@ -31,6 +32,7 @@ public class UserResponse {
                 user.getHouseholdSize(),
                 user.getDonationPublic(),
                 user.getTwoFactorEnabled(),
+                user.getPendingTwoFactor(),
                 user.getNotificationsEnabled(),
                 user.getExpiryAlertsEnabled(),
                 user.getDonationUpdatesEnabled()

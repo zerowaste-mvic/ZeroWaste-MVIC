@@ -101,12 +101,40 @@ export const userApi = {
     });
   },
 
-  updateTwoFactor(enabled) {
-    return request("/api/users/me/two-factor", {
-      method: "PUT",
-      body: JSON.stringify({ enabled }),
+  // ── 2FA ─────────────────────────────────────────────────────────────────
+
+  /** Step 1: trigger OTP email (called when user flips the toggle ON). */
+  initiate2FA() {
+    return request("/api/users/me/two-factor/initiate", { method: "POST" });
+  },
+
+  /** Step 2: submit the 6-digit code. Returns updated UserResponse on success. */
+  verify2FA(code) {
+    return request("/api/users/me/two-factor/verify", {
+      method: "POST",
+      body: JSON.stringify({ code }),
     });
   },
+
+  // Designed API for the following 2FA actions, but not currently used in the frontend:
+  
+
+  /** Request a fresh OTP if the previous one expired or wasn't received. */
+  resend2FACode() {
+    return request("/api/users/me/two-factor/resend", { method: "POST" });
+  },
+
+  /** Turn 2FA off immediately (no OTP required). */
+  disable2FA() {
+    return request("/api/users/me/two-factor", { method: "DELETE" });
+  },
+
+  /** Cancel a pending 2FA enable attempt (user dismissed the modal). */
+  cancelPending2FA() {
+    return request("/api/users/me/two-factor/cancel", { method: "POST" });
+  },
+
+  // ── Other preferences ────────────────────────────────────────────────────
 
   updateNotifications(enabled) {
     return request("/api/users/me/notifications", {

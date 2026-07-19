@@ -1,6 +1,6 @@
 // src/components/Dashboard/pages/Settings.jsx
-import { useEffect, useState } from "react";
-import { User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { User, ShieldCheck, ShieldOff, Mail, RefreshCw } from "lucide-react";
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { userApi } from "../../../services/api";
 import { getStoredUser, setStoredUser } from "../../../utils/auth";
@@ -44,8 +44,6 @@ function SectionHeading({ children }) {
   );
 }
 
-// Visual pill switch. Controlled via `checked`/`onChange`; `disabled` is used
-// while a save request to the backend is in flight.
 function ToggleSwitch({ checked, onChange, disabled }) {
   return (
     <button
@@ -108,8 +106,233 @@ function PreferenceRow({ title, description, checked, onChange, disabled }) {
   );
 }
 
+// ── 2FA OTP Modal ─────────────────────────────────────────────────────────────
+function TwoFAModal({ userEmail, onVerified, onCancel }) {
+  const [digits, setDigits] = useState(["", "", "", "", "", ""]);
+  const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
+  const [verifying, setVerifying] = useState(false);
+  const [resending, setResending] = useState(false);
+  const inputRefs = useRef([]);
+
+  // focus first box on mount
+  useEffect(() => {
+    inputRefs.current[0]?.focus();
+  }, []);
+
+  const code = digits.join("");
+
+  const handleDigitChange = (idx, value) => {
+    const char = value.replace(/\D/g, "").slice(-1);
+    const next = [...digits];
+    next[idx] = char;
+    setDigits(next);
+    setError("");
+    if (char && idx < 5) inputRefs.current[idx + 1]?.focus();
+  };
+
+  const handleKeyDown = (idx, e) => {
+    if (e.key === "Backspace" && !digits[idx] && idx > 0) {
+      inputRefs.current[idx - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const next = [...digits];
+    for (let i = 0; i < 6; i++) next[i] = pasted[i] || "";
+    setDigits(next);
+    const focusIdx = Math.min(pasted.length, 5);
+    inputRefs.current[focusIdx]?.focus();
+  };
+
+  const handleVerify = async () => {
+    if (code.length !== 6) {
+      setError("Please enter the complete 6-digit code.");
+      return;
+    }
+    setVerifying(true);
+    setError("");
+    setInfo("");
+    try {
+      const updated = await userApi.verify2FA(code);
+      onVerified(updated);
+    } catch (err) {
+      setError(err.message || "Invalid code. Please try again.");
+      setDigits(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } finally {
+      setVerifying(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setError("");
+    setInfo("");
+    try {
+      await userApi.resend2FACode();
+      setInfo("A new code has been sent to your email.");
+      setDigits(["", "", "", "", "", ""]);
+      inputRefs.current[0]?.focus();
+    } catch (err) {
+      setError(err.message || "Could not resend code. Please try again.");
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      await userApi.cancelPending2FA();
+    } catch (_) {
+      // best-effort
+    }
+    onCancel();
+  };
+
+  return (
+    <div
+      className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+      style={{ background: "rgba(0,0,0,0.45)", zIndex: 1050 }}
+    >
+      <div
+        className="rounded-3 p-4"
+        style={{
+          background: colors.authBg,
+          width: 420,
+          maxWidth: "95%",
+          boxShadow: "0 16px 48px rgba(0,0,0,0.18)",
+        }}
+      >
+        {/* Header */}
+        <div className="d-flex align-items-center gap-2 mb-3">
+          <div
+            className="d-flex align-items-center justify-content-center rounded-circle"
+            style={{ width: 40, height: 40, background: "rgba(62,160,102,0.15)" }}
+          >
+            <Mail size={20} color={colors.green} />
+          </div>
+          <div>
+            <h5 style={{ fontFamily: fonts.body, color: colors.charcoal, margin: 0, fontWeight: 700 }}>
+              Verify Your Email
+            </h5>
+            <div style={{ fontSize: "0.78rem", color: colors.muted }}>
+              Two-Factor Authentication Setup
+            </div>
+          </div>
+        </div>
+
+        <p style={{ fontSize: "0.88rem", color: colors.muted, marginBottom: "1.25rem", lineHeight: 1.6 }}>
+          A 6-digit verification code was sent to{" "}
+          <strong style={{ color: colors.charcoal }}>{userEmail}</strong>.
+          Enter it below to enable 2FA on your account.
+        </p>
+
+        {/* OTP input boxes */}
+        <div className="d-flex justify-content-center gap-2 mb-3" onPaste={handlePaste}>
+          {digits.map((d, idx) => (
+            <input
+              key={idx}
+              ref={(el) => (inputRefs.current[idx] = el)}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={d}
+              onChange={(e) => handleDigitChange(idx, e.target.value)}
+              onKeyDown={(e) => handleKeyDown(idx, e)}
+              disabled={verifying}
+              style={{
+                width: 46,
+                height: 54,
+                textAlign: "center",
+                fontSize: "1.5rem",
+                fontWeight: 700,
+                borderRadius: 8,
+                border: `2px solid ${d ? colors.green : colors.greenLrgb}`,
+                background: d ? "rgba(62,160,102,0.07)" : colors.white,
+                color: colors.charcoal,
+                outline: "none",
+                transition: "border-color 0.15s",
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Feedback */}
+        {error && (
+          <div className="alert alert-danger py-2 small mb-3" style={{ borderRadius: 8 }}>
+            {error}
+          </div>
+        )}
+        {info && (
+          <div className="alert alert-success py-2 small mb-3" style={{ borderRadius: 8 }}>
+            {info}
+          </div>
+        )}
+
+        {/* Resend */}
+        <div className="text-center mb-3">
+          <button
+            type="button"
+            className="btn btn-link p-0 d-inline-flex align-items-center gap-1"
+            style={{ fontSize: "0.83rem", color: colors.green, textDecoration: "none" }}
+            disabled={resending || verifying}
+            onClick={handleResend}
+          >
+            <RefreshCw size={14} />
+            {resending ? "Sending…" : "Resend Code"}
+          </button>
+        </div>
+
+        {/* Actions */}
+        <div className="d-flex justify-content-end gap-2">
+          <button
+            type="button"
+            className="btn"
+            style={{
+              opacity: 0.7,
+              borderColor: colors.green,
+              color: colors.charcoal,
+              fontWeight: 600,
+              borderRadius: 6,
+              borderWidth: "2px",
+              padding: "0.45rem 1.25rem",
+              fontSize: "0.9rem",
+            }}
+            onClick={handleCancel}
+            disabled={verifying}
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="btn"
+            style={{
+              ...btnPrimaryStyle,
+              color: colors.white,
+              fontWeight: 600,
+              padding: "0 1.5rem",
+              fontSize: "0.9rem",
+              height: 40,
+              borderRadius: 6,
+              opacity: code.length === 6 ? 1 : 0.65,
+            }}
+            disabled={verifying || code.length !== 6}
+            onClick={handleVerify}
+          >
+            {verifying ? "Verifying…" : "Verify & Enable"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Main Settings component ───────────────────────────────────────────────────
 export default function Settings({ onProfileUpdated }) {
-  // ---- Profile Information (backend-connected) ----
+  // ---- Profile Information ----
   const [profile, setProfile] = useState({
     fullName: "",
     email: "",
@@ -121,16 +344,18 @@ export default function Settings({ onProfileUpdated }) {
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState({ type: "", text: "" });
 
-  // ---- Privacy (backend-connected: only this toggle is functional) ----
+  // ---- Privacy ----
   const [donationPublic, setDonationPublic] = useState(true);
   const [savingPrivacy, setSavingPrivacy] = useState(false);
   const [privacyMsg, setPrivacyMsg] = useState("");
 
-  // ---- Security & Alerts (backend-connected: generate notifications on change) ----
-  const [twoFactor, setTwoFactor] = useState(true);
-  const [savingTwoFactor, setSavingTwoFactor] = useState(false);
-  const [twoFactorMsg, setTwoFactorMsg] = useState("");
+  // ---- 2FA ----
+  const [twoFactor, setTwoFactor] = useState(false);
+  const [show2FAModal, setShow2FAModal] = useState(false);
+  const [initiating2FA, setInitiating2FA] = useState(false);
+  const [twoFactorMsg, setTwoFactorMsg] = useState({ type: "", text: "" });
 
+  // ---- Notifications ----
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
   const [savingNotifications, setSavingNotifications] = useState(false);
   const [notificationsMsg, setNotificationsMsg] = useState("");
@@ -139,9 +364,19 @@ export default function Settings({ onProfileUpdated }) {
   const [savingExpiryAlerts, setSavingExpiryAlerts] = useState(false);
   const [expiryAlertsMsg, setExpiryAlertsMsg] = useState("");
 
-  // ---- Replica-only toggle (no backend, local state only) ----
   const [donationUpdates, setDonationUpdates] = useState(true);
 
+  // ---- Password modal ----
+  const [showPwdModal, setShowPwdModal] = useState(false);
+  const [pwdForm, setPwdForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [savingPwd, setSavingPwd] = useState(false);
+  const [pwdMsg, setPwdMsg] = useState({ type: "", text: "" });
+
+  // ── Load profile on mount ──────────────────────────────────────────────────
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -158,7 +393,7 @@ export default function Settings({ onProfileUpdated }) {
             data.householdSize == null ? "" : String(data.householdSize),
         });
         setDonationPublic(data.donationPublic !== false);
-        setTwoFactor(data.twoFactorEnabled !== false);
+        setTwoFactor(data.twoFactorEnabled === true);
         setNotificationsEnabled(data.notificationsEnabled !== false);
         setExpiryAlerts(data.expiryAlertsEnabled !== false);
         setDonationUpdates(data.donationUpdatesEnabled !== false);
@@ -177,6 +412,7 @@ export default function Settings({ onProfileUpdated }) {
     };
   }, []);
 
+  // ── Profile ────────────────────────────────────────────────────────────────
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
     setProfile((prev) => ({ ...prev, [name]: value }));
@@ -212,7 +448,6 @@ export default function Settings({ onProfileUpdated }) {
         householdSize:
           updated.householdSize == null ? "" : String(updated.householdSize),
       });
-      // Keep the cached user (used by the dashboard header, etc.) in sync.
       const cached = getStoredUser();
       setStoredUser({ ...cached, ...updated });
       setProfileMsg({ type: "success", text: "Profile updated successfully." });
@@ -227,9 +462,10 @@ export default function Settings({ onProfileUpdated }) {
     }
   };
 
+  // ── Privacy ────────────────────────────────────────────────────────────────
   const handleTogglePrivacy = async (nextValue) => {
     const previous = donationPublic;
-    setDonationPublic(nextValue); // optimistic
+    setDonationPublic(nextValue);
     setSavingPrivacy(true);
     setPrivacyMsg("");
     try {
@@ -238,30 +474,70 @@ export default function Settings({ onProfileUpdated }) {
       const cached = getStoredUser();
       setStoredUser({ ...cached, donationPublic: updated.donationPublic });
     } catch (err) {
-      setDonationPublic(previous); // rollback
+      setDonationPublic(previous);
       setPrivacyMsg(err.message || "Failed to update privacy setting.");
     } finally {
       setSavingPrivacy(false);
     }
   };
 
-  const handleToggleTwoFactor = async (nextValue) => {
-    const previous = twoFactor;
-    setTwoFactor(nextValue); // optimistic
-    setSavingTwoFactor(true);
-    setTwoFactorMsg("");
+  // ── 2FA ────────────────────────────────────────────────────────────────────
+  const handleToggle2FA = async (nextValue) => {
+    setTwoFactorMsg({ type: "", text: "" });
+
+    if (!nextValue) {
+      // Turning OFF — immediate, no OTP needed
+      try {
+        const updated = await userApi.disable2FA();
+        setTwoFactor(updated.twoFactorEnabled === true);
+        setTwoFactorMsg({
+          type: "success",
+          text: "Two-factor authentication has been disabled.",
+        });
+      } catch (err) {
+        setTwoFactorMsg({
+          type: "danger",
+          text: err.message || "Failed to disable 2FA.",
+        });
+      }
+      return;
+    }
+
+    // Turning ON — send OTP email then show modal
+    setInitiating2FA(true);
     try {
-      await userApi.updateTwoFactor(nextValue);
+      await userApi.initiate2FA();
+      setShow2FAModal(true);
     } catch (err) {
-      setTwoFactor(previous); // rollback
-      setTwoFactorMsg(
-        err.message || "Failed to update two-factor authentication.",
-      );
+      setTwoFactorMsg({
+        type: "danger",
+        text: err.message || "Failed to send verification email. Please try again.",
+      });
     } finally {
-      setSavingTwoFactor(false);
+      setInitiating2FA(false);
     }
   };
 
+  /** Called by TwoFAModal when OTP is verified successfully */
+  const handle2FAVerified = (updatedUser) => {
+    setShow2FAModal(false);
+    setTwoFactor(updatedUser.twoFactorEnabled === true);
+    const cached = getStoredUser();
+    setStoredUser({ ...cached, twoFactorEnabled: updatedUser.twoFactorEnabled });
+    setTwoFactorMsg({
+      type: "success",
+      text: "Two-factor authentication is now enabled on your account! 🎉",
+    });
+  };
+
+  /** Called by TwoFAModal when the user cancels without verifying */
+  const handle2FAModalCancel = () => {
+    setShow2FAModal(false);
+    setTwoFactor(false); // toggle snaps back to OFF
+    setTwoFactorMsg({ type: "", text: "" });
+  };
+
+  // ── Notifications ──────────────────────────────────────────────────────────
   const handleToggleNotifications = async (nextValue) => {
     const previous = notificationsEnabled;
     setNotificationsEnabled(nextValue);
@@ -282,16 +558,15 @@ export default function Settings({ onProfileUpdated }) {
 
   const handleToggleExpiryAlerts = async (nextValue) => {
     if (!notificationsEnabled) return;
-
     const previous = expiryAlerts;
-    setExpiryAlerts(nextValue); // optimistic
+    setExpiryAlerts(nextValue);
     setSavingExpiryAlerts(true);
     setExpiryAlertsMsg("");
     try {
       const updated = await userApi.updateExpiryAlerts(nextValue);
       setExpiryAlerts(updated.expiryAlertsEnabled !== false);
     } catch (err) {
-      setExpiryAlerts(previous); // rollback
+      setExpiryAlerts(previous);
       setExpiryAlertsMsg(err.message || "Failed to update expiry alerts.");
     } finally {
       setSavingExpiryAlerts(false);
@@ -300,7 +575,6 @@ export default function Settings({ onProfileUpdated }) {
 
   const handleToggleDonationUpdates = async (nextValue) => {
     if (!notificationsEnabled) return;
-
     const previous = donationUpdates;
     setDonationUpdates(nextValue);
     try {
@@ -313,15 +587,7 @@ export default function Settings({ onProfileUpdated }) {
     }
   };
 
-  const [showPwdModal, setShowPwdModal] = useState(false);
-  const [pwdForm, setPwdForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  const [savingPwd, setSavingPwd] = useState(false);
-  const [pwdMsg, setPwdMsg] = useState({ type: "", text: "" });
-
+  // ── Password modal ─────────────────────────────────────────────────────────
   const handlePwdChange = (e) => {
     const { name, value } = e.target;
     setPwdForm((prev) => ({ ...prev, [name]: value }));
@@ -353,53 +619,52 @@ export default function Settings({ onProfileUpdated }) {
     }
   };
 
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <div>
-      <style>
-        {`
-          .changePwd-btn {
-            opacity: 0.75;
-            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-          }
+      <style>{`
+        .changePwd-btn {
+          opacity: 0.75;
+          transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .changePwd-btn:hover:not(:disabled) {
+          opacity: 1;
+          transform: translateY(-1px);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.16);
+        }
+        .save-changes {
+          opacity: 0.75;
+          transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .save-changes:hover:not(:disabled) {
+          opacity: 1;
+          transform: translateY(-1px);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.16);
+        }
+        .save-password {
+          opacity: 0.75;
+          transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .save-password:hover:not(:disabled) {
+          opacity: 1;
+          transform: translateY(-1px);
+          box-shadow: 0 8px 20px rgba(0,0,0,0.16);
+        }
+        .cancel-btn {
+          transition: all 0.25s ease;
+        }
+        .cancel-btn:hover {
+          opacity: 1 !important;
+          background: ${colors.greenLrgb};
+          border-color: transparent;
+        }
+        .otp-input:focus {
+          outline: none;
+          border-color: ${colors.green} !important;
+          box-shadow: 0 0 0 3px rgba(62,160,102,0.2);
+        }
+      `}</style>
 
-          .changePwd-btn:hover:not(:disabled) {
-            opacity: 1;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
-          }
-            .save-changes {
-            opacity: 0.75;
-            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-          }
-
-          .save-changes:hover:not(:disabled) {
-            opacity: 1;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
-          }
-
-          .save-password {
-            opacity: 0.75;
-            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
-          }
-
-          .save-password:hover:not(:disabled) {
-            opacity: 1;
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
-          }
-
-          .cancel-btn{
-            transition: all 0.25s ease;
-          }
-
-          .cancel-btn:hover{
-            opacity: 1 !important;
-            background:${colors.greenLrgb};
-            border-color: transparent;
-          }
-        `}
-      </style>
       <div className="mb-4">
         <h1
           style={{
@@ -419,7 +684,7 @@ export default function Settings({ onProfileUpdated }) {
       </div>
 
       <div className="row g-4">
-        {/* ---- Left column: Profile Information ---- */}
+        {/* ── Left: Profile ── */}
         <div className="col-12 col-lg-6">
           <div className="rounded-4 p-4 h-100" style={cardStyle}>
             <SectionHeading>Profile Information</SectionHeading>
@@ -438,7 +703,7 @@ export default function Settings({ onProfileUpdated }) {
                   color: colors.charcoal,
                 }}
               >
-                {loadingProfile ? "..." : profile.fullName || "Your Name"}
+                {loadingProfile ? "…" : profile.fullName || "Your Name"}
               </div>
             </div>
 
@@ -452,106 +717,43 @@ export default function Settings({ onProfileUpdated }) {
 
             <form onSubmit={handleSaveProfile}>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>
-                  Full Name:
-                </label>
-                <input
-                  type="text"
-                  name="fullName"
-                  className="form-control"
-                  style={inputStyle}
-                  value={profile.fullName}
-                  onChange={handleProfileChange}
-                  disabled={loadingProfile}
-                  placeholder="Full name"
-                />
+                <label className="form-label" style={labelStyle}>Full Name:</label>
+                <input type="text" name="fullName" className="form-control" style={inputStyle}
+                  value={profile.fullName} onChange={handleProfileChange}
+                  disabled={loadingProfile} placeholder="Full name" />
               </div>
-
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>
-                  Email:
-                </label>
-                <input
-                  type="email"
-                  name="email"
-                  className="form-control"
-                  style={inputStyle}
-                  value={profile.email}
-                  onChange={handleProfileChange}
-                  disabled={loadingProfile}
-                  placeholder="someone@gmail.com"
-                />
+                <label className="form-label" style={labelStyle}>Email:</label>
+                <input type="email" name="email" className="form-control" style={inputStyle}
+                  value={profile.email} onChange={handleProfileChange}
+                  disabled={loadingProfile} placeholder="someone@gmail.com" />
               </div>
-
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>
-                  Gender:
-                </label>
-                <input
-                  type="text"
-                  name="gender"
-                  className="form-control"
-                  style={inputStyle}
-                  value={profile.gender}
-                  onChange={handleProfileChange}
-                  disabled={loadingProfile}
-                  placeholder="Male"
-                />
+                <label className="form-label" style={labelStyle}>Gender:</label>
+                <input type="text" name="gender" className="form-control" style={inputStyle}
+                  value={profile.gender} onChange={handleProfileChange}
+                  disabled={loadingProfile} placeholder="Male" />
               </div>
-
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>
-                  Address:
-                </label>
-                <input
-                  type="text"
-                  name="address"
-                  className="form-control"
-                  style={inputStyle}
-                  value={profile.address}
-                  onChange={handleProfileChange}
-                  disabled={loadingProfile}
-                  placeholder="somewhere"
-                />
+                <label className="form-label" style={labelStyle}>Address:</label>
+                <input type="text" name="address" className="form-control" style={inputStyle}
+                  value={profile.address} onChange={handleProfileChange}
+                  disabled={loadingProfile} placeholder="somewhere" />
               </div>
-
               <div className="mb-4">
-                <label className="form-label" style={labelStyle}>
-                  Household Size (optional):
-                </label>
-                <input
-                  type="number"
-                  name="householdSize"
-                  min="1"
-                  className="form-control"
-                  style={inputStyle}
-                  value={profile.householdSize}
-                  onChange={handleProfileChange}
-                  disabled={loadingProfile}
-                  placeholder="e.g. 4"
-                />
+                <label className="form-label" style={labelStyle}>Household Size (optional):</label>
+                <input type="number" name="householdSize" min="1" className="form-control"
+                  style={inputStyle} value={profile.householdSize}
+                  onChange={handleProfileChange} disabled={loadingProfile} placeholder="e.g. 4" />
                 <div className="form-text mt-2" style={{ color: colors.muted }}>
-                  {profile.householdSize === ""
-                    ? "-"
-                    : `Household size: ${profile.householdSize}`}
+                  {profile.householdSize === "" ? "-" : `Household size: ${profile.householdSize}`}
                 </div>
               </div>
-
               <div className="text-center">
-                <button
-                  type="submit"
-                  className="btn px-4 save-changes"
-                  style={{
-                    ...btnPrimaryStyle,
-                    color: colors.white,
-                    fontWeight: 600,
-                    padding: "0 1rem",
-                    fontSize: "0.9rem",
-                    height: 40,
-                    borderRadius: 4,
-                  }}
-                  disabled={loadingProfile || savingProfile}
-                >
+                <button type="submit" className="btn px-4 save-changes"
+                  style={{ ...btnPrimaryStyle, color: colors.white, fontWeight: 600,
+                    padding: "0 1rem", fontSize: "0.9rem", height: 40, borderRadius: 4 }}
+                  disabled={loadingProfile || savingProfile}>
                   Save Changes
                 </button>
               </div>
@@ -559,59 +761,87 @@ export default function Settings({ onProfileUpdated }) {
           </div>
         </div>
 
-        {/* ---- Right column ---- */}
+        {/* ── Right column ── */}
         <div className="col-12 col-lg-6 d-flex flex-column gap-4">
-          {/* Security — visual replica only, no backend function */}
+
+          {/* Security */}
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Security</SectionHeading>
 
-            {twoFactorMsg && (
-              <div className="alert alert-danger py-2 small mb-3">
-                {twoFactorMsg}
+            {twoFactorMsg.text && (
+              <div
+                className={`alert alert-${twoFactorMsg.type === "success" ? "success" : "danger"} py-2 small mb-3`}
+                style={{ borderRadius: 8 }}
+              >
+                {twoFactorMsg.type === "success"
+                  ? <span><ShieldCheck size={14} className="me-1" />{twoFactorMsg.text}</span>
+                  : <span><ShieldOff size={14} className="me-1" />{twoFactorMsg.text}</span>}
+              </div>
+            )}
+
+            {/* 2FA status badge */}
+            {!loadingProfile && (
+              <div
+                className="d-flex align-items-center gap-2 mb-3 px-3 py-2 rounded-3"
+                style={{
+                  background: twoFactor
+                    ? "rgba(62,160,102,0.12)"
+                    : "rgba(220,53,69,0.07)",
+                  border: `1.5px solid ${twoFactor ? "rgba(62,160,102,0.4)" : "rgba(220,53,69,0.25)"}`,
+                }}
+              >
+                {twoFactor
+                  ? <ShieldCheck size={18} color={colors.green} />
+                  : <ShieldOff size={18} color="#dc3545" />}
+                <span style={{ fontSize: "0.83rem", fontWeight: 600,
+                  color: twoFactor ? colors.green : "#dc3545" }}>
+                  {twoFactor ? "2FA is Active" : "2FA is Inactive"}
+                </span>
               </div>
             )}
 
             <PreferenceRow
               title="Two-Factor Authentication"
-              description="Add an extra layer of security to your account."
+              description={
+                twoFactor
+                  ? "Your account is protected with email verification."
+                  : "Enable to add an extra layer of security. We'll email you a 6-digit code to confirm."
+              }
               checked={twoFactor}
-              onChange={handleToggleTwoFactor}
-              disabled={savingTwoFactor || loadingProfile}
+              onChange={handleToggle2FA}
+              disabled={initiating2FA || loadingProfile}
             />
+
+            {initiating2FA && (
+              <p className="small mb-3" style={{ color: colors.muted }}>
+                <span className="spinner-border spinner-border-sm me-2" role="status" />
+                Sending verification code to your email…
+              </p>
+            )}
+
             <button
               type="button"
-              className="btn mb-4 changePwd-btn"
-              style={{
-                ...btnPrimaryStyle,
-                color: colors.white,
-                fontWeight: 600,
-                padding: "0 1rem",
-                fontSize: "0.9rem",
-                height: 40,
-                borderRadius: 4,
-              }}
+              className="btn mb-2 changePwd-btn"
+              style={{ ...btnPrimaryStyle, color: colors.white, fontWeight: 600,
+                padding: "0 1rem", fontSize: "0.9rem", height: 40, borderRadius: 4 }}
               onClick={() => setShowPwdModal(true)}
             >
               Change Password
             </button>
           </div>
 
-          {/* Privacy — the one functional toggle */}
+          {/* Privacy */}
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Privacy</SectionHeading>
-
             {privacyMsg && (
-              <div className="alert alert-danger py-2 small mb-3">
-                {privacyMsg}
-              </div>
+              <div className="alert alert-danger py-2 small mb-3">{privacyMsg}</div>
             )}
-
             <PreferenceRow
               title="Make my donation public"
               description={
                 donationPublic
                   ? "Visible to everyone in Browse Food Item."
-                  : "Only visible to you - hidden from everyone else."
+                  : "Only visible to you — hidden from everyone else."
               }
               checked={donationPublic}
               onChange={handleTogglePrivacy}
@@ -619,15 +849,14 @@ export default function Settings({ onProfileUpdated }) {
             />
           </div>
 
+          {/* Notifications */}
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Notification Preferences</SectionHeading>
-
             {(notificationsMsg || expiryAlertsMsg) && (
               <div className="alert alert-danger py-2 small mb-3">
                 {notificationsMsg || expiryAlertsMsg}
               </div>
             )}
-
             <PreferenceRow
               title="Notifications"
               description="Turn all notification types on or off"
@@ -652,6 +881,18 @@ export default function Settings({ onProfileUpdated }) {
           </div>
         </div>
       </div>
+
+
+      {/* ── 2FA OTP Modal, email verification features worked  ── */}
+      {show2FAModal && (
+        <TwoFAModal
+          userEmail={profile.email}
+          onVerified={handle2FAVerified}
+          onCancel={handle2FAModalCancel}
+        />
+      )}
+
+      {/* ── Change Password Modal ── */}
       {showPwdModal && (
         <div
           className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
@@ -675,50 +916,22 @@ export default function Settings({ onProfileUpdated }) {
 
             <form onSubmit={handleChangePassword}>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>
-                  Current Password:
-                </label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  className="form-control"
-                  style={inputStyle}
-                  value={pwdForm.currentPassword}
-                  onChange={handlePwdChange}
-                  disabled={savingPwd}
-                  required
-                />
+                <label className="form-label" style={labelStyle}>Current Password:</label>
+                <input type="password" name="currentPassword" className="form-control"
+                  style={inputStyle} value={pwdForm.currentPassword}
+                  onChange={handlePwdChange} disabled={savingPwd} required />
               </div>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>
-                  New Password:
-                </label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  className="form-control"
-                  style={inputStyle}
-                  value={pwdForm.newPassword}
-                  onChange={handlePwdChange}
-                  disabled={savingPwd}
-                  required
-                  minLength={8}
-                />
+                <label className="form-label" style={labelStyle}>New Password:</label>
+                <input type="password" name="newPassword" className="form-control"
+                  style={inputStyle} value={pwdForm.newPassword}
+                  onChange={handlePwdChange} disabled={savingPwd} required minLength={8} />
               </div>
               <div className="mb-4">
-                <label className="form-label" style={labelStyle}>
-                  Confirm New Password:
-                </label>
-                <input
-                  type="password"
-                  name="confirmPassword"
-                  className="form-control"
-                  style={inputStyle}
-                  value={pwdForm.confirmPassword}
-                  onChange={handlePwdChange}
-                  disabled={savingPwd}
-                  required
-                />
+                <label className="form-label" style={labelStyle}>Confirm New Password:</label>
+                <input type="password" name="confirmPassword" className="form-control"
+                  style={inputStyle} value={pwdForm.confirmPassword}
+                  onChange={handlePwdChange} disabled={savingPwd} required />
               </div>
 
               <div className="d-flex justify-content-end gap-2">
@@ -734,16 +947,11 @@ export default function Settings({ onProfileUpdated }) {
                     borderWidth: "2px",
                     padding: "0.45rem 1.25rem",
                     fontSize: "0.9rem",
-                    transition: "all 0.5s ease",
                   }}
                   onClick={() => {
                     setShowPwdModal(false);
                     setPwdMsg({ type: "", text: "" });
-                    setPwdForm({
-                      currentPassword: "",
-                      newPassword: "",
-                      confirmPassword: "",
-                    });
+                    setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
                   }}
                   disabled={savingPwd}
                 >
@@ -752,15 +960,8 @@ export default function Settings({ onProfileUpdated }) {
                 <button
                   type="submit"
                   className="btn save-password"
-                  style={{
-                    ...btnPrimaryStyle,
-                    color: colors.white,
-                    fontWeight: 600,
-                    padding: "0 1rem",
-                    fontSize: "0.9rem",
-                    height: 40,
-                    borderRadius: 4,
-                  }}
+                  style={{ ...btnPrimaryStyle, color: colors.white, fontWeight: 600,
+                    padding: "0 1rem", fontSize: "0.9rem", height: 40, borderRadius: 4 }}
                   disabled={savingPwd}
                 >
                   Save Password
