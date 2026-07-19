@@ -114,6 +114,7 @@ export default function FoodInventory({ onNavigate }) {
           fontWeight: 700,
           color: colors.charcoal,
           marginBottom: "0.25rem",
+          opacity: 0.75,
         }}
       >
         Food Inventory

@@ -6,12 +6,12 @@ import { userApi } from "../../../services/api";
 import { getStoredUser, setStoredUser } from "../../../utils/auth";
 
 const inputStyle = {
-  borderColor: colors.border,
-  borderWidth: "1.5px",
+  borderColor: colors.greenLrgb,
+  borderWidth: "2px",
   borderRadius: 8,
   fontSize: "0.9rem",
   padding: "0.6rem 0.9rem",
-  background: "#fbf8f2",
+  background: colors.white,
 };
 
 const labelStyle = {
@@ -22,19 +22,19 @@ const labelStyle = {
 };
 
 const cardStyle = {
-  background: "#f7f2df",
-  border: `1px solid ${colors.border}`,
+  background: colors.authBg,
+  border: `2px solid ${colors.greenLrgb}`,
 };
 
 function SectionHeading({ children }) {
   return (
     <h5
       style={{
-        fontFamily: fonts.display,
-        fontWeight: 700,
+        fontFamily: fonts.body,
+        fontWeight: 500,
         color: colors.charcoal,
         display: "inline-block",
-        borderBottom: `2px solid ${colors.green}`,
+        borderBottom: `2px solid ${colors.greenLrgb}`,
         paddingBottom: 4,
         marginBottom: "1.25rem",
       }}
@@ -58,14 +58,14 @@ function ToggleSwitch({ checked, onChange, disabled }) {
         width: 46,
         height: 26,
         borderRadius: 999,
-        border: `1.5px solid ${checked ? colors.green : colors.border}`,
-        background: checked ? colors.green : "#fff",
+        border: `1.5px solid ${checked ? colors.green : colors.greenL}`,
+        background: checked ? colors.greenL : colors.white,
         position: "relative",
         padding: 0,
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.6 : 1,
         flexShrink: 0,
-        transition: "background 0.15s, border-color 0.15s",
+        transition: "all 0.15s ease",
       }}
     >
       <span
@@ -76,8 +76,8 @@ function ToggleSwitch({ checked, onChange, disabled }) {
           width: 20,
           height: 20,
           borderRadius: "50%",
-          background: checked ? "#fff" : colors.muted,
-          transition: "left 0.15s",
+          background: checked ? colors.white : "#778873",
+          transition: "left 0.15s ease",
         }}
       />
     </button>
@@ -269,8 +269,9 @@ export default function Settings({ onProfileUpdated }) {
       <div className="mb-4">
         <h1
           style={{
-            fontFamily: fonts.display,
-            fontSize: "1.75rem",
+            opacity: 0.75,
+            fontFamily: fonts.body,
+            fontSize: "1.60rem",
             fontWeight: 700,
             color: colors.charcoal,
             marginBottom: "0.25rem",

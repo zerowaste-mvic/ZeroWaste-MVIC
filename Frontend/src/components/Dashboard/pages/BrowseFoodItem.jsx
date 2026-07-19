@@ -11,8 +11,15 @@ import {
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
 
-const CATEGORIES = ["All Categories", "Fruits", "Vegetable", "Dairy", "Meat"];
-const PAGE_SIZE = 6;
+const CATEGORIES = [
+  "All Categories",
+  "Fruits",
+  "Vegetable",
+  "Dairy",
+  "Meat",
+  "Other",
+];
+const PAGE_SIZE = 10;
 
 const DEFAULT_IMAGE_BY_CATEGORY = {
   Fruits:
@@ -453,6 +460,15 @@ export default function BrowseFoodItem({ onNavigate }) {
             transform: translateY(-1px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
             }
+
+            .search{
+          outline:none;
+            border-color: ${colors.greenL};
+          }
+          .search:focus{
+            border-color: ${colors.greenLrgb};
+            box-shadow: 0 0 0 0.23rem ${colors.greenLrgb};
+          }
         `}
       </style>
       <h1
@@ -462,6 +478,7 @@ export default function BrowseFoodItem({ onNavigate }) {
           fontWeight: 700,
           color: colors.charcoal,
           marginBottom: "0.25rem",
+          opacity: 0.75,
         }}
       >
         Browse Food Items
@@ -487,7 +504,7 @@ export default function BrowseFoodItem({ onNavigate }) {
           />
           <input
             type="text"
-            className="form-control"
+            className="form-control search"
             style={{
               paddingLeft: "2.4rem",
               borderRadius: 7,

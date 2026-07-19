@@ -118,6 +118,7 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
           fontFamily: fonts.body,
           fontSize: "1.60rem",
           fontWeight: 700,
+          opacity: 0.75,
           color: colors.charcoal,
           marginBottom: "0.25rem",
         }}

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Bell, RefreshCw, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { colors, fonts } from "../../../theme";
+import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
 import DonateModal from "../DonateModal";
 
@@ -96,13 +96,27 @@ export default function ExpiryAlerts() {
 
   return (
     <div>
-      {/* Header */}
       <div className="d-flex align-items-start justify-content-between mb-2 gap-3 flex-wrap">
         <div>
+          <style>
+            {`
+            .donate-btn {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .donate-btn:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+          `}
+          </style>
           <h1
             style={{
               fontFamily: fonts.body,
               fontSize: "1.60rem",
+              opacity: 0.75,
               fontWeight: 700,
               color: colors.charcoal,
               marginBottom: "0.25rem",
@@ -119,10 +133,10 @@ export default function ExpiryAlerts() {
           className="btn btn-sm d-inline-flex align-items-center gap-2"
           onClick={loadItems}
           style={{
-            border: `1.5px solid ${colors.border}`,
+            border: `2px solid ${colors.greenLrgb}`,
             borderRadius: 8,
             color: colors.muted,
-            background: "white",
+            background: colors.white,
             padding: "0.4rem 0.9rem",
             fontSize: "0.825rem",
           }}
@@ -146,11 +160,11 @@ export default function ExpiryAlerts() {
                 padding: "0.5rem 1.4rem",
                 fontSize: "0.9rem",
                 border: "none",
-                borderRadius: 10,
-                background: isActive ? colors.authGreen : "#eef2e3",
+                borderRadius: 6,
+                background: isActive ? colors.greenL : colors.low_greenFade,
                 color: isActive ? "white" : colors.charcoal,
                 cursor: "pointer",
-                transition: "all 0.15s",
+                transition: "all 0.15s ease",
               }}
             >
               {f}
@@ -166,7 +180,10 @@ export default function ExpiryAlerts() {
       {/* Table card */}
       <div
         className="rounded-4 overflow-hidden"
-        style={{ border: `1px solid ${colors.border}`, background: "#fbfaf4" }}
+        style={{
+          border: `2px solid ${colors.greenLrgb}`,
+          background: colors.authGreen,
+        }}
       >
         {loading ? (
           <div className="text-center py-5" style={{ color: colors.muted }}>
@@ -195,7 +212,7 @@ export default function ExpiryAlerts() {
               <thead>
                 <tr
                   style={{
-                    background: "#f6f0c8",
+                    background: colors.authGreen,
                     fontSize: "0.9rem",
                     color: colors.charcoal,
                   }}
@@ -226,7 +243,7 @@ export default function ExpiryAlerts() {
                       key={item.id}
                       style={{
                         borderTop:
-                          idx === 0 ? "none" : `1px solid ${colors.border}`,
+                          idx === 0 ? "none" : `2px solid ${colors.greenLrgb}`,
                       }}
                     >
                       <td className="ps-4 py-3">
@@ -250,8 +267,9 @@ export default function ExpiryAlerts() {
                         <span
                           className="px-3 py-1 rounded-2"
                           style={{
-                            background: isExpired ? "#f3d9ce" : "#dcead0",
-                            color: colors.charcoal,
+                            background: isExpired ? "#BA5A5A" : colors.greenL,
+                            color: colors.white,
+                            boxShadow: "0 0px 5px rgb(169, 169, 169)",
                             fontSize: "0.85rem",
                             fontWeight: 500,
                             display: "inline-block",
@@ -263,19 +281,20 @@ export default function ExpiryAlerts() {
                       <td className="pe-4 py-3 text-end">
                         <button
                           type="button"
-                          className="btn btn-sm"
+                          className="btn btn-sm donate-btn"
                           disabled={donatingId === item.id}
                           onClick={() => setDonateTarget(item)}
                           style={{
-                            background: "#c9dcb8",
-                            border: "none",
-                            borderRadius: 8,
-                            color: colors.charcoal,
-                            fontWeight: 500,
-                            padding: "0.4rem 1.1rem",
+                            ...btnPrimaryStyle,
+                            borderRadius: 4,
+                            fontWeight: 600,
+                            padding: "0.45rem 1.15rem",
+                            fontSize: "0.9rem",
+                            color: colors.white,
+                            transition: "all 0.5s ease",
                           }}
                         >
-                          {donatingId === item.id ? "Donating…" : "Donate"}
+                          Donate
                         </button>
                       </td>
                     </tr>

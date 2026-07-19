@@ -209,6 +209,7 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
           fontWeight: 700,
           color: colors.charcoal,
           marginBottom: "0.25rem",
+          opacity: 0.75,
         }}
       >
         Add Food Items

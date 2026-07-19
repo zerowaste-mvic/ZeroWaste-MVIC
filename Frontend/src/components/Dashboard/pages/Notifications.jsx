@@ -119,6 +119,7 @@ export default function Notifications({ onUnreadCountChange }) {
             fontWeight: 700,
             color: colors.charcoal,
             marginBottom: "0.25rem",
+            opacity: 0.75,
           }}
         >
           Notification
