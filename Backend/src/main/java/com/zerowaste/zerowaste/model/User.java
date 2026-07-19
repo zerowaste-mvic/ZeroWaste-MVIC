@@ -42,6 +42,9 @@ public class User {
 
     private String address;
 
+    @Column(name = "household_size")
+    private Integer householdSize;
+
     /**
      * Privacy setting: when true, this user's donations are visible to
      * everyone in Browse Food Item. When false, their donations are only

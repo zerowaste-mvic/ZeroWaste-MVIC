@@ -13,6 +13,7 @@ public class UserResponse {
     private String role;
     private String gender;
     private String address;
+    private Integer householdSize;
     private Boolean donationPublic;
     private Boolean twoFactorEnabled;
     private Boolean expiryAlertsEnabled;
@@ -25,6 +26,7 @@ public class UserResponse {
                 user.getRole(),
                 user.getGender(),
                 user.getAddress(),
+                user.getHouseholdSize(),
                 user.getDonationPublic(),
                 user.getTwoFactorEnabled(),
                 user.getExpiryAlertsEnabled()

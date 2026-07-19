@@ -40,6 +40,7 @@ public class UserService {
         user.setEmail(newEmail);
         user.setGender(blankToNull(request.getGender()));
         user.setAddress(blankToNull(request.getAddress()));
+        user.setHouseholdSize(normalizeHouseholdSize(request.getHouseholdSize()));
 
         User saved = userRepository.save(user);
         return UserResponse.from(saved);
@@ -111,4 +112,11 @@ public class UserService {
         if (value == null || value.isBlank()) return null;
         return value.trim();
     }
-}
+
+    private Integer normalizeHouseholdSize(Integer householdSize) {
+        if (householdSize == null) {
+            return null;
+        }
+        return Math.max(1, householdSize);
+    }
+}   

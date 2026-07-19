@@ -8,7 +8,13 @@ import { colors, fonts } from "../../theme";
 const SPRING_BOOT_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
 
-const INITIAL = { fullName: "", email: "", password: "", confirmPassword: "" };
+const INITIAL = {
+  fullName: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  householdSize: "",
+};
 
 const cardStyle = {
   overflow: "hidden",
@@ -83,6 +89,7 @@ export default function Signup({ onNavigate }) {
           fullName: form.fullName,
           email: form.email,
           password: form.password,
+          householdSize: form.householdSize === "" ? null : Number(form.householdSize),
         }),
       });
 
@@ -264,6 +271,30 @@ export default function Signup({ onNavigate }) {
                     {fieldErrors.email}
                   </p>
                 )}
+              </div>
+
+              <div>
+                <label
+                  htmlFor="householdSize"
+                  className="form-label fw-medium text-dark mb-1"
+                  style={{ fontSize: "0.95rem" }}
+                >
+                  Household Size (optional):
+                </label>
+                <input
+                  id="householdSize"
+                  name="householdSize"
+                  type="number"
+                  min="1"
+                  className="form-control signup-input rounded-3"
+                  placeholder="e.g. 4"
+                  style={inputStyle}
+                  value={form.householdSize}
+                  onChange={handleChange}
+                />
+                <p className="text-muted small mt-2 mb-0">
+                  Leave blank if you prefer not to share it.
+                </p>
               </div>
 
               <div>

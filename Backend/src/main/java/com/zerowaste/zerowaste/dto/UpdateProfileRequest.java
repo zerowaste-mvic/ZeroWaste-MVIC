@@ -21,4 +21,7 @@ public class UpdateProfileRequest {
 
     // Optional
     private String address;
+
+    // Optional
+    private Integer householdSize;
 }

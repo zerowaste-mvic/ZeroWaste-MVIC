@@ -115,6 +115,7 @@ export default function Settings({ onProfileUpdated }) {
     email: "",
     gender: "",
     address: "",
+    householdSize: "",
   });
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
@@ -149,6 +150,8 @@ export default function Settings({ onProfileUpdated }) {
           email: data.email || "",
           gender: data.gender || "",
           address: data.address || "",
+          householdSize:
+            data.householdSize == null ? "" : String(data.householdSize),
         });
         setDonationPublic(data.donationPublic !== false);
         setTwoFactor(data.twoFactorEnabled !== false);
@@ -192,12 +195,16 @@ export default function Settings({ onProfileUpdated }) {
         email: profile.email.trim(),
         gender: profile.gender.trim(),
         address: profile.address.trim(),
+        householdSize:
+          profile.householdSize === "" ? null : Number(profile.householdSize),
       });
       setProfile({
         fullName: updated.fullName || "",
         email: updated.email || "",
         gender: updated.gender || "",
         address: updated.address || "",
+        householdSize:
+          updated.householdSize == null ? "" : String(updated.householdSize),
       });
       // Keep the cached user (used by the dashboard header, etc.) in sync.
       const cached = getStoredUser();
@@ -450,7 +457,7 @@ export default function Settings({ onProfileUpdated }) {
                 />
               </div>
 
-              <div className="mb-4">
+              <div className="mb-3">
                 <label className="form-label" style={labelStyle}>
                   Address:
                 </label>
@@ -464,6 +471,28 @@ export default function Settings({ onProfileUpdated }) {
                   disabled={loadingProfile}
                   placeholder="somewhere"
                 />
+              </div>
+
+              <div className="mb-4">
+                <label className="form-label" style={labelStyle}>
+                  Household Size (optional):
+                </label>
+                <input
+                  type="number"
+                  name="householdSize"
+                  min="1"
+                  className="form-control"
+                  style={inputStyle}
+                  value={profile.householdSize}
+                  onChange={handleProfileChange}
+                  disabled={loadingProfile}
+                  placeholder="e.g. 4"
+                />
+                <div className="form-text mt-2" style={{ color: colors.muted }}>
+                  {profile.householdSize === ""
+                    ? "-"
+                    : `Household size: ${profile.householdSize}`}
+                </div>
               </div>
 
               <div className="text-center">

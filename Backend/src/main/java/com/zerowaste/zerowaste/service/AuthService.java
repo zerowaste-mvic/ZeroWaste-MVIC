@@ -36,6 +36,7 @@ public class AuthService {
                 .email(request.getEmail().toLowerCase().trim())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("USER")
+                .householdSize(normalizeHouseholdSize(request.getHouseholdSize()))
                 .build();
 
         User saved = Objects.requireNonNull(userRepository.save(user), "Failed to save user");
@@ -56,5 +57,12 @@ public class AuthService {
     private AuthResponse buildAuthResponse(User user) {
         String token = jwtService.generateToken(user);
         return new AuthResponse(token, UserResponse.from(user));
+    }
+
+    private Integer normalizeHouseholdSize(Integer householdSize) {
+        if (householdSize == null) {
+            return null;
+        }
+        return Math.max(1, householdSize);
     }
 }
