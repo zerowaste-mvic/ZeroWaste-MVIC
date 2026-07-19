@@ -115,6 +115,57 @@ public class TwoFactorService {
         return UserResponse.from(saved);
     }
 
+    // ── Login: 2FA-enabled user signs in → send OTP email ──────────────────
+
+    /**
+     * Generates a fresh OTP for a user who is already fully 2FA-enabled and
+     * is attempting to log in. Does not touch pendingTwoFactor/twoFactorEnabled,
+     * since those belong to the enable-2FA flow, not the login flow.
+     */
+    public void initiateLogin2FA(User user) {
+        String otp = generateOtp();
+        user.setOtpCode(otp);
+        user.setOtpExpiresAt(Instant.now().plus(otpExpiryMinutes, ChronoUnit.MINUTES));
+        userRepository.save(user);
+
+        sendOtpEmail(user.getEmail(), user.getFullName(), otp);
+    }
+
+    // ── Login: User submits the login OTP → completes authentication ───────
+
+    /**
+     * Validates the OTP submitted during login for a 2FA-enabled user.
+     * On success, clears the OTP and returns the user so the caller can
+     * issue a JWT. On failure, throws ApiException.
+     */
+    public User verifyLogin2FA(String email, String submittedCode) {
+        User user = userRepository.findByEmail(email.toLowerCase().trim())
+                .orElseThrow(() -> new ApiException("Invalid email or verification code.", HttpStatus.UNAUTHORIZED));
+
+        if (!Boolean.TRUE.equals(user.getTwoFactorEnabled())) {
+            throw new ApiException("Two-factor authentication is not enabled for this account.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (user.getOtpCode() == null || user.getOtpExpiresAt() == null) {
+            throw new ApiException("No OTP found. Please log in again to request a new code.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (Instant.now().isAfter(user.getOtpExpiresAt())) {
+            clearOtp(user);
+            userRepository.save(user);
+            throw new ApiException(
+                    "The verification code has expired. Please log in again to request a new one.",
+                    HttpStatus.GONE);
+        }
+
+        if (!user.getOtpCode().equals(submittedCode.trim())) {
+            throw new ApiException("Invalid verification code. Please try again.", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        clearOtp(user);
+        return userRepository.save(user);
+    }
+
     // ── Resend: User requests a fresh OTP ───────────────────────────────────
 
     /**

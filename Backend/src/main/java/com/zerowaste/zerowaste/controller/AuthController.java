@@ -1,7 +1,9 @@
 package com.zerowaste.zerowaste.controller;
 
 import com.zerowaste.zerowaste.dto.AuthResponse;
+import com.zerowaste.zerowaste.dto.LoginOtpRequest;
 import com.zerowaste.zerowaste.dto.LoginRequest;
+import com.zerowaste.zerowaste.dto.LoginResponse;
 import com.zerowaste.zerowaste.dto.RegisterRequest;
 import com.zerowaste.zerowaste.service.AuthService;
 import jakarta.validation.Valid;
@@ -26,7 +28,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public AuthResponse login(@Valid @RequestBody LoginRequest request) {
+    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @PostMapping("/login/verify-otp")
+    public AuthResponse verifyLoginOtp(@Valid @RequestBody LoginOtpRequest request) {
+        return authService.verifyLogin2FA(request);
     }
 }
