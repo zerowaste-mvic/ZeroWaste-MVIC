@@ -75,6 +75,22 @@ public class UserService {
         return UserResponse.from(saved);
     }
 
+    public UserResponse updateNotifications(Long userId, boolean enabled) {
+        User user = findUser(userId);
+        user.setNotificationsEnabled(enabled);
+        user.setExpiryAlertsEnabled(enabled);
+        user.setDonationUpdatesEnabled(enabled);
+        User saved = userRepository.save(user);
+
+        notify(userId, enabled ? "NOTIFICATIONS_ON" : "NOTIFICATIONS_OFF", "System",
+                "Notifications Updated",
+                enabled
+                        ? "All notification preferences have been turned on."
+                        : "All notification preferences have been turned off.");
+
+        return UserResponse.from(saved);
+    }
+
     public UserResponse updateExpiryAlerts(Long userId, boolean enabled) {
         User user = findUser(userId);
         user.setExpiryAlertsEnabled(enabled);
@@ -85,6 +101,20 @@ public class UserService {
                 enabled
                         ? "Expiry alert notifications have been turned on."
                         : "Expiry alert notifications have been turned off.");
+
+        return UserResponse.from(saved);
+    }
+
+    public UserResponse updateDonationUpdates(Long userId, boolean enabled) {
+        User user = findUser(userId);
+        user.setDonationUpdatesEnabled(enabled);
+        User saved = userRepository.save(user);
+
+        notify(userId, enabled ? "DONATION_UPDATES_ON" : "DONATION_UPDATES_OFF", "Donations",
+                "Donation Updates Updated",
+                enabled
+                        ? "Donation update notifications have been turned on."
+                        : "Donation update notifications have been turned off.");
 
         return UserResponse.from(saved);
     }

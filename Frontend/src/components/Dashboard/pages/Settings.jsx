@@ -131,6 +131,10 @@ export default function Settings({ onProfileUpdated }) {
   const [savingTwoFactor, setSavingTwoFactor] = useState(false);
   const [twoFactorMsg, setTwoFactorMsg] = useState("");
 
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [savingNotifications, setSavingNotifications] = useState(false);
+  const [notificationsMsg, setNotificationsMsg] = useState("");
+
   const [expiryAlerts, setExpiryAlerts] = useState(true);
   const [savingExpiryAlerts, setSavingExpiryAlerts] = useState(false);
   const [expiryAlertsMsg, setExpiryAlertsMsg] = useState("");
@@ -155,7 +159,9 @@ export default function Settings({ onProfileUpdated }) {
         });
         setDonationPublic(data.donationPublic !== false);
         setTwoFactor(data.twoFactorEnabled !== false);
+        setNotificationsEnabled(data.notificationsEnabled !== false);
         setExpiryAlerts(data.expiryAlertsEnabled !== false);
+        setDonationUpdates(data.donationUpdatesEnabled !== false);
       } catch (err) {
         if (!cancelled)
           setProfileMsg({
@@ -256,18 +262,54 @@ export default function Settings({ onProfileUpdated }) {
     }
   };
 
+  const handleToggleNotifications = async (nextValue) => {
+    const previous = notificationsEnabled;
+    setNotificationsEnabled(nextValue);
+    setSavingNotifications(true);
+    setNotificationsMsg("");
+    try {
+      const updated = await userApi.updateNotifications(nextValue);
+      setNotificationsEnabled(updated.notificationsEnabled !== false);
+      setExpiryAlerts(updated.expiryAlertsEnabled !== false);
+      setDonationUpdates(updated.donationUpdatesEnabled !== false);
+    } catch (err) {
+      setNotificationsEnabled(previous);
+      setNotificationsMsg(err.message || "Failed to update notification preferences.");
+    } finally {
+      setSavingNotifications(false);
+    }
+  };
+
   const handleToggleExpiryAlerts = async (nextValue) => {
+    if (!notificationsEnabled) return;
+
     const previous = expiryAlerts;
     setExpiryAlerts(nextValue); // optimistic
     setSavingExpiryAlerts(true);
     setExpiryAlertsMsg("");
     try {
-      await userApi.updateExpiryAlerts(nextValue);
+      const updated = await userApi.updateExpiryAlerts(nextValue);
+      setExpiryAlerts(updated.expiryAlertsEnabled !== false);
     } catch (err) {
       setExpiryAlerts(previous); // rollback
       setExpiryAlertsMsg(err.message || "Failed to update expiry alerts.");
     } finally {
       setSavingExpiryAlerts(false);
+    }
+  };
+
+  const handleToggleDonationUpdates = async (nextValue) => {
+    if (!notificationsEnabled) return;
+
+    const previous = donationUpdates;
+    setDonationUpdates(nextValue);
+    try {
+      const updated = await userApi.updateDonationUpdates(nextValue);
+      setDonationUpdates(updated.donationUpdatesEnabled !== false);
+      setNotificationsEnabled(updated.notificationsEnabled !== false);
+    } catch (err) {
+      setDonationUpdates(previous);
+      setNotificationsMsg(err.message || "Failed to update donation updates.");
     }
   };
 
@@ -580,24 +622,32 @@ export default function Settings({ onProfileUpdated }) {
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Notification Preferences</SectionHeading>
 
-            {expiryAlertsMsg && (
+            {(notificationsMsg || expiryAlertsMsg) && (
               <div className="alert alert-danger py-2 small mb-3">
-                {expiryAlertsMsg}
+                {notificationsMsg || expiryAlertsMsg}
               </div>
             )}
 
             <PreferenceRow
+              title="Notifications"
+              description="Turn all notification types on or off"
+              checked={notificationsEnabled}
+              onChange={handleToggleNotifications}
+              disabled={savingNotifications || loadingProfile}
+            />
+            <PreferenceRow
               title="Expiry Alerts"
-              description="Get notified about items being expiry"
+              description="Get notified about items nearing expiry"
               checked={expiryAlerts}
               onChange={handleToggleExpiryAlerts}
-              disabled={savingExpiryAlerts || loadingProfile}
+              disabled={savingExpiryAlerts || savingNotifications || loadingProfile || !notificationsEnabled}
             />
             <PreferenceRow
               title="Donation Updates"
               description="Get updates about donation activities"
               checked={donationUpdates}
-              onChange={setDonationUpdates}
+              onChange={handleToggleDonationUpdates}
+              disabled={savingNotifications || loadingProfile || !notificationsEnabled}
             />
           </div>
         </div>

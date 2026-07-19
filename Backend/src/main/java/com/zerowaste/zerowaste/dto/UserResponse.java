@@ -16,7 +16,9 @@ public class UserResponse {
     private Integer householdSize;
     private Boolean donationPublic;
     private Boolean twoFactorEnabled;
+    private Boolean notificationsEnabled;
     private Boolean expiryAlertsEnabled;
+    private Boolean donationUpdatesEnabled;
 
     public static UserResponse from(User user) {
         return new UserResponse(
@@ -29,7 +31,9 @@ public class UserResponse {
                 user.getHouseholdSize(),
                 user.getDonationPublic(),
                 user.getTwoFactorEnabled(),
-                user.getExpiryAlertsEnabled()
+                user.getNotificationsEnabled(),
+                user.getExpiryAlertsEnabled(),
+                user.getDonationUpdatesEnabled()
         );
     }
 }

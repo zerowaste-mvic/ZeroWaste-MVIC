@@ -29,7 +29,26 @@ export default function Dashboard({ onNavigate }) {
 
   useEffect(() => {
     if (activePage === "notifications") return;
-    refreshUnreadCount;
+
+    let isMounted = true;
+    const loadUnreadCount = async () => {
+      try {
+        const data = await notificationApi.getUnreadCount();
+        if (isMounted) {
+          setUnreadCount(data?.count || 0);
+        }
+      } catch {
+        // Non-critical — badge just stays at its last known value.
+      }
+    };
+
+    loadUnreadCount();
+    const intervalId = window.setInterval(loadUnreadCount, 15000);
+
+    return () => {
+      isMounted = false;
+      window.clearInterval(intervalId);
+    };
   }, [activePage]);
 
   const handleFoodAdded = () => {
@@ -44,9 +63,6 @@ export default function Dashboard({ onNavigate }) {
   const handleNavigate = (page, data) => {
     if (page === "edit-food" && data) {
       setEditingItem(data);
-    }
-    if (page === "notifications") {
-      setUnreadCount(0);
     }
     setActivePage(page);
   };

@@ -108,8 +108,22 @@ export const userApi = {
     });
   },
 
+  updateNotifications(enabled) {
+    return request("/api/users/me/notifications", {
+      method: "PUT",
+      body: JSON.stringify({ enabled }),
+    });
+  },
+
   updateExpiryAlerts(enabled) {
     return request("/api/users/me/expiry-alerts", {
+      method: "PUT",
+      body: JSON.stringify({ enabled }),
+    });
+  },
+
+  updateDonationUpdates(enabled) {
+    return request("/api/users/me/donation-updates", {
       method: "PUT",
       body: JSON.stringify({ enabled }),
     });

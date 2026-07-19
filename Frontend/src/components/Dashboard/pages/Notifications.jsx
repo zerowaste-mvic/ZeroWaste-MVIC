@@ -42,20 +42,7 @@ export default function Notifications({ onUnreadCountChange }) {
     try {
       const data = await notificationApi.getAll();
       const list = Array.isArray(data) ? data : [];
-      // Keep each item's original read/unread flag so the list can still
-      // highlight what's new — but the badge itself is cleared the moment
-      // this page opens (matches the bell-icon "seen it" behavior).
       setNotifications(list);
-      onUnreadCountChange?.(0);
-
-      const hadUnread = list.some((n) => !n.read);
-      if (hadUnread) {
-        // Persist the "seen" state in the background so a future reload
-        // doesn't bring the badge count back.
-        notificationApi.markAllRead().catch(() => {
-          // Non-critical — worst case the badge reappears next time.
-        });
-      }
     } catch (err) {
       setErrMsg(err.message || "Failed to load notifications.");
     } finally {
@@ -64,6 +51,7 @@ export default function Notifications({ onUnreadCountChange }) {
   };
 
   useEffect(() => {
+    onUnreadCountChange?.(0);
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -49,10 +49,24 @@ public class UserController {
         return userService.updateTwoFactor(userId, request.getEnabled());
     }
 
+    @PutMapping("/me/notifications")
+    public UserResponse updateNotifications(
+            @Valid @RequestBody ToggleRequest request,
+            @AuthenticationPrincipal Long userId) {
+        return userService.updateNotifications(userId, request.getEnabled());
+    }
+
     @PutMapping("/me/expiry-alerts")
     public UserResponse updateExpiryAlerts(
             @Valid @RequestBody ToggleRequest request,
             @AuthenticationPrincipal Long userId) {
         return userService.updateExpiryAlerts(userId, request.getEnabled());
+    }
+
+    @PutMapping("/me/donation-updates")
+    public UserResponse updateDonationUpdates(
+            @Valid @RequestBody ToggleRequest request,
+            @AuthenticationPrincipal Long userId) {
+        return userService.updateDonationUpdates(userId, request.getEnabled());
     }
 }
