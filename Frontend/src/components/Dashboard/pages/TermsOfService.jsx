@@ -141,7 +141,7 @@ export default function TermsOfService({ onNavigate }) {
       <div
         style={{
           background: colors.white,
-          borderBottom: `1px solid ${colors.border}`,
+          borderBottom: `2px solid ${colors.greenLrgb}`,
           padding: "1rem 0",
           position: "sticky",
           top: 0,

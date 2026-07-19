@@ -196,8 +196,14 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
           }            
 
-          .cancel-btn:hover:not(:disabled){
-            opacity:1 !important;
+          .cancel-btn{
+            transition: all 0.25s ease;
+          }
+
+          .cancel-btn:hover{
+            opacity: 1 !important;
+            background:${colors.greenLrgb};
+            border-color: transparent;
           }
           `}
       </style>
@@ -209,6 +215,7 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
           fontWeight: 700,
           color: colors.charcoal,
           marginBottom: "0.25rem",
+          opacity: 0.75,
         }}
       >
         Add Food Items

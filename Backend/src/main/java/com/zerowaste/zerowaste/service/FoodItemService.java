@@ -1,5 +1,16 @@
 package com.zerowaste.zerowaste.service;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import com.zerowaste.zerowaste.dto.DonateRequest;
 import com.zerowaste.zerowaste.dto.FoodItemRequest;
 import com.zerowaste.zerowaste.dto.FoodItemResponse;
@@ -14,22 +25,12 @@ import com.zerowaste.zerowaste.repository.FoodActivityLogRepository;
 import com.zerowaste.zerowaste.repository.FoodItemRepository;
 import com.zerowaste.zerowaste.repository.NotificationRepository;
 import com.zerowaste.zerowaste.repository.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Service
 public class FoodItemService {
 
-    private static final Set<String> ALLOWED_CATEGORIES = Set.of("Dairy", "Meat", "Fruits", "Vegetable");
-    private static final Set<String> ALLOWED_UNITS = Set.of("Kg", "Ltr");
+    private static final Set<String> ALLOWED_CATEGORIES = Set.of("Dairy", "Meat", "Fruits", "Vegetable", "Other");
+    private static final Set<String> ALLOWED_UNITS = Set.of("Kg", "Ltr", "Gram");
 
     private final FoodItemRepository foodItemRepository;
     private final UserRepository userRepository;
@@ -38,10 +39,10 @@ public class FoodItemService {
     private final FoodActivityLogRepository activityLogRepository;
 
     public FoodItemService(FoodItemRepository foodItemRepository,
-                            UserRepository userRepository,
-                            DonationClaimRequestRepository claimRequestRepository,
-                            NotificationRepository notificationRepository,
-                            FoodActivityLogRepository activityLogRepository) {
+            UserRepository userRepository,
+            DonationClaimRequestRepository claimRequestRepository,
+            NotificationRepository notificationRepository,
+            FoodActivityLogRepository activityLogRepository) {
         this.foodItemRepository = foodItemRepository;
         this.userRepository = userRepository;
         this.claimRequestRepository = claimRequestRepository;
@@ -169,8 +170,8 @@ public class FoodItemService {
 
     /**
      * Marks an item as successfully used (eaten/cooked) before it went to
-     * waste. Logs a USED event — which is what "Food Saved" on the
-     * Analytics page counts — then removes the item from the inventory.
+     * waste. Logs a USED event — which is what "Food Saved" on the Analytics
+     * page counts — then removes the item from the inventory.
      */
     public FoodItemResponse markUsed(Long id, Long userId) {
         FoodItem item = foodItemRepository.findByIdAndUserId(id, userId)
@@ -194,11 +195,11 @@ public class FoodItemService {
     }
 
     /**
-     * Broadcasts "X has put Y up for donation" to every other user, so
-     * anyone browsing can find out about new donations without having to
-     * keep refreshing Browse Food Item. Only fires when the donor's
-     * donations are set to public — a private donation stays private,
-     * including the fact that it exists.
+     * Broadcasts "X has put Y up for donation" to every other user, so anyone
+     * browsing can find out about new donations without having to keep
+     * refreshing Browse Food Item. Only fires when the donor's donations are
+     * set to public — a private donation stays private, including the fact that
+     * it exists.
      */
     private void notifyEveryoneOfNewDonation(FoodItem item, Long donorId) {
         User donor = userRepository.findById(donorId).orElseThrow(() -> new ApiException("User not found.", HttpStatus.NOT_FOUND));
@@ -216,25 +217,25 @@ public class FoodItemService {
         Instant now = Instant.now();
         List<Notification> broadcast = everyoneElse.stream()
                 .map(u -> Notification.builder()
-                        .userId(u.getId())
-                        .type("NEW_DONATION")
-                        .category("Donations")
-                        .title("New Donation Available")
-                        .message(donor.getFullName() + " has put \"" + item.getName() + "\" up for donation. Check it out in Browse Food Item!")
-                        .read(false)
-                        .resolved(true)
-                        .itemName(item.getName())
-                        .createdAt(now)
-                        .build())
+                .userId(u.getId())
+                .type("NEW_DONATION")
+                .category("Donations")
+                .title("New Donation Available")
+                .message(donor.getFullName() + " has put \"" + item.getName() + "\" up for donation. Check it out in Browse Food Item!")
+                .read(false)
+                .resolved(true)
+                .itemName(item.getName())
+                .createdAt(now)
+                .build())
                 .toList();
 
         notificationRepository.saveAll(broadcast);
     }
 
     /**
-     * Removes an item outright. If it had already expired and wasn't
-     * donated, this counts as waste for the Analytics page — deleting a
-     * still-good item you simply don't want anymore does not.
+     * Removes an item outright. If it had already expired and wasn't donated,
+     * this counts as waste for the Analytics page — deleting a still-good item
+     * you simply don't want anymore does not.
      */
     public void delete(Long id, Long userId) {
         FoodItem item = foodItemRepository.findByIdAndUserId(id, userId)

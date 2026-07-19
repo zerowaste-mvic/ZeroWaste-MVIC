@@ -26,7 +26,10 @@ function formatMonthYear(date) {
 }
 
 function dayKey(date) {
-  return date.toISOString().split("T")[0];
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
 }
 
 function loadMeals() {
@@ -44,10 +47,10 @@ function saveMeals(meals) {
 const DAY_SHORT = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 export default function MealPlanner() {
-  const [viewMode, setViewMode] = useState("week"); // 'week' | 'month'
+  const [viewMode, setViewMode] = useState("week");
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [meals, setMeals] = useState(loadMeals);
-  const [editing, setEditing] = useState(null); // { key, meal, value }
+  const [editing, setEditing] = useState(null);
 
   const weekDays = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
@@ -121,7 +124,7 @@ export default function MealPlanner() {
 
   const today = dayKey(new Date());
 
-  const cellBorder = `1px solid ${colors.border}`;
+  const cellBorder = `2px solid ${colors.greenLrgb}`;
 
   return (
     <div>
@@ -133,6 +136,7 @@ export default function MealPlanner() {
             fontSize: "1.60rem",
             fontWeight: 700,
             color: colors.charcoal,
+            opacity: 0.75,
             marginBottom: "0.25rem",
           }}
         >
@@ -145,7 +149,6 @@ export default function MealPlanner() {
 
       <SuggestedMeals />
 
-      {/* Controls row */}
       <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <div className="d-flex align-items-center gap-2">
           <button
@@ -156,7 +159,7 @@ export default function MealPlanner() {
               width: 32,
               height: 32,
               borderRadius: 8,
-              border: `1.5px solid ${colors.border}`,
+              border: `2px solid ${colors.greenLrgb}`,
               background: "white",
               padding: 0,
             }}
@@ -184,7 +187,7 @@ export default function MealPlanner() {
               width: 32,
               height: 32,
               borderRadius: 8,
-              border: `1.5px solid ${colors.border}`,
+              border: `2px solid ${colors.greenLrgb}`,
               background: "white",
               padding: 0,
             }}
@@ -193,11 +196,10 @@ export default function MealPlanner() {
           </button>
         </div>
 
-        {/* Week / Month toggle */}
         <div
           className="d-flex"
           style={{
-            border: `1.5px solid ${colors.border}`,
+            border: `2px solid ${colors.greenLrgb}`,
             borderRadius: 10,
             overflow: "hidden",
             background: "white",
@@ -213,11 +215,12 @@ export default function MealPlanner() {
                 fontSize: "0.875rem",
                 fontWeight: 600,
                 border: "none",
-                background: viewMode === mode ? colors.charcoal : "transparent",
+                background:
+                  viewMode === mode ? colors.greenLrgb : "transparent",
                 color: viewMode === mode ? "white" : colors.muted,
                 cursor: "pointer",
                 textTransform: "capitalize",
-                transition: "background 0.15s",
+                transition: "background 0.15s ease",
               }}
             >
               {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -229,7 +232,7 @@ export default function MealPlanner() {
       {/* Calendar card */}
       <div
         className="bg-white rounded-4 overflow-hidden"
-        style={{ border: `1.5px solid ${colors.border}` }}
+        style={{ border: `2px solid ${colors.greenLrgb}` }}
       >
         {viewMode === "week" ? (
           <div style={{ overflowX: "auto" }}>
@@ -241,8 +244,7 @@ export default function MealPlanner() {
               }}
             >
               <thead>
-                <tr style={{ background: colors.cream }}>
-                  {/* meal label col */}
+                <tr style={{ background: colors.showcase_green }}>
                   <th
                     style={{
                       width: 90,
@@ -305,6 +307,7 @@ export default function MealPlanner() {
                         padding: "0 14px",
                         verticalAlign: "middle",
                         width: 90,
+                        background: colors.showcase_green,
                       }}
                     >
                       <span
@@ -333,8 +336,8 @@ export default function MealPlanner() {
                             height: 90,
                             cursor: "pointer",
                             background: isEditingThis
-                              ? "#f0faf4"
-                              : "transparent",
+                              ? colors.authGreen
+                              : colors.white,
                           }}
                           onClick={() => !isEditingThis && startEdit(d, meal)}
                         >
@@ -387,7 +390,7 @@ export default function MealPlanner() {
                                 <span
                                   style={{
                                     fontSize: "0.75rem",
-                                    color: "#d1d5db",
+                                    color: colors.charcoal,
                                   }}
                                 >
                                   + Add meal
@@ -399,7 +402,7 @@ export default function MealPlanner() {
                                     marginTop: 8,
                                     height: 2,
                                     width: "60%",
-                                    background: colors.border,
+                                    background: colors.greenLrgb,
                                     borderRadius: 2,
                                   }}
                                 />

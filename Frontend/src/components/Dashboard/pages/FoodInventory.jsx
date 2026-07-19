@@ -114,6 +114,7 @@ export default function FoodInventory({ onNavigate }) {
           fontWeight: 700,
           color: colors.charcoal,
           marginBottom: "0.25rem",
+          opacity: 0.75,
         }}
       >
         Food Inventory
@@ -167,8 +168,10 @@ export default function FoodInventory({ onNavigate }) {
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
           }
 
-          .used-btn:hover:not(:disabled){
-            opacity:1 !important;
+          .used-btn:hover{
+            opacity: 1 !important;
+            background:${colors.greenLrgb};
+            border-color: transparent;
           }
         `}
       </style>

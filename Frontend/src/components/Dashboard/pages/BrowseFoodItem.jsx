@@ -11,8 +11,15 @@ import {
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
 
-const CATEGORIES = ["All Categories", "Fruits", "Vegetable", "Dairy", "Meat"];
-const PAGE_SIZE = 6;
+const CATEGORIES = [
+  "All Categories",
+  "Fruits",
+  "Vegetable",
+  "Dairy",
+  "Meat",
+  "Other",
+];
+const PAGE_SIZE = 10;
 
 const DEFAULT_IMAGE_BY_CATEGORY = {
   Fruits:
@@ -179,19 +186,25 @@ export default function BrowseFoodItem({ onNavigate }) {
       <div>
         <style>
           {`
-          .claim-btn{
+            .contact-btn{
+            transition: all 0.25s ease;
+          }
+
+          .contact-btn:hover{
+            opacity: 1 !important;
+            background:${colors.greenLrgb};
+            border-color: transparent;
+          }
+
+          .claim-food{
             opacity: 0.75;
             transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
           }
 
-          .claim-btn:hover:not(:disabled){
-            opacity: 1;
+          .claim-food:hover:not(:disabled){
+            opacity: 1 !important;
             transform: translateY(-1px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
-          }
-
-          .contact-btn:hover:not(:disabled){
-            opacity:1 !important;
           }
         `}
         </style>
@@ -415,7 +428,7 @@ export default function BrowseFoodItem({ onNavigate }) {
                   </button>
                   <button
                     type="button"
-                    className="btn px-4 claim-btn"
+                    className="btn px-4 claim-food"
                     style={{
                       ...btnPrimaryStyle,
                       borderRadius: 4,
@@ -453,6 +466,15 @@ export default function BrowseFoodItem({ onNavigate }) {
             transform: translateY(-1px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
             }
+
+            .search{
+          outline:none;
+            border-color: ${colors.greenL};
+          }
+          .search:focus{
+            border-color: ${colors.greenLrgb};
+            box-shadow: 0 0 0 0.23rem ${colors.greenLrgb};
+          }
         `}
       </style>
       <h1
@@ -462,6 +484,7 @@ export default function BrowseFoodItem({ onNavigate }) {
           fontWeight: 700,
           color: colors.charcoal,
           marginBottom: "0.25rem",
+          opacity: 0.75,
         }}
       >
         Browse Food Items
@@ -487,7 +510,7 @@ export default function BrowseFoodItem({ onNavigate }) {
           />
           <input
             type="text"
-            className="form-control"
+            className="form-control search"
             style={{
               paddingLeft: "2.4rem",
               borderRadius: 7,

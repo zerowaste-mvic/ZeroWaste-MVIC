@@ -1,5 +1,11 @@
 package com.zerowaste.zerowaste.service;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.zerowaste.zerowaste.exception.ApiException;
 import com.zerowaste.zerowaste.model.DonationClaimRequest;
 import com.zerowaste.zerowaste.model.FoodItem;
@@ -9,11 +15,6 @@ import com.zerowaste.zerowaste.repository.DonationClaimRequestRepository;
 import com.zerowaste.zerowaste.repository.FoodItemRepository;
 import com.zerowaste.zerowaste.repository.NotificationRepository;
 import com.zerowaste.zerowaste.repository.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class DonationRequestService {
@@ -24,9 +25,9 @@ public class DonationRequestService {
     private final NotificationRepository notificationRepository;
 
     public DonationRequestService(FoodItemRepository foodItemRepository,
-                                   UserRepository userRepository,
-                                   DonationClaimRequestRepository claimRequestRepository,
-                                   NotificationRepository notificationRepository) {
+            UserRepository userRepository,
+            DonationClaimRequestRepository claimRequestRepository,
+            NotificationRepository notificationRepository) {
         this.foodItemRepository = foodItemRepository;
         this.userRepository = userRepository;
         this.claimRequestRepository = claimRequestRepository;
@@ -93,9 +94,9 @@ public class DonationRequestService {
 
     /**
      * Donor accepts a specific claim request: the item moves into that
-     * requester's Food Inventory, and every other pending request for the
-     * same item is automatically declined (with a notification to each of
-     * those other requesters).
+     * requester's Food Inventory, and every other pending request for the same
+     * item is automatically declined (with a notification to each of those
+     * other requesters).
      */
     @Transactional
     public void accept(Long notificationId, Long donorUserId) {

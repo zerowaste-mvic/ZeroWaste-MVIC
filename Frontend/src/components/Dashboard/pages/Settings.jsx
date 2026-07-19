@@ -6,12 +6,12 @@ import { userApi } from "../../../services/api";
 import { getStoredUser, setStoredUser } from "../../../utils/auth";
 
 const inputStyle = {
-  borderColor: colors.border,
-  borderWidth: "1.5px",
+  borderColor: colors.greenLrgb,
+  borderWidth: "2px",
   borderRadius: 8,
   fontSize: "0.9rem",
   padding: "0.6rem 0.9rem",
-  background: "#fbf8f2",
+  background: colors.white,
 };
 
 const labelStyle = {
@@ -22,19 +22,19 @@ const labelStyle = {
 };
 
 const cardStyle = {
-  background: "#f7f2df",
-  border: `1px solid ${colors.border}`,
+  background: colors.authBg,
+  border: `2px solid ${colors.greenLrgb}`,
 };
 
 function SectionHeading({ children }) {
   return (
     <h5
       style={{
-        fontFamily: fonts.display,
-        fontWeight: 700,
+        fontFamily: fonts.body,
+        fontWeight: 500,
         color: colors.charcoal,
         display: "inline-block",
-        borderBottom: `2px solid ${colors.green}`,
+        borderBottom: `2px solid ${colors.greenLrgb}`,
         paddingBottom: 4,
         marginBottom: "1.25rem",
       }}
@@ -58,14 +58,14 @@ function ToggleSwitch({ checked, onChange, disabled }) {
         width: 46,
         height: 26,
         borderRadius: 999,
-        border: `1.5px solid ${checked ? colors.green : colors.border}`,
-        background: checked ? colors.green : "#fff",
+        border: `1.5px solid ${checked ? colors.green : colors.greenL}`,
+        background: checked ? colors.greenL : colors.white,
         position: "relative",
         padding: 0,
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.6 : 1,
         flexShrink: 0,
-        transition: "background 0.15s, border-color 0.15s",
+        transition: "all 0.15s ease",
       }}
     >
       <span
@@ -76,8 +76,8 @@ function ToggleSwitch({ checked, onChange, disabled }) {
           width: 20,
           height: 20,
           borderRadius: "50%",
-          background: checked ? "#fff" : colors.muted,
-          transition: "left 0.15s",
+          background: checked ? colors.white : "#778873",
+          transition: "left 0.15s ease",
         }}
       />
     </button>
@@ -264,13 +264,99 @@ export default function Settings({ onProfileUpdated }) {
     }
   };
 
+  const [showPwdModal, setShowPwdModal] = useState(false);
+  const [pwdForm, setPwdForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [savingPwd, setSavingPwd] = useState(false);
+  const [pwdMsg, setPwdMsg] = useState({ type: "", text: "" });
+
+  const handlePwdChange = (e) => {
+    const { name, value } = e.target;
+    setPwdForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (pwdForm.newPassword !== pwdForm.confirmPassword) {
+      setPwdMsg({ type: "danger", text: "New passwords do not match." });
+      return;
+    }
+    setSavingPwd(true);
+    setPwdMsg({ type: "", text: "" });
+    try {
+      await userApi.changePassword({
+        currentPassword: pwdForm.currentPassword,
+        newPassword: pwdForm.newPassword,
+      });
+      setPwdMsg({ type: "success", text: "Password updated successfully." });
+      setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+      setShowPwdModal(false);
+    } catch (err) {
+      setPwdMsg({
+        type: "danger",
+        text: err.message || "Failed to update password.",
+      });
+    } finally {
+      setSavingPwd(false);
+    }
+  };
+
   return (
     <div>
+      <style>
+        {`
+          .changePwd-btn {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .changePwd-btn:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+            .save-changes {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .save-changes:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+
+          .save-password {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .save-password:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+
+          .cancel-btn{
+            transition: all 0.25s ease;
+          }
+
+          .cancel-btn:hover{
+            opacity: 1 !important;
+            background:${colors.greenLrgb};
+            border-color: transparent;
+          }
+        `}
+      </style>
       <div className="mb-4">
         <h1
           style={{
-            fontFamily: fonts.display,
-            fontSize: "1.75rem",
+            opacity: 0.75,
+            fontFamily: fonts.body,
+            fontSize: "1.60rem",
             fontWeight: 700,
             color: colors.charcoal,
             marginBottom: "0.25rem",
@@ -383,15 +469,19 @@ export default function Settings({ onProfileUpdated }) {
               <div className="text-center">
                 <button
                   type="submit"
-                  className="btn px-4"
+                  className="btn px-4 save-changes"
                   style={{
                     ...btnPrimaryStyle,
-                    background: colors.green,
-                    borderColor: colors.green,
+                    color: colors.white,
+                    fontWeight: 600,
+                    padding: "0 1rem",
+                    fontSize: "0.9rem",
+                    height: 40,
+                    borderRadius: 4,
                   }}
                   disabled={loadingProfile || savingProfile}
                 >
-                  {savingProfile ? "Saving…" : "Save Changes"}
+                  Save Changes
                 </button>
               </div>
             </form>
@@ -403,20 +493,6 @@ export default function Settings({ onProfileUpdated }) {
           {/* Security — visual replica only, no backend function */}
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Security</SectionHeading>
-
-            <button
-              type="button"
-              className="btn mb-4"
-              style={{
-                ...btnPrimaryStyle,
-                background: "#c3d9b8",
-                borderColor: "#c3d9b8",
-                color: colors.charcoal,
-                fontWeight: 700,
-              }}
-            >
-              Change Password
-            </button>
 
             {twoFactorMsg && (
               <div className="alert alert-danger py-2 small mb-3">
@@ -431,6 +507,22 @@ export default function Settings({ onProfileUpdated }) {
               onChange={handleToggleTwoFactor}
               disabled={savingTwoFactor || loadingProfile}
             />
+            <button
+              type="button"
+              className="btn mb-4 changePwd-btn"
+              style={{
+                ...btnPrimaryStyle,
+                color: colors.white,
+                fontWeight: 600,
+                padding: "0 1rem",
+                fontSize: "0.9rem",
+                height: 40,
+                borderRadius: 4,
+              }}
+              onClick={() => setShowPwdModal(true)}
+            >
+              Change Password
+            </button>
           </div>
 
           {/* Privacy — the one functional toggle */}
@@ -448,7 +540,7 @@ export default function Settings({ onProfileUpdated }) {
               description={
                 donationPublic
                   ? "Visible to everyone in Browse Food Item."
-                  : "Only visible to you — hidden from everyone else."
+                  : "Only visible to you - hidden from everyone else."
               }
               checked={donationPublic}
               onChange={handleTogglePrivacy}
@@ -456,7 +548,6 @@ export default function Settings({ onProfileUpdated }) {
             />
           </div>
 
-          {/* Notification Preferences — visual replicas only, no backend function */}
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Notification Preferences</SectionHeading>
 
@@ -482,6 +573,124 @@ export default function Settings({ onProfileUpdated }) {
           </div>
         </div>
       </div>
+      {showPwdModal && (
+        <div
+          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+          style={{ background: "rgba(0,0,0,0.4)", zIndex: 99 }}
+        >
+          <div
+            className="rounded-2 p-4"
+            style={{ background: colors.authBg, width: 380, maxWidth: "90%" }}
+          >
+            <h5 style={{ fontFamily: fonts.body, color: colors.charcoal }}>
+              Change Password
+            </h5>
+
+            {pwdMsg.text && (
+              <div
+                className={`alert alert-${pwdMsg.type === "success" ? "success" : "danger"} py-2 small`}
+              >
+                {pwdMsg.text}
+              </div>
+            )}
+
+            <form onSubmit={handleChangePassword}>
+              <div className="mb-3">
+                <label className="form-label" style={labelStyle}>
+                  Current Password:
+                </label>
+                <input
+                  type="password"
+                  name="currentPassword"
+                  className="form-control"
+                  style={inputStyle}
+                  value={pwdForm.currentPassword}
+                  onChange={handlePwdChange}
+                  disabled={savingPwd}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label" style={labelStyle}>
+                  New Password:
+                </label>
+                <input
+                  type="password"
+                  name="newPassword"
+                  className="form-control"
+                  style={inputStyle}
+                  value={pwdForm.newPassword}
+                  onChange={handlePwdChange}
+                  disabled={savingPwd}
+                  required
+                  minLength={8}
+                />
+              </div>
+              <div className="mb-4">
+                <label className="form-label" style={labelStyle}>
+                  Confirm New Password:
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className="form-control"
+                  style={inputStyle}
+                  value={pwdForm.confirmPassword}
+                  onChange={handlePwdChange}
+                  disabled={savingPwd}
+                  required
+                />
+              </div>
+
+              <div className="d-flex justify-content-end gap-2">
+                <button
+                  type="button"
+                  className="btn cancel-btn"
+                  style={{
+                    opacity: 0.65,
+                    borderColor: colors.green,
+                    color: colors.charcoal,
+                    fontWeight: 600,
+                    borderRadius: 4,
+                    borderWidth: "2px",
+                    padding: "0.45rem 1.25rem",
+                    fontSize: "0.9rem",
+                    transition: "all 0.5s ease",
+                  }}
+                  onClick={() => {
+                    setShowPwdModal(false);
+                    setPwdMsg({ type: "", text: "" });
+                    setPwdForm({
+                      currentPassword: "",
+                      newPassword: "",
+                      confirmPassword: "",
+                    });
+                  }}
+                  disabled={savingPwd}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn save-password"
+                  style={{
+                    ...btnPrimaryStyle,
+                    color: colors.white,
+                    fontWeight: 600,
+                    padding: "0 1rem",
+                    fontSize: "0.9rem",
+                    height: 40,
+                    borderRadius: 4,
+                  }}
+                  disabled={savingPwd}
+                >
+                  Save Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

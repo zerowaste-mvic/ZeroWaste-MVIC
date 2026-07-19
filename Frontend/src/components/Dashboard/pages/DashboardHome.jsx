@@ -9,6 +9,7 @@ export default function DashboardHome() {
           fontSize: "1.60rem",
           fontWeight: 700,
           color: colors.charcoal,
+          opacity: 0.75,
         }}
       >
         Dashboard
