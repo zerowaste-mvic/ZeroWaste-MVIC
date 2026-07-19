@@ -32,7 +32,7 @@ export default function Notifications({ onUnreadCountChange }) {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
-  const [activeTab, setActiveTab] = useState("All");
+  const [activeFilter, setActiveFilter] = useState("All");
   const [actioningId, setActioningId] = useState(null);
   const [actionErr, setActionErr] = useState("");
 
@@ -69,9 +69,9 @@ export default function Notifications({ onUnreadCountChange }) {
   }, []);
 
   const filtered = useMemo(() => {
-    if (activeTab === "All") return notifications;
-    return notifications.filter((n) => n.category === activeTab);
-  }, [notifications, activeTab]);
+    if (activeFilter === "All") return notifications;
+    return notifications.filter((n) => n.category === activeFilter);
+  }, [notifications, activeFilter]);
 
   const handleMarkAllRead = async () => {
     try {
@@ -111,6 +111,30 @@ export default function Notifications({ onUnreadCountChange }) {
 
   return (
     <div>
+      <style>
+        {`
+
+        .mark-btn {
+            opacity: 0.75;
+            transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+          }
+
+          .mark-btn:hover:not(:disabled) {
+            opacity: 1;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+          }
+          .fltr-btn{
+          padding: "0.5rem 1.4rem",
+          fontSize: "0.9rem",
+          border: "none",
+          borderRadius: 6,
+          color: isActive ? "white" : colors.charcoal,
+          cursor: "pointer",
+          transition: "all 0.15s ease",
+          }
+        `}
+      </style>
       <div className="mb-4">
         <h1
           style={{
@@ -132,38 +156,42 @@ export default function Notifications({ onUnreadCountChange }) {
 
       <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
         <div className="d-flex flex-wrap gap-2">
-          {TABS.map((tab) => (
-            <button
-              key={tab}
-              type="button"
-              className="btn btn-sm"
-              onClick={() => setActiveTab(tab)}
-              style={
-                activeTab === tab
-                  ? {
-                      ...btnPrimaryStyle,
-                      background: colors.green,
-                      borderColor: colors.green,
-                    }
-                  : {
-                      ...btnOutlineStyle,
-                      borderColor: colors.border,
-                      color: colors.charcoal,
-                    }
-              }
-            >
-              {tab}
-            </button>
-          ))}
+          {TABS.map((tab) => {
+            const isActive = activeFilter === tab;
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setActiveFilter(tab)}
+                className="fw-semibold"
+                style={{
+                  padding: "0.5rem 1.4rem",
+                  fontSize: "0.9rem",
+                  border: "none",
+                  borderRadius: 6,
+                  background: isActive ? colors.greenL : colors.low_greenFade,
+                  color: isActive ? "white" : colors.charcoal,
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                {tab}
+              </button>
+            );
+          })}
         </div>
 
         <button
           type="button"
-          className="btn btn-sm"
+          className="btn btn-sm mark-btn"
           style={{
             ...btnPrimaryStyle,
-            background: colors.green,
-            borderColor: colors.green,
+            borderRadius: 4,
+            fontWeight: 600,
+            padding: "0.45rem 1.15rem",
+            fontSize: "0.9rem",
+            color: colors.white,
+            transition: "all 0.5s ease",
           }}
           onClick={handleMarkAllRead}
         >
@@ -191,10 +219,10 @@ export default function Notifications({ onUnreadCountChange }) {
             return (
               <div
                 key={n.id}
-                className="d-flex align-items-start justify-content-between gap-3 rounded-3 p-3"
+                className="d-flex align-items-start justify-content-between gap-3 rounded-2 p-3"
                 style={{
-                  background: n.read ? "#fbfaf4" : "#f7f2c8",
-                  border: `1px solid ${colors.border}`,
+                  background: n.read ? colors.authBg : colors.showcase_green,
+                  border: `1px solid ${colors.greenLrgb}`,
                 }}
               >
                 <div style={{ minWidth: 0 }}>
@@ -234,11 +262,12 @@ export default function Notifications({ onUnreadCountChange }) {
                 </div>
 
                 <span
-                  className="flex-shrink-0 rounded-pill px-3 py-1 small fw-semibold"
+                  className="flex-shrink-0 rounded-2 px-3 py-1 small fw-semibold"
                   style={{
-                    background: "#dcead2",
+                    background: colors.greenLrgb,
                     color: colors.charcoal,
                     whiteSpace: "nowrap",
+                    opacity: 0.7,
                   }}
                 >
                   {timeAgo(n.createdAt)}

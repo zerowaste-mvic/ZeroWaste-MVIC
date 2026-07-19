@@ -35,7 +35,7 @@ export default function Header({ onNavigate }) {
 
           .btn-outline:hover{
             opacity: 1 !important;
-            background:${colors.greenL};
+            background:${colors.greenLrgb};
             border-color: transparent;
           }
 

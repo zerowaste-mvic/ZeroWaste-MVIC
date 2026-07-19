@@ -186,19 +186,25 @@ export default function BrowseFoodItem({ onNavigate }) {
       <div>
         <style>
           {`
-          .claim-btn{
+            .contact-btn{
+            transition: all 0.25s ease;
+          }
+
+          .contact-btn:hover{
+            opacity: 1 !important;
+            background:${colors.greenLrgb};
+            border-color: transparent;
+          }
+
+          .claim-food{
             opacity: 0.75;
             transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
           }
 
-          .claim-btn:hover:not(:disabled){
-            opacity: 1;
+          .claim-food:hover:not(:disabled){
+            opacity: 1 !important;
             transform: translateY(-1px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
-          }
-
-          .contact-btn:hover:not(:disabled){
-            opacity:1 !important;
           }
         `}
         </style>
@@ -422,7 +428,7 @@ export default function BrowseFoodItem({ onNavigate }) {
                   </button>
                   <button
                     type="button"
-                    className="btn px-4 claim-btn"
+                    className="btn px-4 claim-food"
                     style={{
                       ...btnPrimaryStyle,
                       borderRadius: 4,

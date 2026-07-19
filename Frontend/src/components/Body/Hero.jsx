@@ -51,7 +51,7 @@ export default function Hero() {
             .btn-outline:hover:not(:disabled) {
             opacity: 1;
             bordercolor: transparent;
-            background:${colors.green};
+            background:${colors.greenLrgb};
             }
 
             .sw-label:hover:not(:disabled) {
