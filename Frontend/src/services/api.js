@@ -244,8 +244,17 @@ export const analyticsApi = {
       { method: "GET" },
     );
   },
+<<<<<<< HEAD
 
   getCommunityImpact() {
     return request("/api/analytics/community-impact", { method: "GET" });
   },
+=======
+  getWasteBreakdown(period) {
+  return request(
+    `/api/analytics/waste-breakdown?period=${encodeURIComponent(period)}`,
+    { method: "GET" },
+  );
+},
+>>>>>>> b4ac11a3388fbe8f684eb562487e24869018df2d
 };

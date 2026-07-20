@@ -39,8 +39,18 @@ public class AnalyticsController {
         return analyticsService.getFoodSavedBreakdown(userId, period);
     }
 
+<<<<<<< HEAD
     @GetMapping("/community-impact")
     public CommunityImpactResponse communityImpact(@AuthenticationPrincipal Long userId) {
         return analyticsService.getCommunityImpact(userId);
     }
 }
+=======
+    @GetMapping("/waste-breakdown")
+public ChartBreakdownResponse wasteBreakdown(
+        @RequestParam(defaultValue = "month") String period,
+        @AuthenticationPrincipal Long userId) {
+    return analyticsService.getWasteBreakdown(userId, period);
+}
+}
+>>>>>>> b4ac11a3388fbe8f684eb562487e24869018df2d

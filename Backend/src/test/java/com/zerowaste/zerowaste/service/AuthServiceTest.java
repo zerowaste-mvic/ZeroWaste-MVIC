@@ -2,6 +2,7 @@ package com.zerowaste.zerowaste.service;
 
 import com.zerowaste.zerowaste.dto.AuthResponse;
 import com.zerowaste.zerowaste.dto.RegisterRequest;
+import com.zerowaste.zerowaste.dto.RegisterResponse;
 import com.zerowaste.zerowaste.model.User;
 import com.zerowaste.zerowaste.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -45,7 +46,7 @@ class AuthServiceTest {
         when(jwtService.generateToken(any(User.class))).thenReturn("token");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        AuthResponse response = authService.register(request);
+        RegisterResponse response = authService.register(request);
 
         assertThat(response.getUser().getHouseholdSize()).isEqualTo(4);
 

@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -21,8 +22,8 @@ import com.zerowaste.zerowaste.repository.FoodItemRepository;
 public class AnalyticsService {
 
     // Matches FoodItemService.ALLOWED_CATEGORIES; kept in this display order
-    // so every chart always shows all four categories, even at 0%.
-    private static final List<String> CATEGORY_ORDER = List.of("Vegetable", "Fruits", "Meat", "Dairy");
+    // so every chart always shows all five categories, even at 0%.
+    private static final List<String> CATEGORY_ORDER = List.of("Vegetable", "Fruits", "Meat", "Dairy", "Other");
 
     private final FoodActivityLogRepository activityLogRepository;
     private final FoodItemRepository foodItemRepository;
@@ -37,16 +38,19 @@ public class AnalyticsService {
         LocalDate periodStart = startOfPeriod(period);
         Instant sinceInstant = periodStart.atStartOfDay(ZoneId.systemDefault()).toInstant();
 
-        long used = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "USED", sinceInstant).size();
-        long donated = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "DONATED", sinceInstant).size();
+        long used = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "USED", sinceInstant)
+                .size();
+        long donated = activityLogRepository
+                .findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "DONATED", sinceInstant).size();
 
         // "Wasted" combines two things:
-        //  1) items already removed after expiring (logged at delete time), and
-        //  2) items that are *currently* sitting in the inventory past their
-        //     expiry date but haven't been used, donated, or removed yet —
-        //     these count as waste immediately, without waiting for the user
-        //     to delete them.
-        long wastedLogged = activityLogRepository.findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "WASTED", sinceInstant).size();
+        // 1) items already removed after expiring (logged at delete time), and
+        // 2) items that are *currently* sitting in the inventory past their
+        // expiry date but haven't been used, donated, or removed yet —
+        // these count as waste immediately, without waiting for the user
+        // to delete them.
+        long wastedLogged = activityLogRepository
+                .findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "WASTED", sinceInstant).size();
         long wastedLive = foodItemRepository.findByUserIdOrderByExpiryDateAsc(userId).stream()
                 .filter(item -> !Boolean.TRUE.equals(item.getDonated()))
                 .filter(item -> item.getExpiryDate() != null && item.getExpiryDate().isBefore(today))
@@ -92,6 +96,7 @@ public class AnalyticsService {
         return buildBreakdown(categories);
     }
 
+<<<<<<< HEAD
     public CommunityImpactResponse getCommunityImpact(Long userId) {
         long foodSaved = activityLogRepository.findByUserIdAndType(userId, "USED").size()
                 + activityLogRepository.findByUserIdAndType(userId, "DONATED").size();
@@ -99,6 +104,47 @@ public class AnalyticsService {
         long mealsShared = activityLogRepository.findByUserIdAndType(userId, "DONATED").size();
         return new CommunityImpactResponse(foodSaved, activeHouseholds, mealsShared);
     }
+=======
+    /**
+     * Category breakdown of items logged as "Wasted" within the selected
+     * period — backs the new Waste by Category chart, so users can see
+     * which categories are actually spoiling rather than being used or
+     * donated.
+     */
+    /**
+ * Category breakdown of "wasted" items within the selected period —
+ * backs the Waste by Category chart, so users can see which categories
+ * are actually spoiling rather than being used or donated. Mirrors the
+ * two-part definition of "wasted" used in getSummary(): items already
+ * logged as WASTED (removed after expiring), plus items still sitting
+ * in the inventory right now that are already past their expiry date
+ * but haven't been used, donated, or deleted yet.
+ */
+public ChartBreakdownResponse getWasteBreakdown(Long userId, String period) {
+    LocalDate today = LocalDate.now();
+    LocalDate periodStart = startOfPeriod(period);
+    Instant since = periodStart.atStartOfDay(ZoneId.systemDefault()).toInstant();
+
+    List<String> loggedWasted = activityLogRepository
+            .findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "WASTED", since).stream()
+            .map(item -> item != null ? item.getCategory() : null)
+            .filter(Objects::nonNull)
+            .toList();
+
+    List<String> liveWasted = foodItemRepository.findByUserIdOrderByExpiryDateAsc(userId).stream()
+            .filter(item -> !Boolean.TRUE.equals(item.getDonated()))
+            .filter(item -> item.getExpiryDate() != null && item.getExpiryDate().isBefore(today))
+            .filter(item -> !item.getExpiryDate().isBefore(periodStart))
+            .map(item -> item != null ? item.getCategory() : null)
+            .filter(Objects::nonNull)
+            .toList();
+
+    List<String> categories = new ArrayList<>(loggedWasted);
+    categories.addAll(liveWasted);
+
+    return buildBreakdown(categories);
+}
+>>>>>>> b4ac11a3388fbe8f684eb562487e24869018df2d
 
     private ChartBreakdownResponse buildBreakdown(List<String> categories) {
         Map<String, Long> counts = categories.stream()
