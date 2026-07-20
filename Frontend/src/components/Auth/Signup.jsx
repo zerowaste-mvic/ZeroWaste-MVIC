@@ -1,7 +1,7 @@
 // src/components/Auth/Signup.jsx  —  CHANGED: "terms & privacy policy" link now navigates correctly
 // Only the anchor near "By signing up you agree to our…" was changed.
 // Everything else is identical to the original.
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { colors, fonts } from "../../theme";
 
@@ -52,6 +52,36 @@ export default function Signup({ onNavigate }) {
   const [status, setStatus] = useState("idle");
   const [fieldErrors, setFieldErrors] = useState({});
   const [errMsg, setErrMsg] = useState("");
+
+  // ── Email verification link handling ──────────────────────────────────
+  // If this page was opened via the link in the verification email
+  // (?token=...), we show a verification status card instead of the
+  // signup form.
+  const [verifyToken] = useState(
+    () => new URLSearchParams(window.location.search).get("token"),
+  );
+  const [verifyStatus, setVerifyStatus] = useState(verifyToken ? "loading" : "idle");
+  const [verifyMessage, setVerifyMessage] = useState("");
+
+  useEffect(() => {
+    if (!verifyToken) return;
+
+    fetch(`${SPRING_BOOT_URL}/api/auth/verify-email?token=${encodeURIComponent(verifyToken)}`, {
+      method: "POST",
+    })
+      .then(async (res) => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.message || "Verification failed. Please try again.");
+        }
+        setVerifyStatus("success");
+        setVerifyMessage(data.message || "Your email has been verified! You can now log in.");
+      })
+      .catch((err) => {
+        setVerifyStatus("error");
+        setVerifyMessage(err.message || "This verification link is invalid or has expired.");
+      });
+  }, [verifyToken]);
 
   const handleChange = (e) =>
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -109,6 +139,88 @@ export default function Signup({ onNavigate }) {
       setStatus("error");
     }
   };
+
+  if (verifyToken) {
+    const isLoading = verifyStatus === "loading";
+    const isSuccess = verifyStatus === "success";
+
+    return (
+      <div
+        className="min-vh-100 d-flex align-items-center justify-content-center p-3 p-md-5"
+        style={{ background: colors.white }}
+      >
+        <div
+          className="text-center p-4 p-md-5"
+          style={{
+            maxWidth: 460,
+            width: "100%",
+            background: colors.authGreen,
+            borderRadius: 20,
+            boxShadow: "0 0px 12px rgba(0, 0, 0, 0.20)",
+          }}
+        >
+          <div className="mb-4">
+            <img
+              draggable="false"
+              src="/images/zerowaste-logo.png"
+              alt="ZeroWaste"
+              className="img-fluid"
+              style={{ maxWidth: 110 }}
+            />
+          </div>
+
+          {isLoading && (
+            <>
+              <div
+                className="spinner-border mb-3"
+                role="status"
+                style={{ color: colors.greenD }}
+              >
+                <span className="visually-hidden">Verifying…</span>
+              </div>
+              <p style={{ ...bodyTextStyle, fontSize: "1rem" }}>
+                Verifying your email address…
+              </p>
+            </>
+          )}
+
+          {!isLoading && (
+            <>
+              <h1
+                className="fw-bold mb-3"
+                style={{
+                  fontSize: "1.3rem",
+                  color: isSuccess ? colors.greenD : "#b02a37",
+                }}
+              >
+                {isSuccess ? "Email Verified" : "Verification Failed"}
+              </h1>
+              <p
+                className="mb-4"
+                style={{ ...bodyTextStyle, fontSize: "0.95rem" }}
+              >
+                {verifyMessage}
+              </p>
+              <button
+                type="button"
+                className="btn text-white fw-bold text-uppercase rounded-3 py-2 px-4 signup-btn"
+                style={{
+                  ...bodyTextStyle,
+                  background: colors.greenL,
+                  fontSize: "0.9rem",
+                  letterSpacing: "0.06em",
+                  fontWeight: 600,
+                }}
+                onClick={() => onNavigate?.(isSuccess ? "login" : "signup")}
+              >
+                {isSuccess ? "Go to Login" : "Back to Sign Up"}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

@@ -4,7 +4,9 @@ import com.zerowaste.zerowaste.dto.AuthResponse;
 import com.zerowaste.zerowaste.dto.LoginOtpRequest;
 import com.zerowaste.zerowaste.dto.LoginRequest;
 import com.zerowaste.zerowaste.dto.LoginResponse;
+import com.zerowaste.zerowaste.dto.MessageResponse;
 import com.zerowaste.zerowaste.dto.RegisterRequest;
+import com.zerowaste.zerowaste.dto.RegisterResponse;
 import com.zerowaste.zerowaste.dto.UserResponse;
 import com.zerowaste.zerowaste.exception.ApiException;
 import com.zerowaste.zerowaste.model.User;
@@ -14,7 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -23,21 +28,28 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final TwoFactorService twoFactorService;
+    private final EmailVerificationService emailVerificationService;
+
+    private static final int VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
 
     public AuthService(UserRepository userRepository,
                        PasswordEncoder passwordEncoder,
                        JwtService jwtService,
-                       TwoFactorService twoFactorService) {
+                       TwoFactorService twoFactorService,
+                       EmailVerificationService emailVerificationService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.twoFactorService = twoFactorService;
+        this.emailVerificationService = emailVerificationService;
     }
 
-    public AuthResponse register(RegisterRequest request) {
+    public RegisterResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail().toLowerCase())) {
             throw new ApiException("An account with this email already exists.", HttpStatus.CONFLICT);
         }
+
+        String verificationToken = UUID.randomUUID().toString();
 
         User user = User.builder()
                 .fullName(request.getFullName().trim())
@@ -45,10 +57,18 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("USER")
                 .householdSize(normalizeHouseholdSize(request.getHouseholdSize()))
+                .emailVerified(false)
+                .verificationToken(verificationToken)
+                .verificationTokenExpiresAt(Instant.now().plus(VERIFICATION_TOKEN_EXPIRY_HOURS, ChronoUnit.HOURS))
                 .build();
 
         User saved = Objects.requireNonNull(userRepository.save(user), "Failed to save user");
-        return buildAuthResponse(saved);
+
+        emailVerificationService.sendVerificationEmail(saved.getEmail(), saved.getFullName(), verificationToken);
+
+        return new RegisterResponse(
+                UserResponse.from(saved),
+                "Account created! Please check your email to verify your address before logging in.");
     }
 
     public LoginResponse login(LoginRequest request) {
@@ -57,6 +77,14 @@ public class AuthService {
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new ApiException("Invalid email or password.", HttpStatus.UNAUTHORIZED);
+        }
+
+        // First-login gate: account must be email-verified before any token is issued.
+        // Once true this never needs checking again — verification is a one-time step.
+        if (!Boolean.TRUE.equals(user.getEmailVerified())) {
+            throw new ApiException(
+                    "Please verify your email address before logging in. Check your inbox for the verification link we sent when you signed up.",
+                    HttpStatus.FORBIDDEN);
         }
 
         if (Boolean.TRUE.equals(user.getTwoFactorEnabled())) {
@@ -69,6 +97,31 @@ public class AuthService {
         }
 
         return new LoginResponse(jwtService.generateToken(user), UserResponse.from(user), false, null);
+    }
+
+    public MessageResponse verifyEmail(String token) {
+        if (token == null || token.isBlank()) {
+            throw new ApiException("Invalid verification link.", HttpStatus.BAD_REQUEST);
+        }
+
+        User user = userRepository.findByVerificationToken(token.trim())
+                .orElseThrow(() -> new ApiException("Invalid or expired verification link.", HttpStatus.BAD_REQUEST));
+
+        if (Boolean.TRUE.equals(user.getEmailVerified())) {
+            // Link clicked again after already being verified — treat as a harmless success.
+            return new MessageResponse("Your email is already verified. You can log in.");
+        }
+
+        if (user.getVerificationTokenExpiresAt() == null || Instant.now().isAfter(user.getVerificationTokenExpiresAt())) {
+            throw new ApiException("This verification link has expired. Please contact support or register again.", HttpStatus.GONE);
+        }
+
+        user.setEmailVerified(true);
+        user.setVerificationToken(null);
+        user.setVerificationTokenExpiresAt(null);
+        userRepository.save(user);
+
+        return new MessageResponse("Your email has been verified! You can now log in.");
     }
 
     public AuthResponse verifyLogin2FA(LoginOtpRequest request) {

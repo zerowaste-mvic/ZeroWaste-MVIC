@@ -73,6 +73,21 @@ public class User {
     @Column(name = "donation_updates_enabled", columnDefinition = "boolean default true")
     private Boolean donationUpdatesEnabled = true;
 
+    // ── Email verification (required once, at first login only) ────────────
+
+    /** True once the user has clicked the verification link from their signup email. */
+    @Builder.Default
+    @Column(name = "email_verified", columnDefinition = "boolean default false")
+    private Boolean emailVerified = false;
+
+    /** Pending verification token (null once verified or never issued). */
+    @Column(name = "verification_token")
+    private String verificationToken;
+
+    /** When the verification token expires (null when none is pending). */
+    @Column(name = "verification_token_expires_at")
+    private Instant verificationTokenExpiresAt;
+
     // ── 2FA OTP fields ──────────────────────────────────────────────────────
     // - These fields are used for the 2FA OTP verification process. They are not used for regular authentication.
 
