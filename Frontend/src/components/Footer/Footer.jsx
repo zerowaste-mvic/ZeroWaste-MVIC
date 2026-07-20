@@ -192,9 +192,21 @@ export default function Footer({ onNavigate }) {
             </div>
           </div>
 
-          <LinkColumn title="Quick Links" links={quickLinks} onNavigate={onNavigate} />
-          <LinkColumn title="Platform" links={platformLinks} onNavigate={onNavigate} />
-          <LinkColumn title="Support & Legal" links={supportLinks} onNavigate={onNavigate} />
+          <LinkColumn
+            title="Quick Links"
+            links={quickLinks}
+            onNavigate={onNavigate}
+          />
+          <LinkColumn
+            title="Platform"
+            links={platformLinks}
+            onNavigate={onNavigate}
+          />
+          <LinkColumn
+            title="Support & Legal"
+            links={supportLinks}
+            onNavigate={onNavigate}
+          />
         </div>
 
         <div
@@ -205,7 +217,7 @@ export default function Footer({ onNavigate }) {
             marginBottom: "2rem",
           }}
         >
-          © 2024 ZeroWaste. All rights reserved.
+          <span>&copy;</span> 2026 ZeroWaste. All rights reserved.
         </div>
       </div>
       <svg

@@ -19,11 +19,11 @@ import { isLoggedIn } from "./utils/auth";
 
 const getPageFromPath = () => {
   const pathname = window.location.pathname.replace(/\/+$/, "");
-  if (pathname === "/login") return "login";
-  if (pathname === "/signup") return "signup";
+  if (pathname === "/login") return isLoggedIn() ? "dashboard" : "login";
+  if (pathname === "/signup") return isLoggedIn() ? "dashboard" : "signup";
   if (pathname === "/privacy-policy") return "privacy";
   if (pathname === "/terms-of-service") return "terms";
-  if (pathname === "/dashboard") return isLoggedIn() ? "dashboard" : "home";
+  if (pathname === "/dashboard") return isLoggedIn() ? "dashboard" : "login";
   return isLoggedIn() ? "dashboard" : "home";
 };
 
@@ -67,6 +67,12 @@ export default function App() {
     }
     setPage(nextPage);
   };
+
+  useEffect(() => {
+    if (page === "dashboard" && !isLoggedIn()) {
+      navigate("login");
+    }
+  }, [page]);
 
   if (page === "login") return <Login onNavigate={navigate} />;
   if (page === "signup") return <Signup onNavigate={navigate} />;

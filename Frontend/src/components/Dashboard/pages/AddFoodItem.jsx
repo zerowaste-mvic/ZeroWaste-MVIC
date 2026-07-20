@@ -7,6 +7,7 @@ import {
   btnOutlineStyle,
 } from "../../../theme";
 import { foodApi } from "../../../services/api";
+import { logActivity } from "../../../utils/activityLog";
 
 const CATEGORIES = ["Fruits", "Vegetable", "Dairy", "Meat", "Other"];
 const UNITS = ["Kg", "Ltr", "Gram"];
@@ -161,6 +162,7 @@ export default function AddFoodItem({ onSuccess, onCancel }) {
         expiryDate: form.expiryDate,
         imageUrl: uploadedImageData || form.imageUrl.trim() || null,
       });
+      logActivity(`Added ${form.name.trim()}`);
       resetForm();
       onSuccess?.();
     } catch (err) {

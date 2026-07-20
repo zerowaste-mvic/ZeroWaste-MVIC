@@ -19,7 +19,7 @@ const CATEGORIES = [
   "Meat",
   "Other",
 ];
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 9;
 
 const DEFAULT_IMAGE_BY_CATEGORY = {
   Fruits:
@@ -152,6 +152,7 @@ export default function BrowseFoodItem({ onNavigate }) {
     setClaimMsg("");
     try {
       await foodApi.claim(selectedItem.id);
+      logActivity(`Requested ${selectedItem.name}`);
       setClaimMsg(
         "Request sent! The donor will be notified and can accept or decline it.",
       );

@@ -9,5 +9,4 @@ public class ZerowasteApplication {
     public static void main(String[] args) {
         SpringApplication.run(ZerowasteApplication.class, args);
     }
-
 }

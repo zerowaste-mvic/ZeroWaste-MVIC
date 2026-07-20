@@ -1,11 +1,11 @@
 import { getStoredToken } from "../utils/auth";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080";
+const API_BASE = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081";
 
-function buildHeaders(extra = {}) {
+function buildHeaders(extra = {}, isFormData = false) {
   const token = getStoredToken();
   return {
-    "Content-Type": "application/json",
+    ...(isFormData ? {} : { "Content-Type": "application/json" }),
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...extra,
   };
@@ -21,9 +21,10 @@ async function parseError(response) {
 }
 
 async function request(path, options = {}) {
+  const isFormData = options.body instanceof FormData;
   const response = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers: buildHeaders(options.headers),
+    headers: buildHeaders(options.headers, isFormData),
   });
 
   if (!response.ok) {
@@ -39,6 +40,17 @@ async function request(path, options = {}) {
   if (!text) return null;
   return JSON.parse(text);
 }
+export function resolveAssetUrl(assetPath) {
+  if (!assetPath) return "";
+  if (assetPath.startsWith("http://") || assetPath.startsWith("https://")) {
+    return assetPath;
+  }
+  if (assetPath.startsWith("/")) {
+    return `${API_BASE}${assetPath}`;
+  }
+  return assetPath;
+}
+
 export const foodApi = {
   getAll() {
     return request("/api/food-items", { method: "GET" });
@@ -81,7 +93,7 @@ export const foodApi = {
     return request(`/api/food-items/${id}`, { method: "DELETE" });
   },
 };
-// 
+//
 export const authApi = {
   login(email, password) {
     return request("/api/auth/login", {
@@ -110,6 +122,15 @@ export const userApi = {
     });
   },
 
+  updateProfileImage(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    return request("/api/users/me/profile-image", {
+      method: "POST",
+      body: formData,
+    });
+  },
+
   updatePrivacy(donationPublic) {
     return request("/api/users/me/privacy", {
       method: "PUT",
@@ -133,7 +154,6 @@ export const userApi = {
   },
 
   // Designed API for the following 2FA actions, but not currently used in the frontend:
-  
 
   /** Request a fresh OTP if the previous one expired or wasn't received. */
   resend2FACode() {
@@ -223,5 +243,9 @@ export const analyticsApi = {
       `/api/analytics/food-saved-breakdown?period=${encodeURIComponent(period)}`,
       { method: "GET" },
     );
+  },
+
+  getCommunityImpact() {
+    return request("/api/analytics/community-impact", { method: "GET" });
   },
 };

@@ -2,6 +2,7 @@ package com.zerowaste.zerowaste.controller;
 
 import com.zerowaste.zerowaste.dto.AnalyticsSummaryResponse;
 import com.zerowaste.zerowaste.dto.ChartBreakdownResponse;
+import com.zerowaste.zerowaste.dto.CommunityImpactResponse;
 import com.zerowaste.zerowaste.service.AnalyticsService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -36,5 +37,10 @@ public class AnalyticsController {
             @RequestParam(defaultValue = "month") String period,
             @AuthenticationPrincipal Long userId) {
         return analyticsService.getFoodSavedBreakdown(userId, period);
+    }
+
+    @GetMapping("/community-impact")
+    public CommunityImpactResponse communityImpact(@AuthenticationPrincipal Long userId) {
+        return analyticsService.getCommunityImpact(userId);
     }
 }

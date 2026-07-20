@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Search, ChevronRight, Plus, Pencil, Trash2 } from "lucide-react";
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
+import { logActivity } from "../../../utils/activityLog";
 import DonateModal from "../DonateModal";
 
 const CATEGORIES = [
@@ -13,7 +14,7 @@ const CATEGORIES = [
   "Other",
 ];
 
-const ITEMS_PER_PAGE = 10;
+const ITEMS_PER_PAGE = 6;
 
 const DEFAULT_IMAGE =
   "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200&h=200&fit=crop";
@@ -61,9 +62,11 @@ export default function FoodInventory({ onNavigate }) {
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this food item?")) return;
+    const target = items.find((item) => item.id === id);
     try {
       await foodApi.delete(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
+      logActivity(`Removed ${target?.name || "an item"}`);
     } catch (err) {
       setErrMsg(err.message || "Failed to delete item.");
     }
@@ -76,9 +79,11 @@ export default function FoodInventory({ onNavigate }) {
       )
     )
       return;
+    const target = items.find((item) => item.id === id);
     try {
       await foodApi.markUsed(id);
       setItems((prev) => prev.filter((item) => item.id !== id));
+      logActivity(`Used ${target?.name || "an item"}`);
     } catch (err) {
       setErrMsg(err.message || "Failed to mark item as used.");
     }
@@ -86,6 +91,7 @@ export default function FoodInventory({ onNavigate }) {
 
   const handleDonateConfirm = async (details) => {
     await foodApi.donate(donateTarget.id, details);
+    logActivity(`Donated ${donateTarget.name}`);
     setItems((prev) => prev.filter((item) => item.id !== donateTarget.id));
     setDonateTarget(null);
     onNavigate?.("browse");

@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { User, ShieldCheck, ShieldOff, Mail, RefreshCw } from "lucide-react";
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
-import { userApi } from "../../../services/api";
+import { resolveAssetUrl, userApi } from "../../../services/api";
 import { getStoredUser, setStoredUser } from "../../../utils/auth";
 
 const inputStyle = {
@@ -139,7 +139,10 @@ function TwoFAModal({ userEmail, onVerified, onCancel }) {
 
   const handlePaste = (e) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
     const next = [...digits];
     for (let i = 0; i < 6; i++) next[i] = pasted[i] || "";
     setDigits(next);
@@ -186,7 +189,7 @@ function TwoFAModal({ userEmail, onVerified, onCancel }) {
   const handleCancel = async () => {
     try {
       await userApi.cancelPending2FA();
-    } catch (_) {
+    } catch {
       // best-effort
     }
     onCancel();
@@ -210,12 +213,23 @@ function TwoFAModal({ userEmail, onVerified, onCancel }) {
         <div className="d-flex align-items-center gap-2 mb-3">
           <div
             className="d-flex align-items-center justify-content-center rounded-circle"
-            style={{ width: 40, height: 40, background: "rgba(62,160,102,0.15)" }}
+            style={{
+              width: 40,
+              height: 40,
+              background: "rgba(62,160,102,0.15)",
+            }}
           >
             <Mail size={20} color={colors.green} />
           </div>
           <div>
-            <h5 style={{ fontFamily: fonts.body, color: colors.charcoal, margin: 0, fontWeight: 700 }}>
+            <h5
+              style={{
+                fontFamily: fonts.body,
+                color: colors.charcoal,
+                margin: 0,
+                fontWeight: 700,
+              }}
+            >
               Verify Your Email
             </h5>
             <div style={{ fontSize: "0.78rem", color: colors.muted }}>
@@ -224,14 +238,24 @@ function TwoFAModal({ userEmail, onVerified, onCancel }) {
           </div>
         </div>
 
-        <p style={{ fontSize: "0.88rem", color: colors.muted, marginBottom: "1.25rem", lineHeight: 1.6 }}>
+        <p
+          style={{
+            fontSize: "0.88rem",
+            color: colors.muted,
+            marginBottom: "1.25rem",
+            lineHeight: 1.6,
+          }}
+        >
           A 6-digit verification code was sent to{" "}
-          <strong style={{ color: colors.charcoal }}>{userEmail}</strong>.
-          Enter it below to enable 2FA on your account.
+          <strong style={{ color: colors.charcoal }}>{userEmail}</strong>. Enter
+          it below to enable 2FA on your account.
         </p>
 
         {/* OTP input boxes */}
-        <div className="d-flex justify-content-center gap-2 mb-3" onPaste={handlePaste}>
+        <div
+          className="d-flex justify-content-center gap-2 mb-3"
+          onPaste={handlePaste}
+        >
           {digits.map((d, idx) => (
             <input
               key={idx}
@@ -262,12 +286,18 @@ function TwoFAModal({ userEmail, onVerified, onCancel }) {
 
         {/* Feedback */}
         {error && (
-          <div className="alert alert-danger py-2 small mb-3" style={{ borderRadius: 8 }}>
+          <div
+            className="alert alert-danger py-2 small mb-3"
+            style={{ borderRadius: 8 }}
+          >
             {error}
           </div>
         )}
         {info && (
-          <div className="alert alert-success py-2 small mb-3" style={{ borderRadius: 8 }}>
+          <div
+            className="alert alert-success py-2 small mb-3"
+            style={{ borderRadius: 8 }}
+          >
             {info}
           </div>
         )}
@@ -277,7 +307,11 @@ function TwoFAModal({ userEmail, onVerified, onCancel }) {
           <button
             type="button"
             className="btn btn-link p-0 d-inline-flex align-items-center gap-1"
-            style={{ fontSize: "0.83rem", color: colors.green, textDecoration: "none" }}
+            style={{
+              fontSize: "0.83rem",
+              color: colors.green,
+              textDecoration: "none",
+            }}
             disabled={resending || verifying}
             onClick={handleResend}
           >
@@ -339,10 +373,12 @@ export default function Settings({ onProfileUpdated }) {
     gender: "",
     address: "",
     householdSize: "",
+    profileImageUrl: "",
   });
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileMsg, setProfileMsg] = useState({ type: "", text: "" });
+  const fileInputRef = useRef(null);
 
   // ---- Privacy ----
   const [donationPublic, setDonationPublic] = useState(true);
@@ -391,6 +427,7 @@ export default function Settings({ onProfileUpdated }) {
           address: data.address || "",
           householdSize:
             data.householdSize == null ? "" : String(data.householdSize),
+          profileImageUrl: data.profileImageUrl || "",
         });
         setDonationPublic(data.donationPublic !== false);
         setTwoFactor(data.twoFactorEnabled === true);
@@ -447,6 +484,7 @@ export default function Settings({ onProfileUpdated }) {
         address: updated.address || "",
         householdSize:
           updated.householdSize == null ? "" : String(updated.householdSize),
+        profileImageUrl: updated.profileImageUrl || profile.profileImageUrl,
       });
       const cached = getStoredUser();
       setStoredUser({ ...cached, ...updated });
@@ -511,7 +549,8 @@ export default function Settings({ onProfileUpdated }) {
     } catch (err) {
       setTwoFactorMsg({
         type: "danger",
-        text: err.message || "Failed to send verification email. Please try again.",
+        text:
+          err.message || "Failed to send verification email. Please try again.",
       });
     } finally {
       setInitiating2FA(false);
@@ -523,7 +562,10 @@ export default function Settings({ onProfileUpdated }) {
     setShow2FAModal(false);
     setTwoFactor(updatedUser.twoFactorEnabled === true);
     const cached = getStoredUser();
-    setStoredUser({ ...cached, twoFactorEnabled: updatedUser.twoFactorEnabled });
+    setStoredUser({
+      ...cached,
+      twoFactorEnabled: updatedUser.twoFactorEnabled,
+    });
     setTwoFactorMsg({
       type: "success",
       text: "Two-factor authentication is now enabled on your account! 🎉",
@@ -550,7 +592,9 @@ export default function Settings({ onProfileUpdated }) {
       setDonationUpdates(updated.donationUpdatesEnabled !== false);
     } catch (err) {
       setNotificationsEnabled(previous);
-      setNotificationsMsg(err.message || "Failed to update notification preferences.");
+      setNotificationsMsg(
+        err.message || "Failed to update notification preferences.",
+      );
     } finally {
       setSavingNotifications(false);
     }
@@ -584,6 +628,31 @@ export default function Settings({ onProfileUpdated }) {
     } catch (err) {
       setDonationUpdates(previous);
       setNotificationsMsg(err.message || "Failed to update donation updates.");
+    }
+  };
+
+  const handleProfileImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const updated = await userApi.updateProfileImage(file);
+      setProfile((prev) => ({
+        ...prev,
+        profileImageUrl: updated.profileImageUrl || "",
+      }));
+      const cached = getStoredUser();
+      setStoredUser({
+        ...cached,
+        profileImageUrl: updated.profileImageUrl || "",
+      });
+      setProfileMsg({ type: "success", text: "Profile picture updated." });
+      onProfileUpdated?.();
+    } catch (err) {
+      setProfileMsg({
+        type: "danger",
+        text: err.message || "Failed to upload profile picture.",
+      });
     }
   };
 
@@ -632,11 +701,11 @@ export default function Settings({ onProfileUpdated }) {
           transform: translateY(-1px);
           box-shadow: 0 8px 20px rgba(0,0,0,0.16);
         }
-        .save-changes {
+        .save-changes, .upload-btn {
           opacity: 0.75;
           transition: opacity 0.2s ease, background 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
         }
-        .save-changes:hover:not(:disabled) {
+        .save-changes:hover:not(:disabled), .upload-btn:hover:not(:disabled) {
           opacity: 1;
           transform: translateY(-1px);
           box-shadow: 0 8px 20px rgba(0,0,0,0.16);
@@ -690,20 +759,54 @@ export default function Settings({ onProfileUpdated }) {
             <SectionHeading>Profile Information</SectionHeading>
 
             <div className="text-center mb-4">
-              <div
+              <label
+                htmlFor="profile-image-upload"
                 className="d-inline-flex align-items-center justify-content-center rounded-circle mb-2"
-                style={{ width: 90, height: 90, background: "#d7e6cf" }}
-              >
-                <User size={40} color={colors.muted} />
-              </div>
-              <div
                 style={{
-                  fontFamily: '"Roboto Mono", monospace',
-                  fontWeight: 700,
-                  color: colors.charcoal,
+                  width: 90,
+                  height: 90,
+                  background: colors.greenLrgb,
+                  overflow: "hidden",
+                  cursor: "pointer",
                 }}
               >
-                {loadingProfile ? "…" : profile.fullName || "Your Name"}
+                {profile.profileImageUrl ? (
+                  <img
+                    src={resolveAssetUrl(profile.profileImageUrl)}
+                    alt="Profile"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                  />
+                ) : (
+                  <User size={40} color={colors.muted} />
+                )}
+              </label>
+              <input
+                ref={fileInputRef}
+                id="profile-image-upload"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={handleProfileImageUpload}
+              />
+              <div className="d-flex justify-content-center mt-2">
+                <button
+                  type="button"
+                  className="btn btn-sm upload-btn"
+                  style={{
+                    ...btnPrimaryStyle,
+                    padding: "0.45rem 0.9rem",
+                    fontSize: "0.8rem",
+                    borderRadius: 6,
+                    color: colors.white,
+                  }}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Upload photo
+                </button>
               </div>
             </div>
 
@@ -717,43 +820,96 @@ export default function Settings({ onProfileUpdated }) {
 
             <form onSubmit={handleSaveProfile}>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>Full Name:</label>
-                <input type="text" name="fullName" className="form-control" style={inputStyle}
-                  value={profile.fullName} onChange={handleProfileChange}
-                  disabled={loadingProfile} placeholder="Full name" />
+                <label className="form-label" style={labelStyle}>
+                  Full Name:
+                </label>
+                <input
+                  type="text"
+                  name="fullName"
+                  className="form-control"
+                  style={inputStyle}
+                  value={profile.fullName}
+                  onChange={handleProfileChange}
+                  disabled={loadingProfile}
+                  placeholder="Full name"
+                />
               </div>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>Email:</label>
-                <input type="email" name="email" className="form-control" style={inputStyle}
-                  value={profile.email} onChange={handleProfileChange}
-                  disabled={loadingProfile} placeholder="someone@gmail.com" />
+                <label className="form-label" style={labelStyle}>
+                  Email:
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  className="form-control"
+                  style={inputStyle}
+                  value={profile.email}
+                  onChange={handleProfileChange}
+                  disabled={loadingProfile}
+                  placeholder="someone@gmail.com"
+                />
               </div>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>Gender:</label>
-                <input type="text" name="gender" className="form-control" style={inputStyle}
-                  value={profile.gender} onChange={handleProfileChange}
-                  disabled={loadingProfile} placeholder="Male" />
+                <label className="form-label" style={labelStyle}>
+                  Gender:
+                </label>
+                <input
+                  type="text"
+                  name="gender"
+                  className="form-control"
+                  style={inputStyle}
+                  value={profile.gender}
+                  onChange={handleProfileChange}
+                  disabled={loadingProfile}
+                  placeholder="Male"
+                />
               </div>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>Address:</label>
-                <input type="text" name="address" className="form-control" style={inputStyle}
-                  value={profile.address} onChange={handleProfileChange}
-                  disabled={loadingProfile} placeholder="somewhere" />
+                <label className="form-label" style={labelStyle}>
+                  Address:
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  className="form-control"
+                  style={inputStyle}
+                  value={profile.address}
+                  onChange={handleProfileChange}
+                  disabled={loadingProfile}
+                  placeholder="somewhere"
+                />
               </div>
               <div className="mb-4">
-                <label className="form-label" style={labelStyle}>Household Size (optional):</label>
-                <input type="number" name="householdSize" min="1" className="form-control"
-                  style={inputStyle} value={profile.householdSize}
-                  onChange={handleProfileChange} disabled={loadingProfile} placeholder="e.g. 4" />
-                <div className="form-text mt-2" style={{ color: colors.muted }}>
-                  {profile.householdSize === "" ? "-" : `Household size: ${profile.householdSize}`}
-                </div>
+                <label className="form-label" style={labelStyle}>
+                  Household Size (optional):
+                </label>
+                <input
+                  type="number"
+                  name="householdSize"
+                  min="1"
+                  className="form-control"
+                  style={inputStyle}
+                  value={profile.householdSize}
+                  onChange={handleProfileChange}
+                  disabled={loadingProfile}
+                  placeholder="e.g. 4"
+                />
               </div>
               <div className="text-center">
-                <button type="submit" className="btn px-4 save-changes"
-                  style={{ ...btnPrimaryStyle, color: colors.white, fontWeight: 600,
-                    padding: "0 1rem", fontSize: "0.9rem", height: 40, borderRadius: 4 }}
-                  disabled={loadingProfile || savingProfile}>
+                <button
+                  type="submit"
+                  className="btn px-4 save-changes"
+                  style={{
+                    ...btnPrimaryStyle,
+                    color: colors.white,
+                    fontWeight: 600,
+                    padding: "0 1rem",
+                    fontSize: "0.9rem",
+                    height: 40,
+                    borderRadius: 4,
+                  }}
+                  disabled={loadingProfile || savingProfile}
+                >
                   Save Changes
                 </button>
               </div>
@@ -763,7 +919,6 @@ export default function Settings({ onProfileUpdated }) {
 
         {/* ── Right column ── */}
         <div className="col-12 col-lg-6 d-flex flex-column gap-4">
-
           {/* Security */}
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Security</SectionHeading>
@@ -773,9 +928,17 @@ export default function Settings({ onProfileUpdated }) {
                 className={`alert alert-${twoFactorMsg.type === "success" ? "success" : "danger"} py-2 small mb-3`}
                 style={{ borderRadius: 8 }}
               >
-                {twoFactorMsg.type === "success"
-                  ? <span><ShieldCheck size={14} className="me-1" />{twoFactorMsg.text}</span>
-                  : <span><ShieldOff size={14} className="me-1" />{twoFactorMsg.text}</span>}
+                {twoFactorMsg.type === "success" ? (
+                  <span>
+                    <ShieldCheck size={14} className="me-1" />
+                    {twoFactorMsg.text}
+                  </span>
+                ) : (
+                  <span>
+                    <ShieldOff size={14} className="me-1" />
+                    {twoFactorMsg.text}
+                  </span>
+                )}
               </div>
             )}
 
@@ -790,11 +953,18 @@ export default function Settings({ onProfileUpdated }) {
                   border: `1.5px solid ${twoFactor ? "rgba(62,160,102,0.4)" : "rgba(220,53,69,0.25)"}`,
                 }}
               >
-                {twoFactor
-                  ? <ShieldCheck size={18} color={colors.green} />
-                  : <ShieldOff size={18} color="#dc3545" />}
-                <span style={{ fontSize: "0.83rem", fontWeight: 600,
-                  color: twoFactor ? colors.green : "#dc3545" }}>
+                {twoFactor ? (
+                  <ShieldCheck size={18} color={colors.green} />
+                ) : (
+                  <ShieldOff size={18} color="#dc3545" />
+                )}
+                <span
+                  style={{
+                    fontSize: "0.83rem",
+                    fontWeight: 600,
+                    color: twoFactor ? colors.green : "#dc3545",
+                  }}
+                >
                   {twoFactor ? "2FA is Active" : "2FA is Inactive"}
                 </span>
               </div>
@@ -814,7 +984,10 @@ export default function Settings({ onProfileUpdated }) {
 
             {initiating2FA && (
               <p className="small mb-3" style={{ color: colors.muted }}>
-                <span className="spinner-border spinner-border-sm me-2" role="status" />
+                <span
+                  className="spinner-border spinner-border-sm me-2"
+                  role="status"
+                />
                 Sending verification code to your email…
               </p>
             )}
@@ -822,8 +995,15 @@ export default function Settings({ onProfileUpdated }) {
             <button
               type="button"
               className="btn mb-2 changePwd-btn"
-              style={{ ...btnPrimaryStyle, color: colors.white, fontWeight: 600,
-                padding: "0 1rem", fontSize: "0.9rem", height: 40, borderRadius: 4 }}
+              style={{
+                ...btnPrimaryStyle,
+                color: colors.white,
+                fontWeight: 600,
+                padding: "0 1rem",
+                fontSize: "0.9rem",
+                height: 40,
+                borderRadius: 4,
+              }}
               onClick={() => setShowPwdModal(true)}
             >
               Change Password
@@ -834,7 +1014,9 @@ export default function Settings({ onProfileUpdated }) {
           <div className="rounded-4 p-4" style={cardStyle}>
             <SectionHeading>Privacy</SectionHeading>
             {privacyMsg && (
-              <div className="alert alert-danger py-2 small mb-3">{privacyMsg}</div>
+              <div className="alert alert-danger py-2 small mb-3">
+                {privacyMsg}
+              </div>
             )}
             <PreferenceRow
               title="Make my donation public"
@@ -869,19 +1051,25 @@ export default function Settings({ onProfileUpdated }) {
               description="Get notified about items nearing expiry"
               checked={expiryAlerts}
               onChange={handleToggleExpiryAlerts}
-              disabled={savingExpiryAlerts || savingNotifications || loadingProfile || !notificationsEnabled}
+              disabled={
+                savingExpiryAlerts ||
+                savingNotifications ||
+                loadingProfile ||
+                !notificationsEnabled
+              }
             />
             <PreferenceRow
               title="Donation Updates"
               description="Get updates about donation activities"
               checked={donationUpdates}
               onChange={handleToggleDonationUpdates}
-              disabled={savingNotifications || loadingProfile || !notificationsEnabled}
+              disabled={
+                savingNotifications || loadingProfile || !notificationsEnabled
+              }
             />
           </div>
         </div>
       </div>
-
 
       {/* ── 2FA OTP Modal, email verification features worked  ── */}
       {show2FAModal && (
@@ -916,22 +1104,50 @@ export default function Settings({ onProfileUpdated }) {
 
             <form onSubmit={handleChangePassword}>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>Current Password:</label>
-                <input type="password" name="currentPassword" className="form-control"
-                  style={inputStyle} value={pwdForm.currentPassword}
-                  onChange={handlePwdChange} disabled={savingPwd} required />
+                <label className="form-label" style={labelStyle}>
+                  Current Password:
+                </label>
+                <input
+                  type="password"
+                  name="currentPassword"
+                  className="form-control"
+                  style={inputStyle}
+                  value={pwdForm.currentPassword}
+                  onChange={handlePwdChange}
+                  disabled={savingPwd}
+                  required
+                />
               </div>
               <div className="mb-3">
-                <label className="form-label" style={labelStyle}>New Password:</label>
-                <input type="password" name="newPassword" className="form-control"
-                  style={inputStyle} value={pwdForm.newPassword}
-                  onChange={handlePwdChange} disabled={savingPwd} required minLength={8} />
+                <label className="form-label" style={labelStyle}>
+                  New Password:
+                </label>
+                <input
+                  type="password"
+                  name="newPassword"
+                  className="form-control"
+                  style={inputStyle}
+                  value={pwdForm.newPassword}
+                  onChange={handlePwdChange}
+                  disabled={savingPwd}
+                  required
+                  minLength={8}
+                />
               </div>
               <div className="mb-4">
-                <label className="form-label" style={labelStyle}>Confirm New Password:</label>
-                <input type="password" name="confirmPassword" className="form-control"
-                  style={inputStyle} value={pwdForm.confirmPassword}
-                  onChange={handlePwdChange} disabled={savingPwd} required />
+                <label className="form-label" style={labelStyle}>
+                  Confirm New Password:
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  className="form-control"
+                  style={inputStyle}
+                  value={pwdForm.confirmPassword}
+                  onChange={handlePwdChange}
+                  disabled={savingPwd}
+                  required
+                />
               </div>
 
               <div className="d-flex justify-content-end gap-2">
@@ -951,7 +1167,11 @@ export default function Settings({ onProfileUpdated }) {
                   onClick={() => {
                     setShowPwdModal(false);
                     setPwdMsg({ type: "", text: "" });
-                    setPwdForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+                    setPwdForm({
+                      currentPassword: "",
+                      newPassword: "",
+                      confirmPassword: "",
+                    });
                   }}
                   disabled={savingPwd}
                 >
@@ -960,8 +1180,15 @@ export default function Settings({ onProfileUpdated }) {
                 <button
                   type="submit"
                   className="btn save-password"
-                  style={{ ...btnPrimaryStyle, color: colors.white, fontWeight: 600,
-                    padding: "0 1rem", fontSize: "0.9rem", height: 40, borderRadius: 4 }}
+                  style={{
+                    ...btnPrimaryStyle,
+                    color: colors.white,
+                    fontWeight: 600,
+                    padding: "0 1rem",
+                    fontSize: "0.9rem",
+                    height: 40,
+                    borderRadius: 4,
+                  }}
                   disabled={savingPwd}
                 >
                   Save Password

@@ -8,6 +8,7 @@ const CATEGORY_COLORS = {
   Fruits: "#e8b84b",
   Meat: "#a8433c",
   Dairy: "#e3ded0",
+  Other: colors.brownL,
 };
 
 const CATEGORY_LABELS = {
@@ -15,6 +16,7 @@ const CATEGORY_LABELS = {
   Fruits: "Fruits",
   Meat: "Meat",
   Dairy: "Dairy",
+  Other: "Other",
 };
 
 function DonutChart({ data, size = 170, strokeWidth = 30 }) {
@@ -34,7 +36,7 @@ function DonutChart({ data, size = 170, strokeWidth = 30 }) {
         cy={size / 2}
         r={radius}
         fill="none"
-        stroke="#e9e4d4"
+        stroke="#DEE5D4"
         strokeWidth={strokeWidth}
       />
       {data.map((d) => {
