@@ -51,8 +51,19 @@ export default function Notifications({ onUnreadCountChange }) {
   };
 
   useEffect(() => {
-    onUnreadCountChange?.(0);
-    load();
+    (async () => {
+      await load();
+      // Visiting this page counts as having seen everything — persist that
+      // to the backend (not just the local badge) so the count doesn't
+      // reappear the next time it's polled from another page.
+      try {
+        await notificationApi.markAllRead();
+        setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+      } catch {
+        // Non-critical — the explicit "Mark all as read" button remains available.
+      }
+      onUnreadCountChange?.(0);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
