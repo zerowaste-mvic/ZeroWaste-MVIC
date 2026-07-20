@@ -224,4 +224,10 @@ export const analyticsApi = {
       { method: "GET" },
     );
   },
+  getWasteBreakdown(period) {
+  return request(
+    `/api/analytics/waste-breakdown?period=${encodeURIComponent(period)}`,
+    { method: "GET" },
+  );
+},
 };

@@ -8,6 +8,7 @@ const CATEGORY_COLORS = {
   Fruits: "#e8b84b",
   Meat: "#a8433c",
   Dairy: "#e3ded0",
+  Other: "#8c9bb5",
 };
 
 const CATEGORY_LABELS = {
@@ -15,6 +16,7 @@ const CATEGORY_LABELS = {
   Fruits: "Fruits",
   Meat: "Meat",
   Dairy: "Dairy",
+  Other: "Other",
 };
 
 function DonutChart({ data, size = 170, strokeWidth = 30 }) {
@@ -170,34 +172,38 @@ export default function Analytics() {
   const [summary, setSummary] = useState(null);
   const [inventoryOverview, setInventoryOverview] = useState(null);
   const [foodSavedBreakdown, setFoodSavedBreakdown] = useState(null);
+  const [wasteBreakdown, setWasteBreakdown] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      setErrMsg("");
-      try {
-        const [summaryData, inventoryData, savedData] = await Promise.all([
+  let cancelled = false;
+  (async () => {
+    setLoading(true);
+    setErrMsg("");
+    try {
+      const [summaryData, inventoryData, savedData, wasteData] =
+        await Promise.all([
           analyticsApi.getSummary(period),
           analyticsApi.getInventoryOverview(),
           analyticsApi.getFoodSavedBreakdown(period),
+          analyticsApi.getWasteBreakdown(period),
         ]);
-        if (cancelled) return;
-        setSummary(summaryData);
-        setInventoryOverview(inventoryData);
-        setFoodSavedBreakdown(savedData);
-      } catch (err) {
-        if (!cancelled) setErrMsg(err.message || "Failed to load analytics.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [period]);
+      if (cancelled) return;
+      setSummary(summaryData);
+      setInventoryOverview(inventoryData);
+      setFoodSavedBreakdown(savedData);
+      setWasteBreakdown(wasteData);
+    } catch (err) {
+      if (!cancelled) setErrMsg(err.message || "Failed to load analytics.");
+    } finally {
+      if (!cancelled) setLoading(false);
+    }
+  })();
+  return () => {
+    cancelled = true;
+  };
+}, [period]);
 
   const handleExport = () => {
     window.print();
@@ -327,13 +333,10 @@ export default function Analytics() {
           </div>
 
           <div className="row g-4">
-            <div className="col-12 col-lg-6">
+            <div className="col-12 col-lg-4">
               <div
                 className="rounded-4 p-4 h-100"
-                style={{
-                  background: colors.authGreen,
-                  border: `2px solid ${colors.greenLrgb}`,
-                }}
+                style={{ background: colors.authGreen, border: `2px solid ${colors.greenLrgb}` }}
               >
                 <h6 className="fw-bold mb-3" style={{ color: colors.charcoal }}>
                   Inventory Overview
@@ -342,10 +345,7 @@ export default function Analytics() {
                   <DonutChart data={inventoryOverview?.breakdown || []} />
                   <Legend data={inventoryOverview?.breakdown || []} />
                 </div>
-                <div
-                  className="text-end mt-3 small"
-                  style={{ color: colors.muted }}
-                >
+                <div className="text-end mt-3 small" style={{ color: colors.muted }}>
                   Total Items:{" "}
                   <span className="fw-bold" style={{ color: colors.authGreen }}>
                     {inventoryOverview?.totalItems ?? 0}
@@ -354,13 +354,10 @@ export default function Analytics() {
               </div>
             </div>
 
-            <div className="col-12 col-lg-6">
+            <div className="col-12 col-lg-4">
               <div
                 className="rounded-4 p-4 h-100"
-                style={{
-                  background: colors.authGreen,
-                  border: `2px solid ${colors.greenLrgb}`,
-                }}
+                style={{ background: colors.authGreen, border: `2px solid ${colors.greenLrgb}` }}
               >
                 <h6 className="fw-bold mb-3" style={{ color: colors.charcoal }}>
                   Food Saved
@@ -369,13 +366,34 @@ export default function Analytics() {
                   <BarChart data={foodSavedBreakdown?.breakdown || []} />
                   <Legend data={foodSavedBreakdown?.breakdown || []} />
                 </div>
-                <div
-                  className="text-end mt-3 small"
-                  style={{ color: colors.muted }}
-                >
+                <div className="text-end mt-3 small" style={{ color: colors.muted }}>
                   Total Items:{" "}
                   <span className="fw-bold" style={{ color: colors.authGreen }}>
                     {foodSavedBreakdown?.totalItems ?? 0}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="col-12 col-lg-4">
+              <div
+                className="rounded-4 p-4 h-100"
+                style={{ background: colors.authGreen, border: `2px solid ${colors.greenLrgb}` }}
+              >
+                <h6 className="fw-bold mb-3" style={{ color: colors.charcoal }}>
+                  Waste by Category
+                </h6>
+                <p className="small mb-3" style={{ color: colors.muted, marginTop: "-0.5rem" }}>
+                  Which categories are actually spoiling, not just being used or donated.
+                </p>
+                <div className="d-flex align-items-center gap-4 flex-wrap">
+                  <DonutChart data={wasteBreakdown?.breakdown || []} />
+                  <Legend data={wasteBreakdown?.breakdown || []} />
+                </div>
+                <div className="text-end mt-3 small" style={{ color: colors.muted }}>
+                  Total Items:{" "}
+                  <span className="fw-bold" style={{ color: colors.authGreen }}>
+                    {wasteBreakdown?.totalItems ?? 0}
                   </span>
                 </div>
               </div>
