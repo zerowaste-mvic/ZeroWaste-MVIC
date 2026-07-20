@@ -1,11 +1,16 @@
+import { useEffect, useState } from "react";
 import { Recycle, Users, Calendar, Bold } from "lucide-react";
 import heroImage from "/images/hero_image.png";
 import { colors, btnPrimaryStyle } from "../../theme";
+import { analyticsApi } from "../../services/api";
 
-const stats = [
-  { icon: Recycle, label: "Food Saved", value: "10 kg" },
-  { icon: Users, label: "Active Donors", value: "100 people" },
-  { icon: Calendar, label: "Meals Planned", value: "100+" },
+const formatCount = (value) =>
+  new Intl.NumberFormat("en-US").format(value ?? 0);
+
+const defaultStats = [
+  { icon: Recycle, label: "Food Saved", value: "0+" },
+  { icon: Users, label: "Active Donors", value: "0+" },
+  { icon: Calendar, label: "Meals Planned", value: "0+" },
 ];
 
 const headingStyle = {
@@ -18,12 +23,52 @@ const headingStyle = {
 };
 
 export default function Hero() {
+  const [stats, setStats] = useState(defaultStats);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const [summary, impact] = await Promise.all([
+          analyticsApi.getSummary("month"),
+          analyticsApi.getCommunityImpact(),
+        ]);
+
+        if (cancelled) return;
+
+        setStats([
+          {
+            icon: Recycle,
+            label: "Food Saved",
+            value: `${formatCount(summary?.foodSavedCount ?? impact?.foodSavedCount ?? 0)}+`,
+          },
+          {
+            icon: Users,
+            label: "Active Donors",
+            value: `${formatCount(impact?.activeHouseholds ?? 0)}+`,
+          },
+          {
+            icon: Calendar,
+            label: "Meals Planned",
+            value: `${formatCount(impact?.mealsSharedCount ?? 0)}+`,
+          },
+        ]);
+      } catch {
+        if (!cancelled) setStats(defaultStats);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   return (
     <section
       className="position-relative overflow-hidden hero-section"
       style={{
         width: "100%",
-        // backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e8f0ea' fill-opacity='0.6'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
       }}
     >
       <style>
@@ -185,15 +230,18 @@ export default function Hero() {
               className="overflow-hidden img-holder"
               style={{
                 borderRadius: 12,
-                height: "600px",
+                width: "100%",
+                maxWidth: 550,
+                minHeight: 360,
+                aspectRatio: "11 / 12",
                 boxShadow: "0 0px 15px rgb(131, 130, 130)",
-                width: "550px",
               }}
             >
               <img
                 src={heroImage}
                 alt="Fresh healthy food including vegetables, fruits, and proteins"
                 className="w-100 h-100 object-fit-cover"
+                style={{ minHeight: 360 }}
               />
             </div>
           </div>

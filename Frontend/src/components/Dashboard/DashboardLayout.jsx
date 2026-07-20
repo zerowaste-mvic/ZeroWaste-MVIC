@@ -3,6 +3,7 @@ import { Menu, X, Bell, User } from "lucide-react";
 import DashboardSidebar from "./DashboardSidebar";
 import { colors } from "../../theme";
 import { getStoredUser } from "../../utils/auth";
+import { resolveAssetUrl } from "../../services/api";
 
 export default function DashboardLayout({
   activePage,
@@ -87,17 +88,30 @@ export default function DashboardLayout({
             </button>
 
             <div className="d-flex align-items-center gap-2">
-              <span
-                className="d-inline-flex align-items-center justify-content-center rounded-circle"
-                style={{
-                  width: 36,
-                  height: 36,
-                  background: colors.green,
-                  color: colors.white,
-                }}
-              >
-                <User size={20} />
-              </span>
+              {user?.profileImageUrl ? (
+                <img
+                  src={resolveAssetUrl(user.profileImageUrl)}
+                  alt={user.fullName || "Profile"}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                  }}
+                />
+              ) : (
+                <span
+                  className="d-inline-flex align-items-center justify-content-center rounded-circle"
+                  style={{
+                    width: 36,
+                    height: 36,
+                    background: colors.green,
+                    color: colors.white,
+                  }}
+                >
+                  <User size={20} />
+                </span>
+              )}
               <span
                 style={{
                   fontSize: "1.05rem",

@@ -9,6 +9,7 @@ import {
 import { notificationApi } from "../../../services/api";
 
 const TABS = ["All", "Alerts", "Donations", "Reminders", "System"];
+const PAGE_SIZE = 8;
 
 function timeAgo(isoString) {
   if (!isoString) return "";
@@ -33,6 +34,7 @@ export default function Notifications({ onUnreadCountChange }) {
   const [loading, setLoading] = useState(true);
   const [errMsg, setErrMsg] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
+  const [page, setPage] = useState(1);
   const [actioningId, setActioningId] = useState(null);
   const [actionErr, setActionErr] = useState("");
 
@@ -51,6 +53,7 @@ export default function Notifications({ onUnreadCountChange }) {
   };
 
   useEffect(() => {
+
     (async () => {
       await load();
       // Visiting this page counts as having seen everything — persist that
@@ -64,6 +67,13 @@ export default function Notifications({ onUnreadCountChange }) {
       }
       onUnreadCountChange?.(0);
     })();
+
+    const timer = window.setTimeout(() => {
+      onUnreadCountChange?.(0);
+      void load();
+    }, 0);
+    return () => window.clearTimeout(timer);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -71,6 +81,13 @@ export default function Notifications({ onUnreadCountChange }) {
     if (activeFilter === "All") return notifications;
     return notifications.filter((n) => n.category === activeFilter);
   }, [notifications, activeFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedNotifications = filtered.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   const handleMarkAllRead = async () => {
     try {
@@ -161,7 +178,10 @@ export default function Notifications({ onUnreadCountChange }) {
               <button
                 key={tab}
                 type="button"
-                onClick={() => setActiveFilter(tab)}
+                onClick={() => {
+                  setActiveFilter(tab);
+                  setPage(1);
+                }}
                 className="fw-semibold"
                 style={{
                   padding: "0.5rem 1.4rem",
@@ -213,7 +233,7 @@ export default function Notifications({ onUnreadCountChange }) {
             No notifications here yet.
           </div>
         ) : (
-          filtered.map((n) => {
+          paginatedNotifications.map((n) => {
             const isActionable = n.claimRequestId && !n.resolved;
             return (
               <div
@@ -276,6 +296,40 @@ export default function Notifications({ onUnreadCountChange }) {
           })
         )}
       </div>
+
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-end align-items-center gap-2 mt-4">
+          <button
+            type="button"
+            className="btn btn-sm"
+            style={{
+              borderRadius: 4,
+              border: `2px solid ${colors.greenLrgb}`,
+              opacity: currentPage === 1 ? 0.5 : 1,
+            }}
+            disabled={currentPage === 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+          >
+            Prev
+          </button>
+          <span style={{ color: colors.charcoal, fontWeight: 700 }}>
+            {currentPage}
+          </span>
+          <button
+            type="button"
+            className="btn btn-sm"
+            style={{
+              borderRadius: 4,
+              border: `2px solid ${colors.greenLrgb}`,
+              opacity: currentPage === totalPages ? 0.5 : 1,
+            }}
+            disabled={currentPage === totalPages}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -80,15 +80,18 @@ export default function About({ onNavigate }) {
               className="overflow-hidden"
               style={{
                 borderRadius: 12,
-                height: "600px",
+                width: "100%",
+                maxWidth: 550,
+                minHeight: 360,
+                aspectRatio: "11 / 12",
                 boxShadow: "0 0px 15px rgb(131, 130, 130)",
-                width: "550px",
               }}
             >
               <img
                 src={heroImage}
                 alt="Fresh ingredients including broccoli, fruits, dairy, and vegetables"
                 className="w-100 h-100 object-fit-cover"
+                style={{ minHeight: 360 }}
               />
             </div>
           </div>

@@ -24,4 +24,7 @@ public class UpdateProfileRequest {
 
     // Optional
     private Integer householdSize;
+
+    // Optional
+    private String profileImageUrl;
 }

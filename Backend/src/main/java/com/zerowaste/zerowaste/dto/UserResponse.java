@@ -7,9 +7,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class UserResponse {
+
     private Long id;
     private String fullName;
     private String email;
+    private String profileImageUrl;
     private String role;
     private String gender;
     private String address;
@@ -26,6 +28,7 @@ public class UserResponse {
                 user.getId(),
                 user.getFullName(),
                 user.getEmail(),
+                user.getProfileImageUrl(),
                 user.getRole(),
                 user.getGender(),
                 user.getAddress(),

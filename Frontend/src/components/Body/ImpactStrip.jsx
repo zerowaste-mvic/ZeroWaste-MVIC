@@ -1,25 +1,75 @@
+import { useEffect, useState } from "react";
 import { colors } from "../../theme";
-
-const stats = [
-  { num: "123 kg", label: "of food saved from waste in our community" },
-  { num: "123 +", label: "households actively reducing food waste" },
-  { num: "123 +", label: "meals shared using ZeroWaste inventory" },
-];
+import { analyticsApi } from "../../services/api";
 
 export default function ImpactStrip() {
+  const [impact, setImpact] = useState(null);
+  const [summary, setSummary] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [summaryData, impactData] = await Promise.all([
+          analyticsApi.getSummary("month"),
+          analyticsApi.getCommunityImpact(),
+        ]);
+        if (!cancelled) {
+          setSummary(summaryData);
+          setImpact(impactData);
+        }
+      } catch {
+        if (!cancelled) {
+          setSummary(null);
+          setImpact({
+            foodSavedCount: 0,
+            activeHouseholds: 0,
+            mealsSharedCount: 0,
+          });
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const formatCount = (value) =>
+    new Intl.NumberFormat("en-US").format(value ?? 0);
+
+  const stats = [
+    {
+      num: `${formatCount(summary?.foodSavedCount ?? impact?.foodSavedCount ?? 0)}+`,
+      label: "food saved from waste in our community",
+    },
+    {
+      num: `${formatCount(impact?.activeHouseholds ?? 0)}+`,
+      label: "households actively reducing food waste",
+    },
+    {
+      num: `${formatCount(impact?.mealsSharedCount ?? 0)}+`,
+      label: "meals shared using ZeroWaste inventory",
+    },
+  ];
   return (
     <section className="py-5 impact-strip-section">
       <style>
         {`
 
           .impact-strip-section{
-            height:425px;
+            min-height: 425px;
             align-content:center;
             position:relative;
             padding: 5rem 0;
             overflow:hidden;
             -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%);
 
+          }
+
+          @media (max-width: 767px) {
+            .impact-strip-section {
+              padding: 3rem 0;
+            }
           }
 
           .impact-strip-section::before{

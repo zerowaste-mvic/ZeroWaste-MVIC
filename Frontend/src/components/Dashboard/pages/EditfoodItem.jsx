@@ -7,6 +7,7 @@ import {
   btnOutlineStyle,
 } from "../../../theme";
 import { foodApi } from "../../../services/api";
+import { logActivity } from "../../../utils/activityLog";
 
 const CATEGORIES = ["Dairy", "Meat", "Fruits", "Vegetable", "Other"];
 const UNITS = ["Kg", "Ltr", "Gram"];
@@ -70,6 +71,7 @@ export default function EditFoodItem({ item, onSuccess, onCancel }) {
         expiryDate: form.expiryDate,
         imageUrl: form.imageUrl.trim() || null,
       });
+      logActivity(`Updated ${form.name.trim()}`);
       setStatus("success");
       setTimeout(() => onSuccess?.(), 600);
     } catch (err) {

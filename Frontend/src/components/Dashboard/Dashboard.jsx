@@ -13,7 +13,7 @@ import Analytics from "./pages/Analytics";
 import { notificationApi } from "../../services/api";
 
 export default function Dashboard({ onNavigate }) {
-  const [activePage, setActivePage] = useState("inventory");
+  const [activePage, setActivePage] = useState("overview");
   const [editingItem, setEditingItem] = useState(null);
   const [profileVersion, setProfileVersion] = useState(0);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -61,16 +61,17 @@ export default function Dashboard({ onNavigate }) {
   };
 
   const handleNavigate = (page, data) => {
-    if (page === "edit-food" && data) {
+    const targetPage = page === "alerts" ? "expiry" : page;
+    if (targetPage === "edit-food" && data) {
       setEditingItem(data);
     }
-    setActivePage(page);
+    setActivePage(targetPage);
   };
 
   const renderPage = () => {
     switch (activePage) {
       case "overview":
-        return <DashboardHome />;
+        return <DashboardHome onNavigate={handleNavigate} />;
       case "inventory":
         return <FoodInventory onNavigate={handleNavigate} />;
       case "browse":

@@ -3,6 +3,7 @@ import { Bell, RefreshCw, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
 import DonateModal from "../DonateModal";
+import { logActivity } from "../../../utils/activityLog";
 
 const PAGE_SIZE = 8;
 
@@ -60,6 +61,7 @@ export default function ExpiryAlerts() {
     setDonatingId(donateTarget.id);
     try {
       await foodApi.donate(donateTarget.id, details);
+      logActivity(`Donated ${donateTarget.name}`);
       setDonateTarget(null);
       // Move the item into the "donated" pool on the backend; refresh this list.
       loadItems();

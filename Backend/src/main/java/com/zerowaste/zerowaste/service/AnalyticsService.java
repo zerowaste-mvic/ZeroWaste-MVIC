@@ -14,10 +14,12 @@ import org.springframework.stereotype.Service;
 import com.zerowaste.zerowaste.dto.AnalyticsSummaryResponse;
 import com.zerowaste.zerowaste.dto.CategoryBreakdownResponse;
 import com.zerowaste.zerowaste.dto.ChartBreakdownResponse;
-import com.zerowaste.zerowaste.model.FoodActivityLog;
-import com.zerowaste.zerowaste.model.FoodItem;
+import com.zerowaste.zerowaste.dto.CommunityImpactResponse;
 import com.zerowaste.zerowaste.repository.FoodActivityLogRepository;
 import com.zerowaste.zerowaste.repository.FoodItemRepository;
+
+import com.zerowaste.zerowaste.model.FoodActivityLog;
+import com.zerowaste.zerowaste.model.FoodItem;
 
 @Service
 public class AnalyticsService {
@@ -77,7 +79,7 @@ public class AnalyticsService {
         List<String> categories = foodItemRepository.findByUserIdOrderByExpiryDateAsc(userId).stream()
                 .filter(item -> !Boolean.TRUE.equals(item.getDonated()))
                 // .map(FoodItem::getCategory)
-                .map(item -> item != null ? item.getCategory() : null)
+                .map(item -> item != null? item.getCategory() : null)
                 .toList();
         return buildBreakdown(categories);
     }
@@ -91,10 +93,19 @@ public class AnalyticsService {
         List<String> categories = activityLogRepository
                 .findByUserIdAndTypeAndOccurredAtGreaterThanEqual(userId, "USED", since).stream()
                 // .map(FoodActivityLog::getCategory)
-                .map(item -> item != null ? item.getCategory() : null)
+                .map(item -> item != null? item.getCategory() : null)
                 .filter(Objects::nonNull)
                 .toList();
         return buildBreakdown(categories);
+    }
+
+
+    public CommunityImpactResponse getCommunityImpact(Long userId) {
+        long foodSaved = activityLogRepository.findByUserIdAndType(userId, "USED").size()
+                + activityLogRepository.findByUserIdAndType(userId, "DONATED").size();
+        long activeHouseholds = userId != null ? 1L : 0L;
+        long mealsShared = activityLogRepository.findByUserIdAndType(userId, "DONATED").size();
+        return new CommunityImpactResponse(foodSaved, activeHouseholds, mealsShared);
     }
 
     /**
@@ -136,6 +147,7 @@ public ChartBreakdownResponse getWasteBreakdown(Long userId, String period) {
 
     return buildBreakdown(categories);
 }
+
 
     private ChartBreakdownResponse buildBreakdown(List<String> categories) {
         Map<String, Long> counts = categories.stream()

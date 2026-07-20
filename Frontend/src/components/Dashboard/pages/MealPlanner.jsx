@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { colors, fonts } from "../../../theme";
+import { foodApi } from "../../../services/api";
 import SuggestedMeals from "../SuggestedMeals";
+import { logActivity } from "../../../utils/activityLog";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner"];
 const STORAGE_KEY = "zw_meal_planner";
@@ -50,7 +52,23 @@ export default function MealPlanner() {
   const [viewMode, setViewMode] = useState("week");
   const [weekStart, setWeekStart] = useState(() => getWeekStart(new Date()));
   const [meals, setMeals] = useState(loadMeals);
+  const [inventoryItems, setInventoryItems] = useState([]);
   const [editing, setEditing] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const data = await foodApi.getAll();
+        if (!cancelled) setInventoryItems(Array.isArray(data) ? data : []);
+      } catch {
+        if (!cancelled) setInventoryItems([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const weekDays = useMemo(
     () => Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)),
@@ -71,12 +89,12 @@ export default function MealPlanner() {
       monthStart.getMonth() + 1,
       0,
     );
-    // pad to Monday
     const firstDay = start.getDay() === 0 ? 6 : start.getDay() - 1;
     for (let i = 0; i < firstDay; i++) days.push(null);
     for (let d = 1; d <= endDate.getDate(); d++) {
       days.push(new Date(monthStart.getFullYear(), monthStart.getMonth(), d));
     }
+    while (days.length % 7 !== 0) days.push(null);
     return days;
   }, [monthStart]);
 
@@ -119,6 +137,7 @@ export default function MealPlanner() {
     const updated = { ...meals, [editing.key]: editing.value };
     setMeals(updated);
     saveMeals(updated);
+    logActivity(`Planned meal: ${editing.value || "Removed meal"}`);
     setEditing(null);
   };
 
@@ -148,6 +167,38 @@ export default function MealPlanner() {
       </div>
 
       <SuggestedMeals />
+
+      {inventoryItems.length > 0 && (
+        <div
+          className="rounded-4 p-3 mb-3"
+          style={{
+            background: colors.authGreen,
+            border: `2px solid ${colors.greenLrgb}`,
+          }}
+        >
+          <div
+            style={{ fontWeight: 700, color: colors.charcoal, marginBottom: 6 }}
+          >
+            Available from your inventory
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {inventoryItems.slice(0, 8).map((item) => (
+              <span
+                key={item.id}
+                style={{
+                  background: colors.white,
+                  borderRadius: 999,
+                  padding: "0.3rem 0.7rem",
+                  fontSize: "0.78rem",
+                  color: colors.charcoal,
+                }}
+              >
+                {item.name}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
         <div className="d-flex align-items-center gap-2">
@@ -371,7 +422,7 @@ export default function MealPlanner() {
                                 fontFamily: "inherit",
                                 padding: 0,
                               }}
-                              placeholder="Add meal…"
+                              placeholder="Add Meal .."
                             />
                           ) : (
                             <>
@@ -428,7 +479,7 @@ export default function MealPlanner() {
               }}
             >
               <thead>
-                <tr style={{ background: colors.cream }}>
+                <tr style={{ background: colors.showcase_green }}>
                   {DAY_SHORT.map((d, i) => (
                     <th
                       key={d}
@@ -437,7 +488,7 @@ export default function MealPlanner() {
                         borderRight: i < 6 ? cellBorder : "none",
                         padding: "10px 0",
                         textAlign: "center",
-                        fontSize: "0.72rem",
+                        fontSize: "0.85rem",
                         fontWeight: 700,
                         letterSpacing: "0.07em",
                         color: colors.muted,
@@ -474,7 +525,9 @@ export default function MealPlanner() {
                               verticalAlign: "top",
                               minHeight: 90,
                               height: 90,
-                              background: !inMonth ? colors.cream : "white",
+                              background: !inMonth
+                                ? colors.authGreen
+                                : colors.white,
                             }}
                           >
                             {d && (
@@ -488,7 +541,7 @@ export default function MealPlanner() {
                                       ? colors.green
                                       : "transparent",
                                     color: isToday
-                                      ? "white"
+                                      ? colors.white
                                       : inMonth
                                         ? colors.charcoal
                                         : colors.border,
@@ -508,7 +561,7 @@ export default function MealPlanner() {
                                     style={{
                                       fontSize: "0.7rem",
                                       color: colors.greenD,
-                                      background: "#eaf5ef",
+                                      background: colors.authGreen,
                                       borderRadius: 4,
                                       padding: "1px 5px",
                                       marginBottom: 2,
@@ -535,23 +588,6 @@ export default function MealPlanner() {
                           </td>
                         );
                       })}
-                      {/* fill remaining cells in last row */}
-                      {monthDays.slice(wi * 7, wi * 7 + 7).length < 7 &&
-                        Array.from(
-                          {
-                            length:
-                              7 - monthDays.slice(wi * 7, wi * 7 + 7).length,
-                          },
-                          (_, fi) => (
-                            <td
-                              key={`fill-${fi}`}
-                              style={{
-                                borderLeft: cellBorder,
-                                background: colors.cream,
-                              }}
-                            />
-                          ),
-                        )}
                     </tr>
                   ),
                 )}

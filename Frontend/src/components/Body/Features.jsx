@@ -167,7 +167,10 @@ export default function Features() {
             Platform features
           </h1>
         </div>
-        <div className="text-center mx-auto mb-5" style={{ width: "800px" }}>
+        <div
+          className="text-center mx-auto mb-5"
+          style={{ maxWidth: 800, width: "100%", padding: "0 1rem" }}
+        >
           <h2
             style={{
               ...sectionHeadingStyle,

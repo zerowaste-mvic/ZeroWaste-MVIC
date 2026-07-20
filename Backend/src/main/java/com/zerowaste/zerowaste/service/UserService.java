@@ -1,5 +1,9 @@
 package com.zerowaste.zerowaste.service;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.zerowaste.zerowaste.dto.ChangePasswordRequest;
 import com.zerowaste.zerowaste.dto.PrivacyRequest;
 import com.zerowaste.zerowaste.dto.UpdateProfileRequest;
@@ -9,9 +13,7 @@ import com.zerowaste.zerowaste.model.Notification;
 import com.zerowaste.zerowaste.model.User;
 import com.zerowaste.zerowaste.repository.NotificationRepository;
 import com.zerowaste.zerowaste.repository.UserRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+
 
 @Service
 public class UserService {
@@ -21,8 +23,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
-                       NotificationRepository notificationRepository,
-                       PasswordEncoder passwordEncoder) {
+            NotificationRepository notificationRepository,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.notificationRepository = notificationRepository;
         this.passwordEncoder = passwordEncoder;
@@ -47,9 +49,16 @@ public class UserService {
         user.setGender(blankToNull(request.getGender()));
         user.setAddress(blankToNull(request.getAddress()));
         user.setHouseholdSize(normalizeHouseholdSize(request.getHouseholdSize()));
+        user.setProfileImageUrl(blankToNull(request.getProfileImageUrl()));
 
         User saved = userRepository.save(user);
         return UserResponse.from(saved);
+    }
+
+    public UserResponse updateProfileImage(Long userId, String imageUrl) {
+        User user = findUser(userId);
+        user.setProfileImageUrl(blankToNull(imageUrl));
+        return UserResponse.from(userRepository.save(user));
     }
 
     public UserResponse updatePrivacy(Long userId, PrivacyRequest request) {
@@ -111,8 +120,9 @@ public class UserService {
         return UserResponse.from(saved);
     }
 
+    
     // For the protion of 2FA authentication, we will just toggle the boolean value for now. In a real-world application, you would implement a more robust 2FA system.
-
+    
     public void changePassword(Long userId, ChangePasswordRequest request) {
         User user = findUser(userId);
 
@@ -128,7 +138,7 @@ public class UserService {
                 "Your account password has been updated successfully.");
     }
 
-
+    
     private void notify(Long userId, String type, String category, String title, String message) {
         Notification notification = Notification.builder()
                 .userId(userId)
@@ -149,7 +159,9 @@ public class UserService {
     }
 
     private String blankToNull(String value) {
-        if (value == null || value.isBlank()) return null;
+        if (value == null || value.isBlank()) {
+            return null;
+        }
         return value.trim();
     }
 
@@ -161,5 +173,4 @@ public class UserService {
         return Math.max(1, householdSize);
     }
 }
-
 

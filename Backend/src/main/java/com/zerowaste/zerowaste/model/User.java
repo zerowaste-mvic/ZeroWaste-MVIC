@@ -36,6 +36,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "profile_image_url", length = 2048)
+    private String profileImageUrl;
+
     @Column(nullable = false)
     @Builder.Default
     private String role = "USER";
@@ -48,10 +51,9 @@ public class User {
     private Integer householdSize;
 
     /**
-     * Privacy setting: when true, this user's donations are visible to
-     * everyone in Browse Food Item. When false, their donations are only
-     * visible to themselves (still shown in their own browse list, tagged
-     * "(Private)").
+     * Privacy setting: when true, this user's donations are visible to everyone
+     * in Browse Food Item. When false, their donations are only visible to
+     * themselves (still shown in their own browse list, tagged "(Private)").
      */
     @Builder.Default
     @Column(name = "donation_public", columnDefinition = "boolean default true")
@@ -90,19 +92,22 @@ public class User {
 
     // ── 2FA OTP fields ──────────────────────────────────────────────────────
     // - These fields are used for the 2FA OTP verification process. They are not used for regular authentication.
-
-    /** The 6-digit OTP currently pending verification (null when none). */
+    /**
+     * The 6-digit OTP currently pending verification (null when none).
+     */
     @Column(name = "otp_code", length = 6)
     private String otpCode;
 
-    /** When the OTP expires (null when no OTP is pending). */
+    /**
+     * When the OTP expires (null when no OTP is pending).
+     */
     @Column(name = "otp_expires_at")
     private Instant otpExpiresAt;
 
     /**
-     * Whether the 2FA enable-flow has been fully confirmed.
-     * twoFactorEnabled may be false while pendingTwoFactor is true
-     * (the user triggered the OTP email but has not yet verified it).
+     * Whether the 2FA enable-flow has been fully confirmed. twoFactorEnabled
+     * may be false while pendingTwoFactor is true (the user triggered the OTP
+     * email but has not yet verified it).
      */
     @Builder.Default
     @Column(name = "pending_two_factor", columnDefinition = "boolean default false")

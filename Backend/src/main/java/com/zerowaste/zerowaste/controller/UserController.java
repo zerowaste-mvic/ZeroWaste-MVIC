@@ -1,30 +1,29 @@
 package com.zerowaste.zerowaste.controller;
 
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.zerowaste.zerowaste.dto.PrivacyRequest;
 import com.zerowaste.zerowaste.dto.ToggleRequest;
 import com.zerowaste.zerowaste.dto.UpdateProfileRequest;
 import com.zerowaste.zerowaste.dto.UserResponse;
-import com.zerowaste.zerowaste.dto.VerifyOtpRequest; 
-// Import the VerifyOtpRequest DTO
-import com.zerowaste.zerowaste.service.TwoFactorService; 
-// Import the TwoFactorService
+import com.zerowaste.zerowaste.dto.VerifyOtpRequest;
+import com.zerowaste.zerowaste.service.ProfileImageStorageService;
+import com.zerowaste.zerowaste.service.TwoFactorService;
 import com.zerowaste.zerowaste.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity; 
-// Import ResponseEntity for returning HTTP responses
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping; 
-// Import DeleteMapping for handling DELETE requests
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping; 
-// Import PostMapping for handling POST requests
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map; 
 // Import Map for returning JSON responses
 
 @RestController
@@ -32,13 +31,16 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final TwoFactorService twoFactorService; 
+    private final TwoFactorService twoFactorService;
+    private final ProfileImageStorageService profileImageStorageService;
     // Declare TwoFactorService for handling 2FA operations
 
     // Constructor injection for UserService and TwoFactorService
-    public UserController(UserService userService, TwoFactorService twoFactorService) {
+    public UserController(UserService userService, TwoFactorService twoFactorService,
+            ProfileImageStorageService profileImageStorageService) {
         this.userService = userService;
-        this.twoFactorService = twoFactorService; 
+        this.twoFactorService = twoFactorService;
+        this.profileImageStorageService = profileImageStorageService;
         // Initialize TwoFactorService
     }
 
@@ -54,6 +56,14 @@ public class UserController {
         return userService.updateProfile(userId, request);
     }
 
+    @PostMapping("/me/profile-image")
+    public UserResponse uploadProfileImage(
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal Long userId) {
+        String imageUrl = profileImageStorageService.storeProfileImage(file);
+        return userService.updateProfileImage(userId, imageUrl);
+    }
+
     @PutMapping("/me/privacy")
     public UserResponse updatePrivacy(
             @Valid @RequestBody PrivacyRequest request,
@@ -64,11 +74,11 @@ public class UserController {
 
     // Mapping for changing password
     // ── 2FA endpoints ────────────────────────────────────────────────────────
-
+    
     /**
-     * POST /api/users/me/two-factor/initiate
-     * Triggers OTP generation and sends the verification email.
-     * Call this when the user toggles 2FA ON in Settings.
+     * POST /api/users/me/two-factor/initiate Triggers OTP generation and sends
+     * the verification email. Call this when the user toggles 2FA ON in
+     * Settings.
      */
     @PostMapping("/me/two-factor/initiate")
     public ResponseEntity<Map<String, String>> initiate2FA(
@@ -79,8 +89,8 @@ public class UserController {
     }
 
     /**
-     * POST /api/users/me/two-factor/verify
-     * Accepts the 6-digit OTP and, on success, activates 2FA.
+     * POST /api/users/me/two-factor/verify Accepts the 6-digit OTP and, on
+     * success, activates 2FA.
      */
     @PostMapping("/me/two-factor/verify")
     public UserResponse verify2FA(
@@ -90,22 +100,21 @@ public class UserController {
     }
 
     /**
-     * POST /api/users/me/two-factor/resend
-     * Re-generates and re-sends the OTP when the current one has expired or was
-     * not received.
+     * POST /api/users/me/two-factor/resend Re-generates and re-sends the OTP
+     * when the current one has expired or was not received.
      */
     @PostMapping("/me/two-factor/resend")
     public ResponseEntity<Map<String, String>> resendOtp(
-            @AuthenticationPrincipal Long userId) { 
-                // PostMapping for resending OTP
+            @AuthenticationPrincipal Long userId) {
+        // PostMapping for resending OTP
         twoFactorService.resendOtp(userId);
         return ResponseEntity.ok(Map.of(
                 "message", "A new verification code has been sent to your registered email address."));
     }
 
     /**
-     * DELETE /api/users/me/two-factor
-     * Immediately disables 2FA (no OTP required to turn it off).
+     * DELETE /api/users/me/two-factor Immediately disables 2FA (no OTP required
+     * to turn it off).
      */
     @DeleteMapping("/me/two-factor")
     public UserResponse disable2FA(@AuthenticationPrincipal Long userId) {
@@ -113,8 +122,8 @@ public class UserController {
     }
 
     /**
-     * POST /api/users/me/two-factor/cancel
-     * Cancels a pending 2FA enable attempt (user dismissed the OTP modal).
+     * POST /api/users/me/two-factor/cancel Cancels a pending 2FA enable attempt
+     * (user dismissed the OTP modal).
      */
     @PostMapping("/me/two-factor/cancel")
     public UserResponse cancelPending2FA(@AuthenticationPrincipal Long userId) {
@@ -122,7 +131,6 @@ public class UserController {
     }
 
     // ── Existing preference toggles ──────────────────────────────────────────
-
     @PutMapping("/me/notifications")
     public UserResponse updateNotifications(
             @Valid @RequestBody ToggleRequest request,
@@ -143,9 +151,6 @@ public class UserController {
             @AuthenticationPrincipal Long userId) {
         return userService.updateDonationUpdates(userId, request.getEnabled());
     }
-
-    // For the protion of 2FA authentication, we will just toggle the boolean value for now. In a real-world application, you would implement a more robust 2FA system.
-    // for the portion of 2FA authentication, we will just toggle the boolean value for now. In a real-world application, you would implement a more robust 2FA system.
 
     // for the portion of 2FA authentication, we will just toggle the boolean value for now. In a real-world application, you would implement a more robust 2FA system.
     @PutMapping("/me/password")
