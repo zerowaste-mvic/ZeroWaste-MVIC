@@ -37,4 +37,11 @@ public class AnalyticsController {
             @AuthenticationPrincipal Long userId) {
         return analyticsService.getFoodSavedBreakdown(userId, period);
     }
+
+    @GetMapping("/waste-breakdown")
+public ChartBreakdownResponse wasteBreakdown(
+        @RequestParam(defaultValue = "month") String period,
+        @AuthenticationPrincipal Long userId) {
+    return analyticsService.getWasteBreakdown(userId, period);
+}
 }
