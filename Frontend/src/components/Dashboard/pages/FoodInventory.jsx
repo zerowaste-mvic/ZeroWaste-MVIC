@@ -43,7 +43,7 @@ export default function FoodInventory({ onNavigate }) {
   const [errMsg, setErrMsg] = useState("");
   const [donateTarget, setDonateTarget] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -60,12 +60,9 @@ export default function FoodInventory({ onNavigate }) {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadItems();
   }, [loadItems]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, category]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this food item?")) return;
@@ -113,6 +110,7 @@ export default function FoodInventory({ onNavigate }) {
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
   const paginatedItems = filtered.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
@@ -407,7 +405,7 @@ export default function FoodInventory({ onNavigate }) {
               background: "none",
               border: "none",
             }}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
             aria-label="Previous page"
           >
@@ -425,7 +423,7 @@ export default function FoodInventory({ onNavigate }) {
               background: "none",
               border: "none",
             }}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
             aria-label="Next page"
           >
