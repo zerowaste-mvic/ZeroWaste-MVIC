@@ -52,6 +52,8 @@ export default function Login({ onNavigate }) {
   const [status, setStatus] = useState("idle");
   const [fieldErrors, setFieldErrors] = useState({});
   const [errMsg, setErrMsg] = useState("");
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [resendStatus, setResendStatus] = useState("idle");
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -59,6 +61,10 @@ export default function Login({ onNavigate }) {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    if (needsVerification) {
+      setNeedsVerification(false);
+      setResendStatus("idle");
+    }
   };
 
   const validate = () => {
@@ -107,6 +113,8 @@ export default function Login({ onNavigate }) {
     setStatus("loading");
     setErrMsg("");
     setInfoMsg("");
+    setNeedsVerification(false);
+    setResendStatus("idle");
     try {
       const data = await authApi.login(form.email, form.password);
       if (data.twoFactorRequired) {
@@ -121,6 +129,24 @@ export default function Login({ onNavigate }) {
     } catch (err) {
       setErrMsg(err.message || "Something went wrong. Please try again.");
       setStatus("error");
+      // A 403 here means the account exists but hasn't verified its email yet —
+      // surface the resend option instead of leaving the user stuck.
+      if (err.status === 403) {
+        setNeedsVerification(true);
+      }
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendStatus("loading");
+    setErrMsg("");
+    try {
+      const data = await authApi.resendVerification(form.email.trim());
+      setInfoMsg(data.message || "Verification email resent! Please check your inbox.");
+      setResendStatus("sent");
+    } catch (err) {
+      setErrMsg(err.message || "Couldn't resend the verification email. Please try again.");
+      setResendStatus("idle");
     }
   };
 
@@ -336,6 +362,22 @@ export default function Login({ onNavigate }) {
                 </div>
               )}
 
+              {/* {needsVerification && loginStage === "credentials" && (
+                <button
+                  type="button"
+                  className="btn btn-link p-0 text-start"
+                  style={{ ...bodyTextStyle, fontSize: "0.9rem", color: colors.greenD }}
+                  onClick={handleResendVerification}
+                  disabled={resendStatus === "loading" || resendStatus === "sent"}
+                >
+                  {resendStatus === "loading"
+                    ? "Resending…"
+                    : resendStatus === "sent"
+                    ? "Verification email sent"
+                    : "Resend verification email"}
+                </button>
+              )} */}
+
               <div>
                 <label
                   htmlFor="email"
@@ -461,6 +503,22 @@ export default function Login({ onNavigate }) {
                       Forgot Password?
                     </button>
                   </div>
+
+                {needsVerification && loginStage === "credentials" && (
+                <button
+                  type="button"
+                  className="btn btn-link p-0 text-start"
+                  style={{ ...bodyTextStyle, fontSize: "0.9rem", color: colors.greenD }}
+                  onClick={handleResendVerification}
+                  disabled={resendStatus === "loading" || resendStatus === "sent"}
+                >
+                  {resendStatus === "loading"
+                    ? "Resending…"
+                    : resendStatus === "sent"
+                    ? "Verification email sent"
+                    : "Resend verification email"}
+                </button>
+              )}
                 </>
               )}
 

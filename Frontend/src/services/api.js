@@ -28,7 +28,9 @@ async function request(path, options = {}) {
   });
 
   if (!response.ok) {
-    throw new Error(await parseError(response));
+    const error = new Error(await parseError(response));
+    error.status = response.status;
+    throw error;
   }
 
   if (response.status === 204) return null;
@@ -106,6 +108,13 @@ export const authApi = {
     return request("/api/auth/login/verify", {
       method: "POST",
       body: JSON.stringify({ email, code }),
+    });
+  },
+
+  resendVerification(email) {
+    return request("/api/auth/resend-verification", {
+      method: "POST",
+      body: JSON.stringify({ email }),
     });
   },
 };
