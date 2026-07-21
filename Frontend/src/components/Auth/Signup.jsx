@@ -57,7 +57,7 @@ export default function Signup({ onNavigate }) {
   // If this page was opened via the link in the verification email
   // (?token=...), we show a verification status card instead of the
   // signup form.
-  const [verifyToken] = useState(
+  const [verifyToken, setVerifyToken] = useState(
     () => new URLSearchParams(window.location.search).get("token"),
   );
   const [verifyStatus, setVerifyStatus] = useState(verifyToken ? "loading" : "idle");
@@ -211,7 +211,17 @@ export default function Signup({ onNavigate }) {
                   letterSpacing: "0.06em",
                   fontWeight: 600,
                 }}
-                onClick={() => onNavigate?.(isSuccess ? "login" : "signup")}
+                onClick={() => {
+                  // Drop the ?token=... from the URL and clear local verify
+                  // state — otherwise this same card just re-renders since
+                  // navigating to "signup" while already on /signup is a no-op
+                  // for the router (same path, same component instance).
+                  window.history.replaceState({}, "", "/signup");
+                  setVerifyToken(null);
+                  setVerifyStatus("idle");
+                  setVerifyMessage("");
+                  onNavigate?.(isSuccess ? "login" : "signup");
+                }}
               >
                 {isSuccess ? "Go to Login" : "Back to Sign Up"}
               </button>

@@ -7,6 +7,7 @@ import com.zerowaste.zerowaste.dto.LoginResponse;
 import com.zerowaste.zerowaste.dto.MessageResponse;
 import com.zerowaste.zerowaste.dto.RegisterRequest;
 import com.zerowaste.zerowaste.dto.RegisterResponse;
+import com.zerowaste.zerowaste.dto.ResendVerificationRequest;
 import com.zerowaste.zerowaste.dto.UserResponse;
 import com.zerowaste.zerowaste.exception.ApiException;
 import com.zerowaste.zerowaste.model.User;
@@ -99,6 +100,30 @@ public class AuthService {
         return new LoginResponse(jwtService.generateToken(user), UserResponse.from(user), false, null);
     }
 
+    /**
+     * Re-sends the email-verification link for an unverified account.
+     * Used by the "Resend verification email" action on the sign-in page,
+     * which only appears once login has told the user their account isn't
+     * verified yet.
+     */
+    public MessageResponse resendVerificationEmail(ResendVerificationRequest request) {
+        User user = userRepository.findByEmail(request.getEmail().toLowerCase().trim())
+                .orElseThrow(() -> new ApiException("No account found with this email address.", HttpStatus.NOT_FOUND));
+
+        if (Boolean.TRUE.equals(user.getEmailVerified())) {
+            return new MessageResponse("Your email is already verified. You can log in.");
+        }
+
+        String verificationToken = UUID.randomUUID().toString();
+        user.setVerificationToken(verificationToken);
+        user.setVerificationTokenExpiresAt(Instant.now().plus(VERIFICATION_TOKEN_EXPIRY_HOURS, ChronoUnit.HOURS));
+        userRepository.save(user);
+
+        emailVerificationService.sendVerificationEmail(user.getEmail(), user.getFullName(), verificationToken);
+
+        return new MessageResponse("Verification email resent! Please check your inbox.");
+    }
+
     public MessageResponse verifyEmail(String token) {
         if (token == null || token.isBlank()) {
             throw new ApiException("Invalid verification link.", HttpStatus.BAD_REQUEST);
@@ -108,8 +133,10 @@ public class AuthService {
                 .orElseThrow(() -> new ApiException("Invalid or expired verification link.", HttpStatus.BAD_REQUEST));
 
         if (Boolean.TRUE.equals(user.getEmailVerified())) {
-            // Link clicked again after already being verified — treat as a harmless success.
-            return new MessageResponse("Your email is already verified. You can log in.");
+            // Link clicked again after already being verified — this is not an
+            // error, just a reused link. Say so explicitly rather than a generic
+            // "verified" message so the UI can tell the two cases apart.
+            return new MessageResponse("This link has already been used. Your email is already verified — you can log in.");
         }
 
         if (user.getVerificationTokenExpiresAt() == null || Instant.now().isAfter(user.getVerificationTokenExpiresAt())) {
@@ -117,8 +144,12 @@ public class AuthService {
         }
 
         user.setEmailVerified(true);
-        user.setVerificationToken(null);
-        user.setVerificationTokenExpiresAt(null);
+        // NOTE: intentionally NOT clearing verificationToken here. If we null it
+        // out, a second click on the same link can no longer be matched by
+        // findByVerificationToken above, so it falls into the "Invalid or expired
+        // verification link" branch instead of the "already used" branch. Leaving
+        // the token in place (it's harmless once emailVerified is true — this
+        // method never re-verifies) lets repeat visits be recognized correctly.
         userRepository.save(user);
 
         return new MessageResponse("Your email has been verified! You can now log in.");

@@ -7,6 +7,7 @@ import com.zerowaste.zerowaste.dto.LoginResponse;
 import com.zerowaste.zerowaste.dto.MessageResponse;
 import com.zerowaste.zerowaste.dto.RegisterRequest;
 import com.zerowaste.zerowaste.dto.RegisterResponse;
+import com.zerowaste.zerowaste.dto.ResendVerificationRequest;
 import com.zerowaste.zerowaste.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,5 +44,10 @@ public class AuthController {
     @PostMapping("/verify-email")
     public MessageResponse verifyEmail(@RequestParam String token) {
         return authService.verifyEmail(token);
+    }
+
+    @PostMapping("/resend-verification")
+    public MessageResponse resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
+        return authService.resendVerificationEmail(request);
     }
 }
