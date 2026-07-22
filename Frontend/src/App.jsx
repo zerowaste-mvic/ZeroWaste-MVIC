@@ -1,5 +1,6 @@
 // src/App.jsx
 import { useState, useEffect } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 import Header from "./components/Header/Header";
 import Hero from "./components/Body/Hero";
@@ -74,11 +75,36 @@ export default function App() {
     }
   }, [page]);
 
-  if (page === "login") return <Login onNavigate={navigate} />;
-  if (page === "signup") return <Signup onNavigate={navigate} />;
-  if (page === "dashboard") return <Dashboard onNavigate={navigate} />;
-  if (page === "privacy") return <PrivacyPolicy onNavigate={navigate} />;
-  if (page === "terms") return <TermsOfService onNavigate={navigate} />;
+  if (page === "login") return (
+    <>
+      <Login onNavigate={navigate} />
+      <SpeedInsights />
+    </>
+  );
+  if (page === "signup") return (
+    <>
+      <Signup onNavigate={navigate} />
+      <SpeedInsights />
+    </>
+  );
+  if (page === "dashboard") return (
+    <>
+      <Dashboard onNavigate={navigate} />
+      <SpeedInsights />
+    </>
+  );
+  if (page === "privacy") return (
+    <>
+      <PrivacyPolicy onNavigate={navigate} />
+      <SpeedInsights />
+    </>
+  );
+  if (page === "terms") return (
+    <>
+      <TermsOfService onNavigate={navigate} />
+      <SpeedInsights />
+    </>
+  );
 
   return (
     <>
@@ -94,6 +120,7 @@ export default function App() {
       </main>
 
       <Footer onNavigate={navigate} />
+      <SpeedInsights />
     </>
   );
 }
