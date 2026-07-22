@@ -1,0 +1,48 @@
+## Vercel Speed Insights Implementation
+
+Successfully installed and configured Vercel Speed Insights for this React + Vite project following the latest official documentation from https://vercel.com/docs/speed-insights/quickstart.
+
+### Changes Made
+
+**1. Installed Package:**
+- Added `@vercel/speed-insights` package to dependencies using npm
+- Package version: Latest from npm registry
+
+**2. Modified Files:**
+
+**Frontend/package.json**
+- Added `@vercel/speed-insights` to dependencies
+
+**Frontend/package-lock.json**
+- Updated with new package and its dependencies (141 packages added)
+
+**Frontend/src/App.jsx**
+- Imported `SpeedInsights` component from `@vercel/speed-insights/react`
+- Added `<SpeedInsights />` component to all page return statements:
+  - Login page
+  - Signup page
+  - Dashboard page
+  - Privacy Policy page
+  - Terms of Service page
+  - Home page (default)
+
+### Implementation Details
+
+Following the official Vercel documentation for React applications, the SpeedInsights component was added at the end of each page render to ensure it loads on all routes. Since this project uses a custom routing system with conditional rendering based on page state, the component was added to each conditional return statement to ensure comprehensive coverage across all pages.
+
+### Verification Performed
+
+✅ Build completed successfully with `npm run build`
+✅ No new linting errors introduced (existing errors are pre-existing)
+✅ Dependencies installed and lock file updated
+✅ All source code changes staged with git
+
+### Next Steps
+
+Once deployed to Vercel:
+1. Enable Speed Insights in the Vercel dashboard for this project
+2. Deploy the application
+3. Wait for user traffic to generate performance data
+4. View metrics in the Vercel dashboard under Speed Insights
+
+The Speed Insights component will automatically start collecting Web Vitals data (LCP, FID, CLS, FCP, TTFB, INP) once the application is deployed and users visit the site.
