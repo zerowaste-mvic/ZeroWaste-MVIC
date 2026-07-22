@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { colors, fonts } from "../../../theme";
 import { foodApi } from "../../../services/api";
 import SuggestedMeals from "../SuggestedMeals";
-import { logActivity } from "../../../utils/activityLog";
+import { logActivity } from "../../../utils/activitylog";
 
 const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner"];
 const STORAGE_KEY = "zw_meal_planner";

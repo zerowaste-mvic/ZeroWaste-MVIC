@@ -3,7 +3,7 @@ import { Bell, RefreshCw, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
 import DonateModal from "../DonateModal";
-import { logActivity } from "../../../utils/activityLog";
+import { logActivity } from "../../../utils/activitylog";
 
 const PAGE_SIZE = 8;
 

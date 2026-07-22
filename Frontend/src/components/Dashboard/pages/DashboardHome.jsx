@@ -14,7 +14,7 @@ import { analyticsApi, foodApi } from "../../../services/api";
 import {
   getRecentActivity as getLocalActivity,
   onActivityLogged,
-} from "../../../utils/activityLog";
+} from "../../../utils/activitylog";
 
 const EXPIRING_WINDOW_DAYS = 7;
 

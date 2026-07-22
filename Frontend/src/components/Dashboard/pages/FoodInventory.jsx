@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
-import { logActivity } from "../../../utils/activityLog";
+import { logActivity } from "../../../utils/activitylog";
 import DonateModal from "../DonateModal";
 
 const CATEGORIES = [

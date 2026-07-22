@@ -7,7 +7,7 @@ import {
   btnOutlineStyle,
 } from "../../../theme";
 import { foodApi } from "../../../services/api";
-import { logActivity } from "../../../utils/activityLog";
+import { logActivity } from "../../../utils/activitylog";
 
 const CATEGORIES = ["Dairy", "Meat", "Fruits", "Vegetable", "Other"];
 const UNITS = ["Kg", "Ltr", "Gram"];
