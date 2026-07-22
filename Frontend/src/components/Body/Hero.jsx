@@ -232,8 +232,7 @@ export default function Hero() {
                 borderRadius: 12,
                 width: "100%",
                 maxWidth: 550,
-                minHeight: 360,
-                aspectRatio: "11 / 12",
+                height: 600,
                 boxShadow: "0 0px 15px rgb(131, 130, 130)",
               }}
             >

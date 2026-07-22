@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
-import { Search, ChevronRight, Plus, Pencil, Trash2 } from "lucide-react";
+import {
+  Search,
+  ChevronsRight,
+  ChevronsLeft,
+  Plus,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { colors, fonts, btnPrimaryStyle } from "../../../theme";
 import { foodApi } from "../../../services/api";
 import { logActivity } from "../../../utils/activityLog";
@@ -36,7 +43,7 @@ export default function FoodInventory({ onNavigate }) {
   const [errMsg, setErrMsg] = useState("");
   const [donateTarget, setDonateTarget] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
 
   const loadItems = useCallback(async () => {
     setLoading(true);
@@ -53,12 +60,9 @@ export default function FoodInventory({ onNavigate }) {
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     loadItems();
   }, [loadItems]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, category]);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this food item?")) return;
@@ -106,6 +110,7 @@ export default function FoodInventory({ onNavigate }) {
   });
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
   const paginatedItems = filtered.slice(
     (currentPage - 1) * ITEMS_PER_PAGE,
     currentPage * ITEMS_PER_PAGE,
@@ -239,7 +244,7 @@ export default function FoodInventory({ onNavigate }) {
             ))}
           </select>
 
-          <ChevronRight
+          <ChevronsRight
             className="category"
             size={20}
             style={{
@@ -390,54 +395,39 @@ export default function FoodInventory({ onNavigate }) {
           </div>
         )}
       </div>
-      {!loading && filtered.length > 0 && (
-        <div className="d-flex justify-content-end align-items-center gap-2 mt-4">
+      {!loading && filtered.length > 0 && totalPages > 1 && (
+        <div className="d-flex align-items-center justify-content-end gap-3 mt-4">
           <button
             type="button"
-            className="btn btn-sm page-btn"
+            className="btn btn-sm p-1"
             style={{
-              borderRadius: 4,
-              border: `2px solid ${colors.greenLrgb || colors.category}`,
-              opacity: currentPage === 1 ? 0.5 : 1,
+              color: currentPage === 1 ? colors.border : colors.charcoal,
+              background: "none",
+              border: "none",
             }}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            aria-label="Previous page"
           >
-            Prev
+            <ChevronsLeft size={20} />
           </button>
-
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              type="button"
-              className="btn btn-sm page-btn"
-              style={{
-                borderRadius: 4,
-                minWidth: 34,
-                fontWeight: page === currentPage ? 700 : 400,
-                background:
-                  page === currentPage ? colors.authGreen : "transparent",
-                color: page === currentPage ? colors.greenL : colors.charcoal,
-                border: `2px solid ${colors.border || colors.category}`,
-              }}
-              onClick={() => setCurrentPage(page)}
-            >
-              {page}
-            </button>
-          ))}
-
+          <span className="fw-semibold" style={{ color: colors.charcoal }}>
+            {currentPage}
+          </span>
           <button
             type="button"
-            className="btn btn-sm page-btn"
+            className="btn btn-sm p-1"
             style={{
-              borderRadius: 4,
-              border: `2px solid ${colors.greenLrgb || colors.category}`,
-              opacity: currentPage === totalPages ? 0.5 : 1,
+              color:
+                currentPage === totalPages ? colors.border : colors.charcoal,
+              background: "none",
+              border: "none",
             }}
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            aria-label="Next page"
           >
-            Next
+            <ChevronsRight size={20} />
           </button>
         </div>
       )}
